@@ -11,5 +11,8 @@ def verify_password(stored_salt, stored_hash, password_to_check):
     return new_dk == stored_hash
 
 def hash_password_no_salt(password):
-    dk = hashlib.pbkdf2_hmac("sha256", password.encode(), 100000, dklen=64)
-    return dk
+    password_bytes = password.encode('utf-8')
+    hash_object = hashlib.sha256(password_bytes)
+    hashed_password = hash_object.hexdigest()
+    
+    return hashed_password

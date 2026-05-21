@@ -38,14 +38,14 @@ try:
     def destroy_and_set_new_window(new_win):
         global current_toplevel_win
         if current_toplevel_win is not None and current_toplevel_win.winfo_exists():
-            current_toplevel_win.destroy()
+            current_toplevel_win.withdraw()
         current_toplevel_win = new_win
         
 
     ###########################################################
     #               מסך פתיחה                  #
     ###########################################################
-
+    
     def open_splash_screen():
         global splash_root
         splash_root = tk.Tk()
@@ -181,6 +181,7 @@ try:
         splash_root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
 
         splash_root.mainloop()
+        
     ###########################################################
     #                   מסך לוגין                   #
     ###########################################################
@@ -260,7 +261,7 @@ try:
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
 
         header_frame = tk.Frame(main_frame, bg="#1a73e8", height=170)
-        header_frame.pack(fill="x")
+        header_frame.pack(fill="x", padx=0, pady=0)
         header_frame.pack_propagate(False)
 
         tk.Label(
@@ -328,10 +329,10 @@ try:
             content_frame,
             text="צאט כיתתי",
             bg="#60a5fa",
-            command=open_class_chat,
+            command=open_class_chat_room,
             **button_style
         ).grid(row=1, column=1, padx=15, pady=15)
-
+        
         tk.Button(
             content_frame,
             text="משימון",
@@ -348,7 +349,21 @@ try:
             **button_style
         ).grid(row=2, column=1, padx=15, pady=15)
 
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=60)
+        tk.Button(
+            content_frame,
+            text="🤖 עזרה והדרכה",
+            bg="#7c3aed",
+            command=open_chatbot_help,   
+            fg="white",
+            font=("Arial", 14, "bold"),
+            width=30,
+            height=4,
+            bd=0,
+            cursor="hand2",
+            relief="flat"
+        ).grid(row=3, column=0, columnspan=2, padx=0, pady=0)
+
+        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=10)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
 
@@ -362,7 +377,7 @@ try:
             
         
     ###########################################################
-    #                   פונקציית התחברות           #
+    #                   פונקציית התחברות                    #
     ###########################################################
 
     def forgotPass():
@@ -375,8 +390,12 @@ try:
     def open_login_window():
         global entry_username, entry_password, root, splash_root
         
-        if splash_root: 
-            splash_root.destroy()
+        if splash_root is not None: 
+            try:
+                if splash_root.winfo_exists():
+                    splash_root.destroy()
+            except:
+                pass
             
         login_win = tk.Toplevel(root)
         login_win.title("משוב / התחברות")
@@ -601,10 +620,11 @@ try:
             messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
         except Exception as e:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
-    
-    def signUp():
+        
+    def signUp():       
         def attemptSignUp():
             all_entries = [firstName, lastName, gmail, newUsername, newPassword]
+            role = role_box.get()
 
             if any(entry.get().strip() == "" for entry in all_entries):
                 messagebox.showerror("שגיאה", "נא למלא את כל השדות")
@@ -629,80 +649,225 @@ try:
             if firstName.get().isdigit() or lastName.get().isdigit():
                 messagebox.showerror("שגיאה", "שם לא יכול להיות מספר")
                 return
+            
+            if role == "teacher":
+                open_teacher_setup(newUsername.get())
+            
+            if role == "student":
+                open_student_setup(newUsername.get())
 
-            code = simpledialog.askstring(
-                "קוד כניסה",
-                "הכנס קוד כניסה:",
-                show="*"
-            )
 
-            if not code:
-                return
+        def open_teacher_setup(username):
+            win = tk.Toplevel(root)
+            destroy_and_set_new_window(win)
 
-            SERVER_IP = '127.0.0.1'
-            PORT = 9999
+            win.title("הגדרת מורה")
+            width, height = 520, 770
+            screen_width = win.winfo_screenwidth()
+            screen_height = win.winfo_screenheight()
 
-            try:
-                with create_secure_socket() as s:
-                    print(f"Connecting to {SERVER_IP}:{PORT}...")
-                    s.connect((SERVER_IP, PORT))
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
 
-                    subject = (
-                        f"signUp|"
-                        f"{firstName.get()}|"
-                        f"{lastName.get()}|"
-                        f"{gmail.get()}|"
-                        f"{newUsername.get()}|"
-                        f"{newPassword.get()}|"
-                        f"{class_box.get()}|"
-                        f"{role_box.get()}|"
-                        f"{code}"
-                    )
+            win.geometry(f"{width}x{height}+{x}+{y}")
+            win.configure(bg="#f0f4f8")
 
-                    s.sendall(subject.encode("utf-8"))
+            frame = tk.Frame(win, bg="white")
+            frame.place(relx=0.5, rely=0.5, anchor="center", width=480, height=450)
 
-                    raw_data = s.recv(1024)
-                    if not raw_data:
-                        messagebox.showerror("שגיאה", "אין תגובה מהשרת")
-                        return
+            tk.Label(frame, text="🔑", font=("Arial", 40), bg="white", fg="#1a73e8").pack(pady=10)
 
-                    dataFromServer = raw_data.decode("utf-8").strip()
-                    print(f"Received from server: {dataFromServer}")
+            tk.Label(frame, text="אימות מורה", font=("Arial", 22, "bold"), bg="white").pack()
 
-                    if dataFromServer.startswith("200"):
-                        parts = dataFromServer.split("|")
-                        role = parts[1]
-                        class_name = parts[2]
+            tk.Label(frame, text="קוד מורים", bg="white").pack(pady=(20,5))
+            teacher_code = tk.Entry(frame, show="*")
+            teacher_code.pack(ipady=8, fill="x", padx=40)
+
+            tk.Label(frame, text="קוד כיתה (לשיתוף)", bg="white").pack(pady=(20,5))
+            class_code = tk.Entry(frame)
+            class_code.pack(ipady=8, fill="x", padx=40)
+
+            def submit():
+                teachers_code = teacher_code.get()
+                new_class_code = class_code.get()
+
+                if not teacher_code or not class_code:
+                    return
+
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                try:
+                    with create_secure_socket() as s:
+                        print(f"Connecting to {SERVER_IP}:{PORT}...")
+                        s.connect((SERVER_IP, PORT))
+
+                        subject = (
+                            f"signUp|"
+                            f"{firstName.get()}|"
+                            f"{lastName.get()}|"
+                            f"{gmail.get()}|"
+                            f"{newUsername.get()}|"
+                            f"{newPassword.get()}|"
+                            f"{class_box.get()}|"
+                            f"{role_box.get()}|"
+                            f"{teachers_code}|"
+                            f"{class_code.get()}"
+                        )
+
+                        s.sendall(subject.encode("utf-8"))
+
+                        raw_data = s.recv(1024)
+                        if not raw_data:
+                            messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                            return
+
+                        dataFromServer = raw_data.decode("utf-8").strip()
+                        print(f"Received from server: {dataFromServer}")
+
+                        if dataFromServer.startswith("200"):
+                            parts = dataFromServer.split("|")
+                            role = parts[1]
+                            class_name = parts[2]
+                            
+                            messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
+                            new_win.destroy()                       
+                            open_login_window()
+
+                        elif dataFromServer == "gmail already exists":
+                            messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
+
+                        elif dataFromServer == "username already exists":
+                            messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
+
+                        elif dataFromServer == "invalid teacher code":
+                            messagebox.showerror("שגיאה", "קוד מורה שגוי")
+
+                        elif dataFromServer == "invalid student code":
+                            messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+                        
+                        elif dataFromServer.startswith("teacher"):
+                            messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
+                        
+                        elif dataFromServer.startswith("error|"):
+                            messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
+                        
+                        elif dataFromServer.startswith("404"):
+                            messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
+                        
+                        else:
+                            messagebox.showerror("שגיאה", dataFromServer)
+
+                except ConnectionRefusedError:
+                    messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+        
+            tk.Button(frame, text="המשך", bg="#1a73e8", fg="white",
+                    command=submit).pack(pady=30, ipady=10, ipadx=20)
+
+        def open_student_setup(username):
+            win = tk.Toplevel(root)
+            destroy_and_set_new_window(win)
+
+            win.title("כניסת תלמיד")
+            width, height = 520, 770
+            screen_width = win.winfo_screenwidth()  
+            screen_height = win.winfo_screenheight()
+
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
+
+            win.geometry(f"{width}x{height}+{x}+{y}")
+            win.configure(bg="#f0f4f8")
+
+            frame = tk.Frame(win, bg="white")
+            frame.place(relx=0.5, rely=0.5, anchor="center", width=480, height=350)
+
+            tk.Label(frame, text="🎓", font=("Arial", 40), bg="white", fg="#1a73e8").pack(pady=10)
+
+            tk.Label(frame, text="הכנס קוד כיתה", font=("Arial", 20, "bold"), bg="white").pack(pady=10)
+
+            code_entry = tk.Entry(frame)
+            code_entry.pack(ipady=10, fill="x", padx=40)
+
+            def submit():
+                class_code = code_entry.get()
+
+                if not class_code:
+                    return
+
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                try:
+                    with create_secure_socket() as s:
+                        print(f"Connecting to {SERVER_IP}:{PORT}...")
+                        s.connect((SERVER_IP, PORT))
+
+                        subject = (
+                            f"signUp|"
+                            f"{firstName.get()}|"
+                            f"{lastName.get()}|"
+                            f"{gmail.get()}|"
+                            f"{newUsername.get()}|"
+                            f"{newPassword.get()}|"
+                            f"{class_box.get()}|"
+                            f"{role_box.get()}|"
+                            f"is student|"
+                            f"{class_code}"
+                        )
+
+                        s.sendall(subject.encode("utf-8"))
+
+                        raw_data = s.recv(1024)
+                        if not raw_data:
+                            messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                            return
+
+                        dataFromServer = raw_data.decode("utf-8").strip()
+                        print(f"Received from server: {dataFromServer}")
+
+                        if dataFromServer.startswith("200"):
+                            parts = dataFromServer.split("|")
+                            role = parts[1]
+                            class_name = parts[2]
+                            
+                            messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
+                            new_win.destroy()                  
+                            open_login_window()
+
+                        elif dataFromServer == "gmail already exists":
+                            messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
+
+                        elif dataFromServer == "username already exists":
+                            messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
+
+                        elif dataFromServer == "invalid teacher code":
+                            messagebox.showerror("שגיאה", "קוד מורה שגוי")
+
+                        elif dataFromServer == "invalid student code":
+                            messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+                        
+                        elif dataFromServer.startswith("teacher"):
+                            messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
+                        
+                        elif dataFromServer.startswith("error|"):
+                            messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
+                        
+                        elif dataFromServer.startswith("404"):
+                            messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
+
+                        else:
+                            messagebox.showerror("שגיאה", dataFromServer)
+
+                except ConnectionRefusedError:
+                    messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
                     
-                        messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
-                        new_win.destroy()
+                except Exception as e:
+                    messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            
 
-                    elif dataFromServer == "gmail already exists":
-                        messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
-
-                    elif dataFromServer == "username already exists":
-                        messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
-
-                    elif dataFromServer == "invalid teacher code":
-                        messagebox.showerror("שגיאה", "קוד מורה שגוי")
-
-                    elif dataFromServer == "invalid student code":
-                        messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
-                    
-                    elif dataFromServer.startswith("teacher"):
-                        messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
-                    
-                    elif dataFromServer.startswith("error|"):
-                        messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
-
-                    else:
-                        messagebox.showerror("שגיאה", dataFromServer)
-
-            except ConnectionRefusedError:
-                messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
-                
-            except Exception as e:
-                messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            tk.Button(frame, text="כניסה", bg="#1a73e8", fg="white", 
+                    command=submit).pack(pady=30, ipady=10, ipadx=20)
 
         new_win = tk.Toplevel(root)
         new_win.title("MashovApp / הרשמה")
@@ -779,7 +944,7 @@ try:
         tk.Label(form_frame, text="כיתה", **label_style).pack(fill="x", pady=(10, 2))
         class_box = ttk.Combobox(
             form_frame,
-            values=["ט1", "ט2", "ט3", "ט4", "ט5", "ט6"],
+            values=["ז1", "ז2", "ז3", "ז4", "ז5", "ז6", "ח1", "ח2", "ח3", "ח4", "ח5", "ח6", "ט1", "ט2", "ט3", "ט4", "ט5", "ט6", "י1", "י2", "י3", "י4", "י5", "י6", "יא1", "יא2", "יא3", "יא4", "יא5", "יא6", "יב1", "יב2", "יב3", "יב4", "יב5", "יב6"],
             state="readonly",
             font=("Arial", 12)
         )
@@ -816,6 +981,9 @@ try:
             fg="#999999",
             bg="white"
         ).pack()
+        
+        def back_to_login_window():
+            new_win.destroy()
 
         tk.Button(
             footer_frame,
@@ -825,7 +993,7 @@ try:
             bg="white",
             bd=0,
             cursor="hand2",
-            command=new_win.destroy
+            command=back_to_login_window,
         ).pack()
 
         tk.Label(
@@ -1140,16 +1308,36 @@ try:
             cursor="hand2"
         ).pack(pady=15, ipadx=18, ipady=8)
     
-    def open_class_chat():
-        if not current_user_role == "teacher" and not current_user_role == "student":
-            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
-            return
         
+    def open_class_chat_room():
+        global current_user_class
+        hebrew_display_map = {
+            "7th1": "ז'1", "7th2": "ז'2", "7th3": "ז'3",
+            "7th4": "ז'4", "7th5": "ז'5", "7th6": "ז'6",
+
+            "8th1": "ח'1", "8th2": "ח'2", "8th3": "ח'3",
+            "8th4": "ח'4", "8th5": "ח'5", "8th6": "ח'6",
+
+            "9th1": "ט'1", "9th2": "ט'2", "9th3": "ט'3",
+            "9th4": "ט'4", "9th5": "ט'5", "9th6": "ט'6",
+
+            "10th1": "י'1", "10th2": "י'2", "10th3": "י'3",
+            "10th4": "י'4", "10th5": "י'5", "10th6": "י'6",
+
+            "11th1": 'י"א1', "11th2": 'י"א2', "11th3": 'י"א3',
+            "11th4": 'י"א4', "11th5": 'י"א5', "11th6": 'י"א6',
+
+            "12th1": 'י"ב1', "12th2": 'י"ב2', "12th3": 'י"ב3',
+            "12th4": 'י"ב4', "12th5": 'י"ב5', "12th6": 'י"ב6',
+        }
+
+        class_raw = current_user_class  
+        simplefiled_class = hebrew_display_map.get(class_raw, class_raw)  
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
-        new_win.title("כניסה לצ'אט כיתתי")
+        new_win.title("צ'אט כיתתי")
 
-        width, height = 520, 720
+        width, height = 620, 800
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
 
@@ -1161,230 +1349,118 @@ try:
         new_win.resizable(False, False)
 
         main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=470, height=650)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
 
-        header = tk.Frame(main_frame, bg="#1a73e8", height=140)
+        header = tk.Frame(main_frame, bg="#1a73e8", height=100)
         header.pack(fill="x")
         header.pack_propagate(False)
 
         tk.Label(
             header,
-            text="💬",
-            font=("Arial", 38),
+            text=f"💬 צאט כיתה {simplefiled_class}",
+            font=("Arial", 20, "bold"),
             fg="white",
             bg="#1a73e8"
-        ).pack(pady=(18, 0))
+        ).pack(pady=(20, 5))
 
         tk.Label(
             header,
-            text="כניסה לצ'אט",
-            font=("Arial", 23, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack()
-
-        tk.Label(
-            header,
-            text="בחר כיתה והכנס קוד",
+            text="שיח פתוח עם הכיתה",
             font=("Arial", 10),
             fg="#dbeafe",
             bg="#1a73e8"
         ).pack()
 
-        form_frame = tk.Frame(main_frame, bg="#f8fafc")
-        form_frame.pack(fill="both", expand=True, padx=30, pady=25)
+        chat_container = tk.Frame(main_frame, bg="#f8fafc")
+        chat_container.pack(fill="both", expand=True, padx=20, pady=15)
 
-        tk.Label(
-            form_frame,
-            text="בחר כיתה",
-            font=("Arial", 11, "bold"),
-            bg="#f8fafc",
-            fg="#334155"
-        ).pack(anchor="e", pady=(10, 5))
+        canvas = tk.Canvas(chat_container, bg="#f8fafc", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
 
-        class_cb = ttk.Combobox(
-            form_frame,
-            values=["ט'1", "ט'2", "ט'3", "ט'4", "ט'5", "ט'6"],
-            state="readonly",
-            font=("Arial", 11)
+        messages_frame = tk.Frame(canvas, bg="#f8fafc")
+
+        messages_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-        class_cb.pack(fill="x", ipady=5)
 
-        tk.Label(
-            form_frame,
-            text="קוד כניסה",
-            font=("Arial", 11, "bold"),
-            bg="#f8fafc",
-            fg="#334155"
-        ).pack(anchor="e", pady=(20, 5))
+        canvas.create_window((0, 0), window=messages_frame, anchor="nw", width=520)
+        canvas.configure(yscrollcommand=scrollbar.set)
 
-        code_entry = tk.Entry(
-            form_frame,
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        def add_message(name, text, is_me=False):
+            outer = tk.Frame(messages_frame, bg="#f8fafc")
+            outer.pack(fill="x", pady=6, padx=8)
+
+            side = "right" if is_me else "left"
+            bubble_bg = "#1a73e8" if is_me else "white"
+            text_fg = "white" if is_me else "#334155"
+
+            bubble = tk.Frame(
+                outer,
+                bg=bubble_bg,
+                padx=12,
+                pady=10
+            )
+            bubble.pack(side=side)
+
+            tk.Label(
+                bubble,
+                text=name,
+                font=("Arial", 9, "bold"),
+                bg=bubble_bg,
+                fg=text_fg
+            ).pack(anchor="e")
+
+            tk.Label(
+                bubble,
+                text=text,
+                font=("Arial", 11),
+                bg=bubble_bg,
+                fg=text_fg,
+                wraplength=320,
+                justify="right"
+            ).pack(anchor="e", pady=(4, 0))
+
+        add_message("יונתן", "מישהו יודע מה יש במתמטיקה?", False)
+        add_message("אוריה", "כן, עמוד 57 תרגילים 1-5", True)
+        add_message("מאור", "וגם ללמוד למבחן", False)
+
+        input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
+        input_frame.pack(fill="x", padx=20, pady=(0, 15))
+        input_frame.pack_propagate(False)
+
+        message_entry = tk.Entry(
+            input_frame,
             font=("Arial", 11),
             bd=0,
             relief="flat"
         )
-        code_entry.pack(fill="x", ipady=10)
-        
-        def open_class_chat_room():
-            new_win = tk.Toplevel()
-            destroy_and_set_new_window(new_win)
-            new_win.title("צ'אט כיתתי")
+        message_entry.pack(
+            side="right",
+            fill="x",
+            expand=True,
+            padx=(10, 10),
+            pady=18,
+            ipady=10
+        )
 
-            width, height = 620, 800
-            screen_width = new_win.winfo_screenwidth()
-            screen_height = new_win.winfo_screenheight()
-
-            x = (screen_width // 2) - (width // 2)
-            y = (screen_height // 2) - (height // 2)
-
-            new_win.geometry(f"{width}x{height}+{x}+{y}")
-            new_win.configure(bg="#f0f4f8")
-            new_win.resizable(False, False)
-
-            main_frame = tk.Frame(new_win, bg="white")
-            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
-
-            header = tk.Frame(main_frame, bg="#1a73e8", height=100)
-            header.pack(fill="x")
-            header.pack_propagate(False)
-
-            tk.Label(
-                header,
-                text="💬 צ'אט כיתה ט'2",
-                font=("Arial", 20, "bold"),
-                fg="white",
-                bg="#1a73e8"
-            ).pack(pady=(20, 5))
-
-            tk.Label(
-                header,
-                text="שיח פתוח עם הכיתה",
-                font=("Arial", 10),
-                fg="#dbeafe",
-                bg="#1a73e8"
-            ).pack()
-
-            chat_container = tk.Frame(main_frame, bg="#f8fafc")
-            chat_container.pack(fill="both", expand=True, padx=20, pady=15)
-
-            canvas = tk.Canvas(chat_container, bg="#f8fafc", highlightthickness=0)
-            scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
-
-            messages_frame = tk.Frame(canvas, bg="#f8fafc")
-
-            messages_frame.bind(
-                "<Configure>",
-                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-            )
-
-            canvas.create_window((0, 0), window=messages_frame, anchor="nw", width=520)
-            canvas.configure(yscrollcommand=scrollbar.set)
-
-            canvas.pack(side="left", fill="both", expand=True)
-            scrollbar.pack(side="right", fill="y")
-
-            def add_message(name, text, is_me=False):
-                outer = tk.Frame(messages_frame, bg="#f8fafc")
-                outer.pack(fill="x", pady=6, padx=8)
-
-                side = "right" if is_me else "left"
-                bubble_bg = "#1a73e8" if is_me else "white"
-                text_fg = "white" if is_me else "#334155"
-
-                bubble = tk.Frame(
-                    outer,
-                    bg=bubble_bg,
-                    padx=12,
-                    pady=10
-                )
-                bubble.pack(side=side)
-
-                tk.Label(
-                    bubble,
-                    text=name,
-                    font=("Arial", 9, "bold"),
-                    bg=bubble_bg,
-                    fg=text_fg
-                ).pack(anchor="e")
-
-                tk.Label(
-                    bubble,
-                    text=text,
-                    font=("Arial", 11),
-                    bg=bubble_bg,
-                    fg=text_fg,
-                    wraplength=320,
-                    justify="right"
-                ).pack(anchor="e", pady=(4, 0))
-
-            add_message("יונתן", "מישהו יודע מה יש במתמטיקה?", False)
-            add_message("אוריה", "כן, עמוד 57 תרגילים 1-5", True)
-            add_message("מאור", "וגם ללמוד למבחן", False)
-
-            input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
-            input_frame.pack(fill="x", padx=20, pady=(0, 15))
-            input_frame.pack_propagate(False)
-
-            message_entry = tk.Entry(
-                input_frame,
-                font=("Arial", 11),
-                bd=0,
-                relief="flat"
-            )
-            message_entry.pack(
-                side="right",
-                fill="x",
-                expand=True,
-                padx=(10, 10),
-                pady=18,
-                ipady=10
-            )
-
-            tk.Button(
-                input_frame,
-                text="שלח",
-                font=("Arial", 11, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                bd=0,
-                relief="flat",
-                padx=18,
-                pady=8,
-                cursor="hand2"
-            ).pack(side="left", padx=10, pady=18)
-
-            footer = tk.Frame(main_frame, bg="white", height=60)
-            footer.pack(fill="x")
-            footer.pack_propagate(False)
-
-            tk.Button(
-                footer,
-                text="חזרה",
-                font=("Arial", 12),
-                bg="#64748b",
-                fg="white",
-                bd=0,
-                padx=18,
-                pady=8,
-                cursor="hand2",
-                command=lambda: open_main_page(current_username)
-            ).pack(pady=10)
-            
         tk.Button(
-            form_frame,
-            text="כניסה לצ'אט",
-            font=("Arial", 13, "bold"),
+            input_frame,
+            text="שלח",
+            font=("Arial", 11, "bold"),
             bg="#1a73e8",
             fg="white",
             bd=0,
             relief="flat",
-            cursor="hand2",
-            pady=10,
-            command=open_class_chat_room
-        ).pack(fill="x", pady=30)
+            padx=18,
+            pady=8,
+            cursor="hand2"
+        ).pack(side="left", padx=10, pady=18)
 
-        footer = tk.Frame(main_frame, bg="#f8fafc", height=70)
+        footer = tk.Frame(main_frame, bg="white", height=60)
         footer.pack(fill="x")
         footer.pack_propagate(False)
 
@@ -1399,7 +1475,8 @@ try:
             pady=8,
             cursor="hand2",
             command=lambda: open_main_page(current_username)
-        ).pack(pady=15) 
+        ).pack(pady=10)
+        
         
     def open_todo_list():
         global current_username, current_user_class
@@ -2343,8 +2420,25 @@ try:
             cursor="hand2"
         ).pack(pady=15, ipadx=18, ipady=8)
     
+    def open_chatbot_help():
+        new_win = tk.Toplevel()
+        destroy_and_set_new_window(new_win)
+        new_win.title("מערכת שעות")
+
+        width, height = 520, 770
+        screen_width = new_win.winfo_screenwidth()
+        screen_height = new_win.winfo_screenheight()
+
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+
+        new_win.geometry(f"{width}x{height}+{x}+{y}")
+        new_win.configure(bg="#f0f4f8")
+        new_win.resizable(False, False)
+    
     if __name__ == "__main__":
         open_splash_screen()
+        
 
 except KeyboardInterrupt:
     print("Keyboard Interrupt. QUITING!")

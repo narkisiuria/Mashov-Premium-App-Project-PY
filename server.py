@@ -23,7 +23,7 @@ try:
                 try:
                     print("[+] oppening data/users.json and reading it")
                     with open("data/users.json", "r", encoding="utf-8") as f:
-                        print("[+] oppend data/users.json")
+                        print("[+] successfuly oppend data/users.json")
                         print("[+] returing the data of users")
                         return json.load(f)
                     
@@ -86,7 +86,7 @@ try:
                 print("[+] collecting user's data")
                 userData = users[username]
                 storedPassword = userData.get("password", "")
-                print("[+] suucessfuly collected user's data")
+                print("[+] sucessfuly collected user's data")
                 
                 if ":" in storedPassword:
                     print("[+] found that ':' is in user's data")
@@ -104,7 +104,7 @@ try:
                         print("[+] sending client his role|class name")
                         conn.sendall(f"200 ok|{role}|{class_name}".encode("utf-8"))
                         print("[+] successfuly sent client his role|class name")
-                        print["[*] status is success"]
+                        print("[*] status is success")
                         status = "success"
                         
                         with self.attempts_lock:
@@ -121,7 +121,7 @@ try:
         def _send_unauthorized(self, conn, addr, client_ip):
             print(f"[+] sending '401 unauthorized' to client: {addr}")
             conn.sendall("401 unauthorized".encode('utf-8'))
-            print(f"[+] suuccessfuly sent 401 unauthorized to client: {addr}")
+            print(f"[+] successfuly sent 401 unauthorized to client: {addr}")
             with self.attempts_lock:
                 print("[+] updating attempts lock")
                 self.failed_attempts_tracker[client_ip] = self.failed_attempts_tracker.get(client_ip, 0) + 1
@@ -130,31 +130,52 @@ try:
 
         def handle_signup(self, conn, addr, dataFromClient):
             parts = dataFromClient.split("|")
-            if len(parts) != 9:
-                print("[*] found that the length of the request from the client is not equle to 9")
-                print(f"[+] sending '400 bad request' to client: {addr}. hint: (check length of request)")
+            
+            if len(parts) != 10:
+                print("[*] found that the length of the request from the client is not equle to 10")
+                print(f"[+] sending '400 bad request' to client: {addr}. hint: (check length of client request)")
                 conn.sendall("400 bad request".encode('utf-8'))
                 print(f"successfuly sent 400 bad request to client: {addr}")
                 return
 
             print("[+] analyzing the data")
             firstName, lastName, gmail, newUsername, newPassword = parts[1:6]
-            print(f"[+] done analyzing the data of user: {addr}")
+            print(f"[+] done analyzing the data from user: {addr}")
             
             print("[+] getting class map")
             class_map = {
+                "ז1": "7th1", "ז2": "7th2", "ז3": "7th3",
+                "ז4": "7th4", "ז5": "7th5", "ז6": "7th6",
+
+                "ח1": "8th1", "ח2": "8th2", "ח3": "8th3",
+                "ח4": "8th4", "ח5": "8th5", "ח6": "8th6",
+
                 "ט1": "9th1", "ט2": "9th2", "ט3": "9th3",
-                "ט4": "9th4", "ט5": "9th5", "ט6": "9th6"
+                "ט4": "9th4", "ט5": "9th5", "ט6": "9th6",
+
+                "י1": "10th1", "י2": "10th2", "י3": "10th3",
+                "י4": "10th4", "י5": "10th5", "י6": "10th6",
+
+                "יא1": "11th1", "יא2": "11th2", "יא3": "11th3",
+                "יא4": "11th4", "יא5": "11th5", "יא6": "11th6",
+
+                "יב1": "12th1", "יב2": "12th2", "יב3": "12th3",
+                "יב4": "12th4", "יב5": "12th5", "יב6": "12th6"
             }
+
             
-            print("[+] getting user's class name|role|access code")
+            print("[+] getting user's class name|role|access code|new class code?. hint: (is student?)")
             class_raw = parts[6].strip()
             class_name = class_map.get(class_raw, class_raw)
             role = parts[7]
             access_code = parts[8]
+            class_code = parts[9]
+            hashed_access_code_from_client = hashingAlg.hash_password_no_salt(access_code)
+            hashed_class_access_code_from_client = hashingAlg.hash_password_no_salt(class_code)
+            
             print("[+] getting current time")
             timeCreated = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            print(f"[+] time created is: '{timeCreated}'")
+            print(f"[+] time requested creation is: '{timeCreated}'")
 
             print("[+] opening data/users.json")
             with self.db_lock:
@@ -162,11 +183,11 @@ try:
                     with open("data/users.json", "r", encoding='utf-8') as f:
                         print("[+] getting global users data")
                         global_users = json.load(f)
-                        print("[+] suucessfuly got global users data")
+                        print("[+] sucessfuly got global users data")
                         
                 except FileNotFoundError:
                     print("[*] did not find file data/users.json")
-                    print("[*] assinging a an empty list")
+                    print("[*] assinging an empty list")
                     global_users = {}
                     
                 for u_name, data in global_users.items():
@@ -185,57 +206,113 @@ try:
                     return
             
             try:
-                print("[+] oppening keys/teachers.key. hint: (teachers code file)")
-                with open("keys/teachers.key", "r", encoding='utf-8') as f:
-                    print("[+] successfuly oppened keys/teachers.key. hint: (teachers code file)")
+                if role == "teacher":
                     print("[*] getting teachers code")
-                    teacher_code = f.read().strip()
-                    print("[+] got teachers code")
+                    print("[+] opening teacher waitlist codes file")
                     
+                    with open("keys/teacher_wait_list_keys.json", mode="r", encoding='utf-8') as f:
+                        data = json.load(f)
+                        
+                        if class_name in data:
+                            if data[class_name]["code"].strip() == "":
+                                conn.sendall("invalid teacher code".encode('utf-8'))
+                                return
+                            
+                            print("[+] found class name in teacher codes waitlist file")
+                            hashed_teacher_waitlist_code = data[class_name]["code"].strip()
+                            print(f"[+] got teachers code: {hashed_teacher_waitlist_code}")
+                            
+                        else:
+                            print("[-] class name not found in file")
+                            conn.sendall("404".encode('utf-8'))
+                            print("[+] successfuly sent client a 404 not found. hint: (class not found in teacher codes waitlist file)")
+                            return
+                    
+            except FileNotFoundError:
+                print("[-] Error: keys/teacher_wait_list_keys.json not found")
+                return
+                
+            except json.JSONDecodeError:
+                print("[-] Error: Failed to decode JSON")
+                return
+            
+            try:  
                 print("[+] oppening keys/students.key. hint: (students code file)")
-                with open("keys/students.key", "r", encoding='utf-8') as f:  
-                    print("[+] successfuly oppened keys/students.key. hint: (students code file)")
+                with open("data/aval_class_codes.json", "r", encoding='utf-8') as f:  
+                    print("[+] successfuly opened keys/students.key. hint: (students code file)")
                     print("[*] getting students code")
-                    student_code = f.read().strip()
+                    class_codes_from_file = json.load(f)
                     print("[+] got students code")
-                    
+                
+                class_info = class_codes_from_file.get(class_name.strip())
+                
+                if class_info and role != "teacher":
+                    hashed_current_class_code = class_info.get("class code", 0)
+                
+                elif role == "teacher":
+                    pass
+                
+                else:
+                    print("[+] class does not exists.")
+                    print("[=] sending 404 to client. hint: (class does not exists)")
+                    conn.sendall("404".encode("utf-8"))
+                    print("[+] sent.")
+                    return 
+                        
             except FileNotFoundError:
                 print("[-] Key files missing!")
                 print("[*] sending ")
                 conn.sendall("error|server configuration error".encode("utf-8"))
-                print("[*] successfult sent client side a server config error")
+                print("[*] successfuly sent client side a server config error")
                 return
 
-            if role == "teacher" and access_code != teacher_code:
+            if role == "teacher" and hashed_access_code_from_client != hashed_teacher_waitlist_code:
                 conn.sendall("invalid teacher code".encode("utf-8"))
                 return
-            elif role == "student" and access_code != student_code:
+            
+            elif role == "student" and hashed_class_access_code_from_client != hashed_current_class_code:
                 conn.sendall("invalid student code".encode("utf-8"))
                 return
+            
             elif role not in ["teacher", "student"]:
-                conn.sendall("invalid role".encode("utf-8"))
+                conn.sendall("invalid role?".encode("utf-8"))
                 return
             
-            class_file_path = f"classesStudents/{class_name}/students-{class_name}.json"
+            class_dir = f"classesStudents/{class_name}"
+            class_file_path = f"{class_dir}/students-{class_name}.json"
+            group_chat_path = f"{class_dir}/group_chat-{class_name}.json"
+
             with self.db_lock:
+                os.makedirs(class_dir, exist_ok=True)
+
                 try:
                     with open(class_file_path, "r", encoding='utf-8') as f:
                         class_users = json.load(f)
-                        target_class = class_name
+                        
+                    if isinstance(class_users, list):
+                        class_users = {u.get("username", str(i)): u for i, u in enumerate(class_users)}
+                        
+                    teacher_exists = any(user.get('role') == 'teacher' for user in class_users.values())
+                    if teacher_exists and role == "teacher":
+                        conn.sendall("teacher allready exists in this class".encode('utf-8'))
+                        return
 
-                        teacher_exists = any(user['role'] == 'teacher' and user['class'] == target_class 
-                                            for user in class_users.values())
-
-                        if teacher_exists and role == "teacher":
-                            conn.sendall("teacher allready exists in this class".encode('utf-8'))
-                            return
-                            
-                        if isinstance(class_users, list):
-                            class_users = {u.get("username", str(i)): u for i, u in enumerate(class_users)}
-                            
                 except (FileNotFoundError, json.JSONDecodeError):
+                    if role != "teacher":
+                        print(f"[+] Class {class_name} not found.")
+                        conn.sendall("404".encode('utf-8'))
+                        return
                     class_users = {}
 
+                if not os.path.exists(group_chat_path):
+                    try:
+                        with open(group_chat_path, "w", encoding='utf-8') as f:
+                            json.dump({}, f, ensure_ascii=False, indent=4)
+                        print(f"[+] Created group chat file for {class_name}")
+                    except Exception as e:
+                        print(f"[-] Error creating group chat file: {e}")
+
+                          
                 class_users[newUsername] = {
                     "id": len(class_users) + 1,
                     "first_name": firstName,
@@ -253,25 +330,58 @@ try:
                     json.dump(class_users, f, indent=4, ensure_ascii=False)
                     print(f"[+] successfully updated class file for {class_name}")
 
-                salt, hashed_tuple = hashingAlg.hash_new_password(newPassword)
-                password_to_save = f"{salt.hex()}:{hashed_tuple.hex()}"
-                
-                global_users[newUsername] = {
-                    "id": len(global_users) + 1,
-                    "password": password_to_save,
-                    "first_name": firstName,
-                    "last_name": lastName,
-                    "gmail_account": gmail,
-                    "role": role,
-                    "class": class_name,
-                    "created_at": timeCreated
-                }
-                
                 with open("data/users.json", "w", encoding='utf-8') as f:
-                    json.dump(global_users, f, indent=4, ensure_ascii=False)
-                    print("[+] successfully updated global users.json")
-            
+                    salt, hashed_tuple = hashingAlg.hash_new_password(newPassword)
+                    password_to_save = f"{salt.hex()}:{hashed_tuple.hex()}"
+                    
+                    global_users[newUsername] = {
+                        "id": len(global_users) + 1,
+                        "password": password_to_save,
+                        "first_name": firstName,
+                        "last_name": lastName,
+                        "gmail_account": gmail,
+                        "role": role,
+                        "class": class_name,
+                        "created_at": timeCreated
+                    }        
+                    
+                    json.dump(global_users, f, indent=4,  ensure_ascii=False)    
+                
+            with self.db_lock:
+                if role == "teacher":
+                    with open("data/aval_class_codes.json", "r", encoding="utf-8") as file:
+                        codes_from_file = json.load(file)
+                    
+                    if class_name in codes_from_file:
+                        conn.sendall("codeexsists".encode("utf-8"))
+                        return
+
+                    with open("data/aval_class_codes.json", "w", encoding='utf-8') as f:
+                        new_code_field = {
+                            class_name: {
+                                "teacher": firstName,
+                                "class code": hashed_class_access_code_from_client,
+                                "username": newUsername,
+                                "gmail account": gmail,
+                            }
+                        }
+                        
+                        codes_from_file.update(new_code_field)
+                        
+                        json.dump(codes_from_file, f, indent=4, ensure_ascii=False)
+                
+            if role == "teacher":
+                with self.db_lock:
+                    with open("keys/teacher_wait_list_keys.json", "r", encoding='utf-8') as f:  # read first
+                        data_from_teacher_wait_list = json.load(f)                               # pass f
+
+                    data_from_teacher_wait_list[class_name]["code"] = ""                         # modify the right variable
+
+                    with open("keys/teacher_wait_list_keys.json", "w", encoding='utf-8') as f:  # then write
+                        json.dump(data_from_teacher_wait_list, f, indent=4, ensure_ascii=False)  # actually dump it
+                        
             conn.sendall(f"200 ok|{role}|{class_name}".encode('utf-8'))
+            return
 
         def handle_get_schedule(self, conn, dataFromClient):
             class_name = dataFromClient.split("|")[1]
@@ -303,8 +413,10 @@ try:
                                 
                             response = json.dumps(tasks_list, ensure_ascii=False)
                             conn.sendall(response.encode('utf-8'))
+                            
                         else:
                             conn.sendall(f"username: '{username}' is not in this class?!".encode('utf-8'))
+                            
                 except FileNotFoundError:
                     conn.sendall("error|class file not found".encode('utf-8'))
 
