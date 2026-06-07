@@ -2092,9 +2092,314 @@ try:
                 command=see_existing,
                 cursor="hand2",).place(x=280, y=560)
 
-    def open_freer():
-        global days, id_s, id, hr, rs
+    def check_my_requests_status(student_id, student_class):
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
 
+        try:
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                
+                request_msg = f"get_student_requests|{student_class}|{student_id}"
+                s.sendall(request_msg.encode('utf-8'))
+
+                full_response = ""
+                while True:
+                    raw_data = s.recv(4096)
+                    if not raw_data:
+                        break
+                    full_response += raw_data.decode('utf-8')
+                
+                response = full_response.strip()
+                
+                if response.startswith("student_requests_data|"):
+                    json_string = response.split("|", 1)[1]
+                    if json_string == "{}" or not json_string:
+                        messagebox.showinfo("סטטוס בקשות", "אין לך בקשות שחרור במערכת.")
+                        return
+                    
+                    my_requests = json.loads(json_string)
+                    
+                    for req_id, req_info in my_requests.items():
+                        status = req_info.get("status")
+                        day = req_info.get("day")
+                        time = req_info.get("time")
+                        
+                        if status == "approved":
+                            status_heb = "אושרה! ✔ (סע לשלום)"
+                        elif status == "rejected":
+                            status_heb = "נדחתה ❌ (נשארים ללמוד)"
+                        else:
+                            status_heb = "ממתינה לבדיקת מורה ⏳"
+                            
+                        messagebox.showinfo("עדכון בקשה", f"הבקשה שלך ל{day} בשעה {time}:\nסטטוס: {status_heb}")
+                        
+        except Exception as e:
+            messagebox.showerror("שגיאה", f"לא ניתן לבדוק סטטוס: {e}")
+    
+    def open_freer():            
+        global current_user_role, current_username, current_user_class
+        
+        if current_user_role == "teacher":
+            new_win = tk.Toplevel()
+            destroy_and_set_new_window(new_win)
+            new_win.title("ניהול בקשות שחרור - ממשק מורה")
+
+            width, height = 700, 770 
+            screen_width = new_win.winfo_screenwidth()
+            screen_height = new_win.winfo_screenheight()
+
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
+
+            new_win.geometry(f"{width}x{height}+{x}+{y}")
+            new_win.configure(bg="#f0f4f8")
+            new_win.resizable(False, False)
+
+            main_frame = tk.Frame(new_win, bg="white")
+            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=660, height=730)
+
+            header_frame = tk.Frame(main_frame, bg="#1a73e8", height=140)
+            header_frame.pack(fill="x")
+            header_frame.pack_propagate(False)
+
+            tk.Label(
+                header_frame,
+                text="📋",
+                font=("Arial", 38),
+                fg="white",
+                bg="#1a73e8"
+            ).pack(pady=(12, 0))
+
+            tk.Label(
+                header_frame,
+                text="מרכז בקשות שחרור",
+                font=("Arial", 22, "bold"),
+                fg="white",
+                bg="#1a73e8"
+            ).pack()
+
+            tk.Label(
+                header_frame,
+                text="צפייה, אישור ודחייה של בקשות יציאה של תלמידים",
+                font=("Arial", 11),
+                fg="#dbeafe",
+                bg="#1a73e8"
+            ).pack()
+
+            table_frame = tk.Frame(main_frame, bg="#f8fafc")
+            table_frame.pack(fill="both", expand=True, padx=25, pady=20)
+
+            style = ttk.Style()
+            style.theme_use("clam")
+            style.configure("Treeview", font=("Arial", 11), rowheight=32, background="#ffffff", fieldbackground="#ffffff")
+            style.configure("Treeview.Heading", font=("Arial", 11, "bold"), background="#e2e8f0", foreground="#334155")
+            
+            columns = ("id_s", "day", "hour", "reason")
+            tree = ttk.Treeview(table_frame, columns=columns, show="headings", selectmode="browse")
+            
+            tree.heading("id_s", text="ת.ז. תלמיד")
+            tree.heading("day", text="יום שחרור")
+            tree.heading("hour", text="שעה")
+            tree.heading("reason", text="סיבה / הערה מההורה")
+            
+            tree.column("id_s", width=110, anchor="center")
+            tree.column("day", width=100, anchor="center")
+            tree.column("hour", width=70, anchor="center")
+            tree.column("reason", width=280, anchor="e") 
+
+            scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+            tree.configure(yscrollcommand=scrollbar.set)
+            
+            tree.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
+
+            def approve_request():
+                selected_item = tree.selection()
+                if not selected_item:
+                    messagebox.showwarning("שימו לב", "אנא בחרו בקשה מהרשימה לאישור")
+                    return
+                
+                # בדיקה מה ה-ID שנשלף מהשורה שנבחרה
+                req_id = selected_item[0]
+                item_details = tree.item(selected_item)['values']
+                student_id = item_details[0]
+                
+                print(f"[DEBUG CLIENT] Teacher clicked Approve. Selected row iid (req_id): '{req_id}'")
+
+                class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
+                class_name = str(class_name).strip()
+
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        update_msg = f"update_request_status|{class_name}|{req_id}|approved"
+                        print(f"[DEBUG CLIENT] Sending update message to server: '{update_msg}'")
+                        s.sendall(update_msg.encode('utf-8'))
+
+                        raw_data = s.recv(1024)
+                        if raw_data:
+                            res = raw_data.decode('utf-8').strip()
+                            print(f"[DEBUG CLIENT] Server responded to update: '{res}'")
+                            
+                            if res == "200 ok":
+                                messagebox.showinfo("הצלחה", f"בקשת השחרור עבור תלמיד {student_id} אושרה בהצלחה!")
+                                tree.delete(selected_item)
+                            else:
+                                messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
+                except Exception as e:
+                    print(f"[DEBUG CLIENT] Error in approve_request: {e}")
+                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+
+
+            def reject_request():
+                selected_item = tree.selection()
+                if not selected_item:
+                    messagebox.showwarning("שימו לב", "אנא בחרו בקשה מהרשימה לדחייה")
+                    return
+                
+                req_id = selected_item[0]
+                item_details = tree.item(selected_item)['values']
+                student_id = item_details[0]
+                
+                print(f"[DEBUG CLIENT] Teacher clicked Reject. Selected row iid (req_id): '{req_id}'")
+
+                class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
+                class_name = str(class_name).strip()
+
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        update_msg = f"update_request_status|{class_name}|{req_id}|rejected"
+                        print(f"[DEBUG CLIENT] Sending update message to server: '{update_msg}'")
+                        s.sendall(update_msg.encode('utf-8'))
+
+                        raw_data = s.recv(1024)
+                        if raw_data:
+                            res = raw_data.decode('utf-8').strip()
+                            print(f"[DEBUG CLIENT] Server responded to update: '{res}'")
+                            
+                            if res == "200 ok":
+                                messagebox.showinfo("סטטוס עודכן", f"בקשת השחרור עבור תלמיד {student_id} נדחתה.")
+                                tree.delete(selected_item)
+                            else:
+                                messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
+                except Exception as e:
+                    print(f"[DEBUG CLIENT] Error in reject_request: {e}")
+                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+
+            def load_requests():
+                for item in tree.get_children():
+                    tree.delete(item)
+
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        
+                        # דיבאג 1: נראה איזו כיתה המורה מנסה לבקש
+                        class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
+                        print(f"[DEBUG CLIENT] Teacher is requesting data for class: '{class_name}'")
+                        
+                        request_msg = f"get_freer_requests|{class_name}"
+                        s.sendall(request_msg.encode('utf-8'))
+
+                        # מנגנון לקבלת המידע המלא (בלולאה) עד שהשרת מסיים לשלוח
+                        full_response = ""
+                        while True:
+                            raw_data = s.recv(4096)
+                            if not raw_data:
+                                break
+                            full_response += raw_data.decode('utf-8')
+                        
+                        response = full_response.strip()
+                        print(f"[DEBUG CLIENT] Raw response from server: {response}") # דיבאג 2
+
+                        if response.startswith("requests_data|"):
+                            json_string = response.split("|", 1)[1]
+                            print(f"[DEBUG CLIENT] Extracted JSON string: {json_string}") # דיבאג 3
+                            
+                            if json_string == "{}" or not json_string:
+                                print("[DEBUG CLIENT] JSON is empty, nothing to load.")
+                                return  
+                            
+                            all_requests = json.loads(json_string)
+                            
+                            for req_id, req_info in all_requests.items():
+                                print(f"[DEBUG CLIENT] Processing request {req_id}: {req_info}") # דיבאג 4
+                                
+                                # שים לב: בדוק שהסטטוס ב-JSON שלך הוא באמת באותיות קטנות "pending"
+                                if req_info.get("status") == "pending":
+                                    row = (
+                                        req_info.get("student_id"),
+                                        req_info.get("day"),
+                                        req_info.get("time"),
+                                        req_info.get("reason")
+                                    )
+                                    tree.insert("", "end", iid=req_id, values=row)
+                                    print(f"[DEBUG CLIENT] Successfully inserted row for student: {req_info.get('student_id')}")
+                                else:
+                                    print(f"[DEBUG CLIENT] Skipped request {req_id} because status is {req_info.get('status')}")
+                                    
+                except Exception as e:
+                    print(f"[DEBUG CLIENT] Error in load_requests: {e}")
+                    messagebox.showerror("שגיאה", f"לא ניתן לטעון את בקשות השחרור: {e}")
+
+            load_requests()
+
+            actions_frame = tk.Frame(main_frame, bg="white")
+            actions_frame.pack(fill="x", padx=25, pady=(0, 15))
+
+            btn_approve = tk.Button(
+                actions_frame,
+                text="אשר בקשה ✔",
+                command=approve_request,
+                font=("Arial", 12, "bold"),
+                bg="#10b981", 
+                fg="white",
+                relief="flat",
+                cursor="hand2"
+            )
+            btn_approve.pack(side="right", fill="x", expand=True, padx=(8, 0), ipady=10)
+
+            btn_reject = tk.Button(
+                actions_frame,
+                text="דחה בקשה ❌",
+                command=reject_request,
+                font=("Arial", 12, "bold"),
+                bg="#ef4444", 
+                fg="white",
+                relief="flat",
+                cursor="hand2"
+            )
+            btn_reject.pack(side="left", fill="x", expand=True, padx=(0, 8), ipady=10)
+
+            footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
+            footer_frame.pack(fill="x", side="bottom")
+            footer_frame.pack_propagate(False)
+
+            tk.Button(
+                footer_frame,
+                text="חזרה למסך ראשי",
+                command=lambda: open_main_page(current_username),
+                font=("Arial", 13, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2"
+            ).pack(pady=15, ipadx=18, ipady=8)
+
+            return 
+                
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד שיחרורון")
@@ -2110,12 +2415,32 @@ try:
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
 
+        student_id_var = tk.StringVar()
+        parent_id_var = tk.StringVar()
+        day_var = tk.StringVar()
+        hour_var = tk.StringVar()
+        reason_var = tk.StringVar()
+
         def freer_completed():
-            if not current_user_role == "teacher" and not current_user_role == "student":
+            nonlocal student_id_var, parent_id_var, day_var, hour_var, reason_var
+            global current_user_role, current_user_class
+
+            if current_user_role != "teacher" and current_user_role != "student":
                 messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
                 return
             
-            if days.get() == "" or id.get() == "" or id_s.get() == "" or hr.get() == "" or rs.get() == "":
+            s_id = str(student_id_var.get()).strip()
+            p_id = str(parent_id_var.get()).strip()
+            s_day = str(day_var.get()).strip()
+            s_hour = str(hour_var.get()).strip()
+            s_reason = str(reason_var.get()).strip()
+
+            if hasattr(current_user_class, 'get'):
+                u_class = current_user_class.get()
+            else:
+                u_class = str(current_user_class)
+
+            if not s_id or not p_id or not s_day or not s_hour or not s_reason:
                 messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
                 return
 
@@ -2126,22 +2451,23 @@ try:
                 with create_secure_socket() as s:
                     print(f"Connecting to {SERVER_IP}:{PORT}...")
                     s.connect((SERVER_IP, PORT))
-                    subject = "freer premition"
+                    
+                    # בניית המחרוזת
+                    subject = f"freer premition|{s_id}|{s_hour}|{s_day}|{s_reason}|{u_class}"
                     s.sendall(subject.encode('utf-8'))
 
                     while True:
                         raw_data = s.recv(1024)
-
                         if not raw_data:
                             break
 
                         dataFromServer = raw_data.decode('utf-8').strip()
 
                         if dataFromServer == "200 ok":
-                            messagebox.showinfo("!הצלחה", "בקשת השחרור אושרה על ידי השרת")
+                            messagebox.showinfo("!הצלחה", "בקשת השיחרור נשלחה בהצלחה ומחכה לאישור המחנך")
                             break
                         else:
-                            messagebox.showerror("שגיאה!", "בקשת השחרור לא אושרה על ידי השרת")
+                            messagebox.showerror("שגיאה!", "תקלה בשליחת בקשת שיחרור, אנא נסה שוב")
                             break
 
             except ConnectionRefusedError:
@@ -2155,6 +2481,21 @@ try:
         header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
         header_frame.pack(fill="x")
         header_frame.pack_propagate(False)
+
+
+        tk.Button(
+            header_frame,
+            text="➜  בדוק סטטוס בקשות",
+            command=lambda: check_my_requests_status(student_id_var.get(), current_user_class), 
+            font=("Arial", 10, "bold"),
+            bg="#1a73e8",
+            fg="white",
+            activebackground="#1557b0",
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        ).place(x=340, y=12) 
 
         tk.Label(
             header_frame,
@@ -2194,11 +2535,11 @@ try:
             tk.Label(form_frame, text=text, **label_style).pack(fill="x", pady=(10, 4))
 
         add_label("ת.ז. של התלמיד/ה")
-        id_s = ttk.Entry(form_frame, font=("Arial", 11))
+        id_s = ttk.Entry(form_frame, font=("Arial", 11), textvariable=student_id_var)
         id_s.pack(fill="x", ipady=6)
 
         add_label("ת.ז. שלך (ההורה)")
-        id = ttk.Entry(form_frame, font=("Arial", 11))
+        id = ttk.Entry(form_frame, font=("Arial", 11), textvariable=parent_id_var)
         id.pack(fill="x", ipady=6)
 
         add_label("יום השחרור")
@@ -2206,7 +2547,8 @@ try:
             form_frame,
             values=["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי"],
             state="readonly",
-            font=("Arial", 11)
+            font=("Arial", 11),
+            textvariable=day_var
         )
         days.pack(fill="x")
 
@@ -2220,12 +2562,13 @@ try:
                 "15:00", "15:30", "16:00"
             ],
             state="readonly",
-            font=("Arial", 11)
+            font=("Arial", 11),
+            textvariable=hour_var
         )
         hr.pack(fill="x")
 
         add_label("סיבה / הערה")
-        rs = ttk.Entry(form_frame, font=("Arial", 11))
+        rs = ttk.Entry(form_frame, font=("Arial", 11), textvariable=reason_var)
         rs.pack(fill="x", ipady=6)
 
         tk.Label(
@@ -2264,7 +2607,7 @@ try:
             bd=0,
             cursor="hand2"
         ).pack(pady=15, ipadx=18, ipady=8)
-    
+        
     def open_marechet():
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
@@ -2281,7 +2624,6 @@ try:
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
 
-        # ---------------- טעינת לוגיקה קיימת ----------------
         try:
             with open("data/schedule.json", "r", encoding="utf-8") as f:
                 schedule_data = json.load(f)
@@ -2289,7 +2631,6 @@ try:
             messagebox.showerror("שגיאה", f"שגיאה בטעינת המערכת: {e}")
             return
 
-        # ---------------- UI ----------------
         main_frame = tk.Frame(new_win, bg="white")
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
 
@@ -2350,7 +2691,6 @@ try:
             fg="#334155"
         ).pack(side="right", padx=10)
 
-        # ---------------- אזור רשימה ----------------
         list_container = tk.Frame(main_frame, bg="#f8fafc")
         list_container.pack(fill="both", expand=True, padx=25, pady=10)
 

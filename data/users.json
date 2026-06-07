@@ -28,5 +28,55 @@
         "role": "teacher",
         "class": "7th1",
         "created_at": "17/05/2026 12:14:12"
+    },
+    "uria": {
+        "id": 4,
+        "password": "9f7d70be109beea613dee5163a2dcd4f:45bdb1766c44e4f5d09e1b96e790fd266a1c704ce5211adeaaa93da35dd9227fada3abdbdc0a3ce5e0121eb45cf0805d5dc8b81ad16c0196117e715b017540fe",
+        "first_name": "uria",
+        "last_name": "narkisi",
+        "gmail_account": "urianar@gmail.com",
+        "role": "teacher",
+        "class": "12th2",
+        "created_at": "04/06/2026 12:03:20"
+    },
+    "ido": {
+        "id": 5,
+        "password": "e61a0a7d876edab8c89ee6556995f687:69860bcc77515334303eaca2ea92014d58fafa500cef9ea4c0a7efeebdacae5fbdfba97286ab86f70d2e24e146ed5729a7e52b4dfb71a54c4a61c4231a870ca0",
+        "first_name": "ido",
+        "last_name": "k",
+        "gmail_account": "idok1@gmail.com",
+        "role": "student",
+        "class": "12th2",
+        "created_at": "04/06/2026 12:04:18"
+    },
+    "rthrt": {
+        "id": 6,
+        "password": "d08ef981f2c939d720bb027c71a3e791:fbbbc8aaec88656a194e8026dc2dbfd8dcaa6b05ee4026cebd4b480fc2afca0efada4e7f98f3463b3922e7e13bfe0637978127ce268937c3e5c07f282552d49c",
+        "first_name": "trh",
+        "last_name": "hrth",
+        "gmail_account": "rthrth@gmail.com",
+        "role": "teacher",
+        "class": "11th1",
+        "created_at": "07/06/2026 16:29:56"
+    },
+    "u": {
+        "id": 7,
+        "password": "f10d36076581a9d294d39af3aa7d6cac:8cdbc28ffaceb9f5c3bfab581e7cfb81e13c35b68b7e04efb06d2ea46fbbbb18f65861a44b79ad83aa3569d1d7571a8d0e5a4e0dd61f9b15991d59bdb3a83133",
+        "first_name": "u",
+        "last_name": "u",
+        "gmail_account": "u@gmail.com",
+        "role": "teacher",
+        "class": "9th3",
+        "created_at": "07/06/2026 17:10:55"
+    },
+    "i": {
+        "id": 8,
+        "password": "d176fbd89d8c53cb68300231e34854cb:3ff1a92af8e14f9323cfe3f0530d811cd9daedcedd122ec068495f27867f38dfc84002e8b76847d29ba2757d974cfc8b1ff1f1ab07e3ab7ccb36980c53556994",
+        "first_name": "i",
+        "last_name": "i",
+        "gmail_account": "i@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "created_at": "07/06/2026 17:11:29"
     }
 }

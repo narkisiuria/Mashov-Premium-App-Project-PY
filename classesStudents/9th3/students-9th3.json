@@ -1,0 +1,24 @@
+{
+    "u": {
+        "id": 1,
+        "first_name": "u",
+        "last_name": "u",
+        "gmail_account": "u@gmail.com",
+        "role": "teacher",
+        "class": "9th3",
+        "tasks": [],
+        "created_at": "07/06/2026 17:10:55",
+        "grades": "is teacher"
+    },
+    "i": {
+        "id": 2,
+        "first_name": "i",
+        "last_name": "i",
+        "gmail_account": "i@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "tasks": [],
+        "created_at": "07/06/2026 17:11:29",
+        "grades": []
+    }
+}

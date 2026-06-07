@@ -220,7 +220,6 @@ try:
                             
                             print("[+] found class name in teacher codes waitlist file")
                             hashed_teacher_waitlist_code = data[class_name]["code"].strip()
-                            print(f"[+] got teachers code: {hashed_teacher_waitlist_code}")
                             
                         else:
                             print("[-] class name not found in file")
@@ -281,6 +280,7 @@ try:
             class_dir = f"classesStudents/{class_name}"
             class_file_path = f"{class_dir}/students-{class_name}.json"
             group_chat_path = f"{class_dir}/group_chat-{class_name}.json"
+            freer_requests_path = f"{class_dir}/freerrequests-{class_name}.json"
 
             with self.db_lock:
                 os.makedirs(class_dir, exist_ok=True)
@@ -311,6 +311,14 @@ try:
                         print(f"[+] Created group chat file for {class_name}")
                     except Exception as e:
                         print(f"[-] Error creating group chat file: {e}")
+                        
+                if not os.path.exists(freer_requests_path):
+                    try:
+                        with open(freer_requests_path, "w", encoding='utf-8') as f:
+                            json.dump({}, f, ensure_ascii=False, indent=4)
+                        print(f"[+] Created freer requests file for {class_name}")
+                    except Exception as e:
+                        print(f"[-] Error creating freer requests file: {e}")
 
                           
                 class_users[newUsername] = {
@@ -372,16 +380,25 @@ try:
                 
             if role == "teacher":
                 with self.db_lock:
-                    with open("keys/teacher_wait_list_keys.json", "r", encoding='utf-8') as f:  # read first
-                        data_from_teacher_wait_list = json.load(f)                               # pass f
+                    with open("keys/teacher_wait_list_keys.json", "r", encoding='utf-8') as f: 
+                        data_from_teacher_wait_list = json.load(f)                      
 
-                    data_from_teacher_wait_list[class_name]["code"] = ""                         # modify the right variable
+                    data_from_teacher_wait_list[class_name]["code"] = ""                      
 
-                    with open("keys/teacher_wait_list_keys.json", "w", encoding='utf-8') as f:  # then write
-                        json.dump(data_from_teacher_wait_list, f, indent=4, ensure_ascii=False)  # actually dump it
+                    with open("keys/teacher_wait_list_keys.json", "w", encoding='utf-8') as f:  
+                        json.dump(data_from_teacher_wait_list, f, indent=4, ensure_ascii=False) 
                         
             conn.sendall(f"200 ok|{role}|{class_name}".encode('utf-8'))
             return
+
+        def handle_class_chat(self, conn, dataFromClient):
+            parts = dataFromClient.split("|", 3)
+            if len(parts) < 4:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+            
+            class_name, username, message = parts[1], parts[2], parts[3]
+
 
         def handle_get_schedule(self, conn, dataFromClient):
             class_name = dataFromClient.split("|")[1]
@@ -391,6 +408,7 @@ try:
                         schedules = json.load(f)
                         class_schedule = schedules.get(class_name, {})
                         conn.sendall(json.dumps(class_schedule, ensure_ascii=False).encode('utf-8'))
+          
             except FileNotFoundError:
                 conn.sendall("error|file not found".encode('utf-8'))
 
@@ -446,7 +464,159 @@ try:
                 except Exception as e:
                     print(f"[-] Error updating tasks: {e}")
                     conn.sendall(f"error|{e}".encode('utf-8'))
+        
+        def handle_freer(self, conn, datafromclient):
+                    parts = datafromclient.split("|")
+                    if len(parts) < 6:
+                        conn.sendall("400 bad request".encode('utf-8'))
+                        return
 
+                    student_id = parts[1]
+                    hour = parts[2]
+                    day = parts[3]
+                    reason = parts[4]
+                    user_class = parts[5]
+                    
+                    file_path = f"classesStudents/{user_class}/freerrequests-{user_class}.json"
+                    
+                    with self.db_lock:
+
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                all_requests = json.load(f)
+                        except (FileNotFoundError, json.JSONDecodeError):
+                            all_requests = {}
+
+
+                        request_id = f"req_{student_id}_{int(datetime.datetime.now().timestamp())}"
+                        
+                        new_request = {
+                            "student_id": student_id,
+                            "time": hour,
+                            "day": day,
+                            "reason": reason,
+                            "status": "pending" 
+                        }
+                        
+                        all_requests[request_id] = new_request
+                        
+                        try:
+                            with open(file_path, "w", encoding="utf-8") as f:
+                                json.dump(all_requests, f, indent=4, ensure_ascii=False)
+                            
+                            print(f"[+] Free request {request_id} saved for student {student_id} in class {user_class}")
+                            conn.sendall("200 ok".encode('utf-8'))
+                            
+                        except Exception as e:
+                            print(f"[-] Error saving free request: {e}")
+                            conn.sendall(f"error|{e}".encode('utf-8'))
+        
+        def handle_get_freer_requests(self, conn, datafromclient):
+            # מנקים רווחים בלתי נראים ושבירות שורה
+            clean_data = datafromclient.strip()
+            parts = clean_data.split("|")
+            
+            if len(parts) < 2:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+                
+            user_class = parts[1].strip() # מנקים רווחים משם הכיתה (למשל מונע בעיות כמו "9th3 ")
+            file_path = f"classesStudents/{user_class}/freerrequests-{user_class}.json"
+            
+            print(f"[DEBUG SERVER] Looking for requests file at: {file_path}")
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            requests_data = f.read()
+                        
+                        print(f"[+] Sending requests data to teacher for class {user_class}")
+                        conn.sendall(f"requests_data|{requests_data}".encode('utf-8'))
+                    else:
+                        print(f"[-] Requests file not found for class {user_class}. Sending empty JSON.")
+                        conn.sendall("requests_data|{}".encode('utf-8'))
+                except Exception as e:
+                    print(f"[-] Error reading requests file: {e}")
+                    conn.sendall(f"error|{e}".encode('utf-8'))
+
+
+        def handle_update_request_status(self, conn, datafromclient):
+            clean_data = datafromclient.strip()
+            parts = clean_data.split("|")
+            
+            if len(parts) < 4:
+                print("[DEBUG SERVER] Error: Received update status command with missing parts.")
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+                
+            user_class = parts[1].strip()
+            req_id = parts[2].strip()
+            new_status = parts[3].strip()
+            
+            file_path = f"classesStudents/{user_class}/freerrequests-{user_class}.json"
+            print(f"[DEBUG SERVER] Attempting to update status. Class: '{user_class}', Req ID: '{req_id}', New Status: '{new_status}'")
+            print(f"[DEBUG SERVER] Target file path: '{file_path}'")
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            all_requests = json.load(f)
+                        
+                        print(f"[DEBUG SERVER] Loaded existing requests keys: {list(all_requests.keys())}")
+                        
+                        if req_id in all_requests:
+                            all_requests[req_id]["status"] = new_status
+                            
+                            with open(file_path, "w", encoding="utf-8") as f:
+                                json.dump(all_requests, f, indent=4, ensure_ascii=False)
+                            
+                            print(f"[+] [DEBUG SERVER] Successfully updated {req_id} to {new_status} in JSON file!")
+                            conn.sendall("200 ok".encode('utf-8'))
+                        else:
+                            print(f"[-] [DEBUG SERVER] Error: req_id '{req_id}' was NOT found in the JSON keys!")
+                            conn.sendall("error|request not found".encode('utf-8'))
+                    else:
+                        print(f"[-] [DEBUG SERVER] Error: File '{file_path}' does not exist.")
+                        conn.sendall("error|file not found".encode('utf-8'))
+                except Exception as e:
+                    print(f"[-] [DEBUG SERVER] Exception during status update: {e}")
+                    conn.sendall(f"error|{e}".encode('utf-8'))
+                    
+
+        def handle_get_student_requests(self, conn, datafromclient):
+            clean_data = datafromclient.strip()
+            parts = clean_data.split("|")
+            
+            if len(parts) < 3:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+                
+            user_class = parts[1].strip()
+            student_id = parts[2].strip()
+            
+            file_path = f"classesStudents/{user_class}/freerrequests-{user_class}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            all_requests = json.load(f)
+                        
+                        student_requests = {
+                            req_id: req_info for req_id, req_info in all_requests.items()
+                            if req_info.get("student_id") == student_id
+                        }
+                        
+                        response_json = json.dumps(student_requests, ensure_ascii=False)
+                        conn.sendall(f"student_requests_data|{response_json}".encode('utf-8'))
+                    else:
+                        conn.sendall("student_requests_data|{}".encode('utf-8'))
+                except Exception as e:
+                    print(f"[-] Error getting requests for student {student_id}: {e}")
+                    conn.sendall(f"error|{e}".encode('utf-8'))
+        
         def handle_client(self, conn, addr):
             with conn:
                 print(f"[+] New connection from {addr}")
@@ -467,10 +637,21 @@ try:
                         print("[+] received sensitive data. cannot show info") 
                         self.handle_signup(conn, addr, dataFromClient)
                         
-                    elif dataFromClient == "freer premition":
-                        print(f"[+] sending '200 ok' to client: {addr}")
-                        conn.sendall("200 ok".encode('utf-8'))
-                        print("[+] sent.")
+                    elif dataFromClient.startswith("freer premition"):
+                        print(f"[+] subject received: freer premition | ({addr})")
+                        self.handle_freer(conn, dataFromClient)
+                        
+                    elif dataFromClient.startswith("get_freer_requests|"):
+                        print(f"[+] subject received: get_freer_requests | ({addr})")
+                        self.handle_get_freer_requests(conn, dataFromClient)
+                        
+                    elif dataFromClient.startswith("get_student_requests|"):
+                        print(f"[+] subject received: get_student_requests | ({addr})")
+                        self.handle_get_student_requests(conn, dataFromClient)
+                        
+                    elif dataFromClient.startswith("update_request_status|"):
+                        print(f"[+] subject received: update_request_status | ({addr})")
+                        self.handle_update_request_status(conn, dataFromClient)
                         
                     elif dataFromClient.startswith("get_schedule|"):
                         print(f"[+] subject received: get_schedule | ({addr})")
