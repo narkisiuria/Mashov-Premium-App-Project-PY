@@ -4,7 +4,7 @@ A secure, multi-threaded school management system built in Python. This project 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 ### Client-Side (GUI)
 * **Interactive Dashboard:** Built using Tkinter and TTK, providing modern transitions and a streamlined user flow.
@@ -20,7 +20,7 @@ A secure, multi-threaded school management system built in Python. This project 
 
 ---
 
-## 📂 Project Directory Structure
+## Project Directory Structure
 
 ### Core Codebase
 
@@ -44,7 +44,7 @@ A secure, multi-threaded school management system built in Python. This project 
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
 This project requires **Python 3.x** installed on your system. It relies heavily on standard native libraries, meaning no heavy external dependencies are required:
