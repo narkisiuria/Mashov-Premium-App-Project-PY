@@ -1,0 +1,60 @@
+[
+    {
+        "time": "11:49",
+        "username": "u",
+        "message": "toooo"
+    },
+    {
+        "time": "11:49",
+        "username": "i",
+        "message": "מה אומר?"
+    },
+    {
+        "time": "11:59",
+        "username": "u",
+        "role": "teacher",
+        "message": "מה איתך"
+    },
+    {
+        "time": "12:00",
+        "username": "i",
+        "role": "student",
+        "message": "אני תלמיד"
+    },
+    {
+        "time": "12:00",
+        "username": "u",
+        "role": "teacher",
+        "message": "אני מורה"
+    },
+    {
+        "time": "12:01",
+        "username": "i",
+        "role": "student",
+        "message": "אני תלמיד"
+    },
+    {
+        "time": "12:01",
+        "username": "u",
+        "role": "teacher",
+        "message": "אני מורה"
+    },
+    {
+        "time": "12:01",
+        "username": "u",
+        "role": "teacher",
+        "message": "גיגכע"
+    },
+    {
+        "time": "12:01",
+        "username": "u",
+        "role": "teacher",
+        "message": "גכעי"
+    },
+    {
+        "time": "12:01",
+        "username": "i",
+        "role": "student",
+        "message": "החומר למבחן זה חלקים א,ב וג"
+    }
+]

@@ -617,6 +617,67 @@ try:
                     print(f"[-] Error getting requests for student {student_id}: {e}")
                     conn.sendall(f"error|{e}".encode('utf-8'))
         
+        def handle_send_chat_message(self, conn, dataFromClient):
+            # פורמט בקשה מעודכן: send_chat_message|class_name|username|role|message
+            parts = dataFromClient.split("|", 4)
+            if len(parts) < 5:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+            
+            class_name = parts[1].strip()
+            username = parts[2].strip()
+            role = parts[3].strip()
+            message = parts[4].strip()
+            
+            os.makedirs("data/chats", exist_ok=True)
+            file_path = f"data/chats/{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            chat_history = json.load(f)
+                    else:
+                        chat_history = []
+                except Exception:
+                    chat_history = []
+                
+                new_msg = {
+                    "time": datetime.datetime.now().strftime("%H:%M"),
+                    "username": username,
+                    "role": role, # הוספנו שמירת תפקיד
+                    "message": message
+                }
+                chat_history.append(new_msg)
+                
+                try:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        json.dump(chat_history, f, indent=4, ensure_ascii=False)
+                    conn.sendall("200 ok".encode('utf-8'))
+                except Exception as e:
+                    conn.sendall(f"error|{e}".encode('utf-8'))
+
+        def handle_get_chat_history(self, conn, dataFromClient):
+            parts = dataFromClient.split("|")
+            if len(parts) < 2:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+            
+            class_name = parts[1].strip()
+            file_path = f"data/chats/{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            chat_history = json.load(f)
+                    else:
+                        chat_history = []
+                    
+                    conn.sendall(json.dumps(chat_history, ensure_ascii=False).encode('utf-8'))
+                except Exception as e:
+                    conn.sendall(f"error|{e}".encode('utf-8'))
+        
         def handle_client(self, conn, addr):
             with conn:
                 print(f"[+] New connection from {addr}")
@@ -636,6 +697,12 @@ try:
                     elif dataFromClient.startswith("signUp|"):
                         print("[+] received sensitive data. cannot show info") 
                         self.handle_signup(conn, addr, dataFromClient)
+                    
+                    elif dataFromClient.startswith("send_chat_message|"):
+                        self.handle_send_chat_message(conn, dataFromClient)
+                        
+                    elif dataFromClient.startswith("get_chat_history|"):
+                        self.handle_get_chat_history(conn, dataFromClient)
                         
                     elif dataFromClient.startswith("freer premition"):
                         print(f"[+] subject received: freer premition | ({addr})")

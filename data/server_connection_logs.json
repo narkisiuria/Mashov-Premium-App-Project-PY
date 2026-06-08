@@ -76,3 +76,14 @@
 {"time": "07/06/2026 17:42:52", "address": "('127.0.0.1', 39159)", "username": "i", "status": "success"}
 {"time": "07/06/2026 17:43:53", "address": "('127.0.0.1', 39169)", "username": "u", "status": "success"}
 {"time": "07/06/2026 17:45:00", "address": "('127.0.0.1', 3653)", "username": "u", "status": "success"}
+{"time": "08/06/2026 11:36:28", "address": "('127.0.0.1', 32942)", "username": "1", "status": "success"}
+{"time": "08/06/2026 11:48:35", "address": "('127.0.0.1', 18033)", "username": "1", "status": "success"}
+{"time": "08/06/2026 11:49:15", "address": "('127.0.0.1', 18063)", "username": "i", "status": "success"}
+{"time": "08/06/2026 11:49:42", "address": "('127.0.0.1', 18095)", "username": "u", "status": "success"}
+{"time": "08/06/2026 11:51:57", "address": "('127.0.0.1', 61192)", "username": "i", "status": "success"}
+{"time": "08/06/2026 11:52:12", "address": "('127.0.0.1', 61204)", "username": "u", "status": "success"}
+{"time": "08/06/2026 11:54:23", "address": "('127.0.0.1', 6938)", "username": "u", "status": "success"}
+{"time": "08/06/2026 11:59:07", "address": "('127.0.0.1', 8495)", "username": "u", "status": "success"}
+{"time": "08/06/2026 11:59:51", "address": "('127.0.0.1', 8526)", "username": "ן", "status": "failed"}
+{"time": "08/06/2026 11:59:55", "address": "('127.0.0.1', 8530)", "username": "i", "status": "success"}
+{"time": "08/06/2026 12:06:26", "address": "('127.0.0.1', 56020)", "username": "u", "status": "success"}

@@ -1310,172 +1310,249 @@ try:
     
         
     def open_class_chat_room():
-        global current_user_class
+        global current_username, current_user_class, current_user_role
+        
+        if not current_user_role in ["student", "teacher"]:
+            messagebox.showerror("שגיאה", "פיצ'ר זה זמין למשתמשים רשומים בלבד")
+            return
+
         hebrew_display_map = {
-            "7th1": "ז'1", "7th2": "ז'2", "7th3": "ז'3",
-            "7th4": "ז'4", "7th5": "ז'5", "7th6": "ז'6",
-
-            "8th1": "ח'1", "8th2": "ח'2", "8th3": "ח'3",
-            "8th4": "ח'4", "8th5": "ח'5", "8th6": "ח'6",
-
-            "9th1": "ט'1", "9th2": "ט'2", "9th3": "ט'3",
-            "9th4": "ט'4", "9th5": "ט'5", "9th6": "ט'6",
-
-            "10th1": "י'1", "10th2": "י'2", "10th3": "י'3",
-            "10th4": "י'4", "10th5": "י'5", "10th6": "י'6",
-
-            "11th1": 'י"א1', "11th2": 'י"א2', "11th3": 'י"א3',
-            "11th4": 'י"א4', "11th5": 'י"א5', "11th6": 'י"א6',
-
-            "12th1": 'י"ב1', "12th2": 'י"ב2', "12th3": 'י"ב3',
-            "12th4": 'י"ב4', "12th5": 'י"ב5', "12th6": 'י"ב6',
+            "7th1": 'ז\'1', "7th2": 'ז\'2', "7th3": 'ז\'3', "7th4": 'ז\'4', "7th5": 'ז\'5', "7th6": 'ז\'6',
+            "8th1": 'ח\'1', "8th2": 'ח\'2', "8th3": 'ח\'3', "8th4": 'ח\'4', "8th5": 'ח\'5', "8th6": 'ח\'6',
+            "9th1": 'ט\'1', "9th2": 'ט\'2', "9th3": 'ט\'3', "9th4": 'ט\'4', "9th5": 'ט\'5', "9th6": 'ט\'6',
+            "10th1": 'י\'1', "10th2": 'י\'2', "10th3": 'י\'3', "10th4": 'י\'4', "10th5": 'י\'5', "10th6": 'י\'6',
+            "11th1": 'י"א1', "11th2": 'י"א2', "11th3": 'י"א3', "11th4": 'י"א4', "11th5": 'י"א5', "11th6": 'י"א6',
+            "12th1": 'י"ב1', "12th2": 'י"ב2', "12th3": 'י"ב3', "12th4": 'י"ב4', "12th5": 'י"ב5', "12th6": 'י"ב6',
         }
-
-        class_raw = current_user_class  
-        simplefiled_class = hebrew_display_map.get(class_raw, class_raw)  
+        
+        class_raw = current_user_class
+        simplified_class = hebrew_display_map.get(class_raw, class_raw)
+        
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("צ'אט כיתתי")
-
-        width, height = 620, 800
+        
+        width, height = 550, 780
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
-
         x = (screen_width // 2) - (width // 2)
         y = (screen_height // 2) - (height // 2)
-
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
+        new_win.configure(bg="#f8fafc") 
         new_win.resizable(False, False)
-
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
-
-        header = tk.Frame(main_frame, bg="#1a73e8", height=100)
-        header.pack(fill="x")
-        header.pack_propagate(False)
-
-        tk.Label(
-            header,
-            text=f"💬 צאט כיתה {simplefiled_class}",
-            font=("Arial", 20, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(20, 5))
-
-        tk.Label(
-            header,
-            text="שיח פתוח עם הכיתה",
-            font=("Arial", 10),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack()
-
-        chat_container = tk.Frame(main_frame, bg="#f8fafc")
-        chat_container.pack(fill="both", expand=True, padx=20, pady=15)
-
-        canvas = tk.Canvas(chat_container, bg="#f8fafc", highlightthickness=0)
+        
+        main_frame = tk.Frame(new_win, bg="white", relief="solid", bd=1)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=740)
+        
+        # כותרת
+        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=90) 
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+        
+        tk.Label(header_frame, text=f"צ'אט כיתה {simplified_class}", font=("Arial", 16, "bold"), fg="white", bg="#1a73e8").pack(pady=(22, 2))
+        tk.Label(header_frame, text="מוצפן מקצה לקצה", font=("Arial", 10), fg="#e8f0fe", bg="#1a73e8").pack()
+        
+        # אזור הצ'אט (Canvas דינמי לבועות)
+        chat_container = tk.Frame(main_frame, bg="#e2e8f0")
+        chat_container.pack(fill="both", expand=True)
+        
+        canvas = tk.Canvas(chat_container, bg="#e2e8f0", highlightthickness=0)
         scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
-
-        messages_frame = tk.Frame(canvas, bg="#f8fafc")
-
-        messages_frame.bind(
+        scrollable_frame = tk.Frame(canvas, bg="#e2e8f0")
+        
+        scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-
-        canvas.create_window((0, 0), window=messages_frame, anchor="nw", width=520)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        def add_message(name, text, is_me=False):
-            outer = tk.Frame(messages_frame, bg="#f8fafc")
-            outer.pack(fill="x", pady=6, padx=8)
-
-            side = "right" if is_me else "left"
-            bubble_bg = "#1a73e8" if is_me else "white"
-            text_fg = "white" if is_me else "#334155"
-
-            bubble = tk.Frame(
-                outer,
-                bg=bubble_bg,
-                padx=12,
-                pady=10
-            )
-            bubble.pack(side=side)
-
-            tk.Label(
-                bubble,
-                text=name,
-                font=("Arial", 9, "bold"),
-                bg=bubble_bg,
-                fg=text_fg
-            ).pack(anchor="e")
-
-            tk.Label(
-                bubble,
-                text=text,
-                font=("Arial", 11),
-                bg=bubble_bg,
-                fg=text_fg,
-                wraplength=320,
-                justify="right"
-            ).pack(anchor="e", pady=(4, 0))
-
-        add_message("יונתן", "מישהו יודע מה יש במתמטיקה?", False)
-        add_message("אוריה", "כן, עמוד 57 תרגילים 1-5", True)
-        add_message("מאור", "וגם ללמוד למבחן", False)
-
-        input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
-        input_frame.pack(fill="x", padx=20, pady=(0, 15))
-        input_frame.pack_propagate(False)
-
-        message_entry = tk.Entry(
-            input_frame,
-            font=("Arial", 11),
-            bd=0,
-            relief="flat"
+        
+        canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        
+        def on_canvas_configure(event):
+            canvas.itemconfig(canvas_window, width=event.width)
+        canvas.bind("<Configure>", on_canvas_configure)
+        
+        canvas.pack(side="right", fill="both", expand=True)
+        scrollbar.pack(side="left", fill="y")
+        
+        # אזור הקלט
+        input_frame = tk.Frame(main_frame, bg="white")
+        input_frame.pack(fill="x", ipady=5)
+        
+        msg_entry = tk.Entry(input_frame, font=("Arial", 13), bg="#f1f5f9", relief="flat", justify="right", fg="#1e293b")
+        msg_entry.pack(side="right", fill="x", expand=True, padx=12, pady=10, ipady=8)
+        msg_entry.focus_set()
+        
+        def send_message(event=None):
+            msg_text = msg_entry.get().strip()
+            if not msg_text:
+                return
+            
+            msg_text = msg_text.replace("|", " ") 
+            
+            SERVER_IP = '127.0.0.1'
+            PORT = 9999
+            try:
+                with create_secure_socket() as s:
+                    s.connect((SERVER_IP, PORT))
+                    # שולח עכשיו גם את תפקיד המשתמש!
+                    subject = f"send_chat_message|{class_raw}|{current_username}|{current_user_role}|{msg_text}"
+                    s.sendall(subject.encode('utf-8'))
+                    raw_data = s.recv(1024)
+                    if raw_data:
+                        res = raw_data.decode('utf-8').strip()
+                        if res == "200 ok":
+                            msg_entry.delete(0, tk.END) 
+                            load_chat_history()
+            except Exception as e:
+                print(f"Error sending message: {e}")
+                
+        msg_entry.bind("<Return>", send_message)
+        
+        btn_send = tk.Button(
+            input_frame, 
+            text="שלח", 
+            font=("Arial", 11, "bold"), 
+            bg="#1a73e8", 
+            fg="white", 
+            relief="flat", 
+            bd=0, 
+            cursor="hand2", 
+            command=send_message, 
+            width=8
         )
-        message_entry.pack(
-            side="right",
-            fill="x",
-            expand=True,
-            padx=(10, 10),
-            pady=18,
-            ipady=10
-        )
-
+        btn_send.pack(side="left", padx=10, pady=10, ipady=6)
+        
+        loaded_message_count = 0
+        
+        def render_bubble(msg_data):
+            """ פונקציה שמציירת בועת צ'אט בודדת לפי סוג השולח """
+            user = msg_data.get("username", "Unknown")
+            text = msg_data.get("message", "")
+            time_str = msg_data.get("time", "")
+            role = msg_data.get("role", "student")
+            
+            is_me = (user == current_username)
+            is_teacher = (role == "teacher")
+            
+            # שורת מעטפת להודעה
+            row = tk.Frame(scrollable_frame, bg="#e2e8f0")
+            row.pack(fill="x", padx=15, pady=6)
+            
+            # הגדרות עיצוב לבועה
+            if is_teacher:
+                bg_color = "#fef08a" # צהוב-זהב להבלטת מורה
+                fg_color = "#854d0e" # צבע טקסט כהה-זהוב
+                border_color = "#eab308"
+                anchor_side = "w"
+                pack_side = "left"
+                header = f"{user} (מורה) • {time_str}"
+            elif is_me:
+                bg_color = "#dcf8c6" # ירוק וואטסאפ (או כחול מודרני אם תרצה לשנות)
+                fg_color = "#000000"
+                border_color = "#b2e289"
+                anchor_side = "e"
+                pack_side = "right"
+                header = f"{time_str}"
+            else:
+                bg_color = "#ffffff" # לבן לתלמידים אחרים
+                fg_color = "#000000"
+                border_color = "#cbd5e1"
+                anchor_side = "w"
+                pack_side = "left"
+                header = f"{user} • {time_str}"
+            
+            bubble = tk.Frame(row, bg=bg_color, highlightbackground=border_color, highlightthickness=1)
+            bubble.pack(side=pack_side, anchor=anchor_side)
+            
+            # מסגרת פנימית לריווח (Padding)
+            inner_bubble = tk.Frame(bubble, bg=bg_color, padx=10, pady=6)
+            inner_bubble.pack()
+            
+            # כותרת (שם המשתמש + שעה)
+            tk.Label(
+                inner_bubble, 
+                text=header, 
+                font=("Arial", 9, "bold" if is_teacher else "normal"), 
+                bg=bg_color, 
+                fg="#64748b" if not is_teacher else fg_color
+            ).pack(anchor=anchor_side, pady=(0, 2))
+            
+            # גוף ההודעה
+            tk.Label(
+                inner_bubble, 
+                text=text, 
+                font=("Arial", 12), 
+                bg=bg_color, 
+                fg=fg_color, 
+                justify="right", 
+                wraplength=320 # שבירת שורות אוטומטית בהודעות ארוכות
+            ).pack(anchor=anchor_side)
+            
+        def load_chat_history():
+            nonlocal loaded_message_count
+            if not new_win.winfo_exists():
+                return
+                
+            SERVER_IP = '127.0.0.1'
+            PORT = 9999
+            try:
+                with create_secure_socket() as s:
+                    s.connect((SERVER_IP, PORT))
+                    subject = f"get_chat_history|{class_raw}"
+                    s.sendall(subject.encode('utf-8'))
+                    
+                    chunks = []
+                    while True:
+                        chunk = s.recv(4096)
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                    
+                    raw_res = b"".join(chunks).decode('utf-8').strip()
+                    if raw_res.startswith("error") or not raw_res:
+                        return
+                        
+                    history = json.loads(raw_res)
+                    
+                    # מצייר רק הודעות חדשות שעוד לא צויירו! יעילות מקסימלית בלי למחוק את המסך
+                    if len(history) > loaded_message_count:
+                        for msg in history[loaded_message_count:]:
+                            render_bubble(msg)
+                            
+                        loaded_message_count = len(history)
+                        
+                        # גלילה אוטומטית למטה אחרי שמציירים
+                        canvas.update_idletasks()
+                        canvas.yview_moveto(1.0)
+                        
+            except Exception as e:
+                print(f"Error loading chat: {e}")
+        
+        def auto_refresh():
+            if new_win.winfo_exists():
+                load_chat_history()
+                new_win.after(2000, auto_refresh)
+                
+        # כפתור תחתון חזרה למסך ראשי
+        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=60)
+        footer_frame.pack(fill="x", side="bottom")
+        footer_frame.pack_propagate(False)
+        
         tk.Button(
-            input_frame,
-            text="שלח",
+            footer_frame,
+            text="חזרה למסך ראשי",
+            command=lambda: open_main_page(current_username),
             font=("Arial", 11, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            bd=0,
-            relief="flat",
-            padx=18,
-            pady=8,
-            cursor="hand2"
-        ).pack(side="left", padx=10, pady=18)
-
-        footer = tk.Frame(main_frame, bg="white", height=60)
-        footer.pack(fill="x")
-        footer.pack_propagate(False)
-
-        tk.Button(
-            footer,
-            text="חזרה",
-            font=("Arial", 12),
             bg="#64748b",
             fg="white",
+            relief="flat",
             bd=0,
-            padx=18,
-            pady=8,
-            cursor="hand2",
-            command=lambda: open_main_page(current_username)
-        ).pack(pady=10)
+            cursor="hand2"
+        ).pack(pady=10, ipadx=20, ipady=4)
+        
+        # הפעלה
+        load_chat_history()
+        auto_refresh()
         
         
     def open_todo_list():
@@ -2434,11 +2511,11 @@ try:
             s_day = str(day_var.get()).strip()
             s_hour = str(hour_var.get()).strip()
             s_reason = str(reason_var.get()).strip()
-
+    
             if hasattr(current_user_class, 'get'):
                 u_class = current_user_class.get()
-            else:
-                u_class = str(current_user_class)
+            else:  
+                u_class = str(current_user_class)   
 
             if not s_id or not p_id or not s_day or not s_hour or not s_reason:
                 messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
@@ -2452,7 +2529,6 @@ try:
                     print(f"Connecting to {SERVER_IP}:{PORT}...")
                     s.connect((SERVER_IP, PORT))
                     
-                    # בניית המחרוזת
                     subject = f"freer premition|{s_id}|{s_hour}|{s_day}|{s_reason}|{u_class}"
                     s.sendall(subject.encode('utf-8'))
 
