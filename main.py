@@ -144,7 +144,7 @@ try:
 
         peak_btn = tk.Button(
             btn_frame,
-            text="כניסה כאורח ",
+            text="כניסה כאורח  ",
             font=("Arial", 14),
             bg="white",
             fg="#1a73e8",
@@ -1015,6 +1015,173 @@ try:
         if not current_user_role == "teacher" and not current_user_role == "student":
             messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
+                
+        # --- ממשק מורה ---
+        if current_user_role == "teacher":
+            new_win = tk.Toplevel()
+            destroy_and_set_new_window(new_win)
+            new_win.title("ניהול ציונים - מורה")
+
+            width, height = 520, 770
+
+            screen_width = new_win.winfo_screenwidth()
+            screen_height = new_win.winfo_screenheight()
+
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
+
+            new_win.geometry(f"{width}x{height}+{x}+{y}")
+            new_win.configure(bg="#f0f4f8")
+            new_win.resizable(False, False)
+
+            main_frame = tk.Frame(new_win, bg="white")
+            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+
+            header_frame = tk.Frame(main_frame, bg="#1a73e8", height=160)
+            header_frame.pack(fill="x")
+            header_frame.pack_propagate(False)
+
+            tk.Label(
+                header_frame,
+                text="📝",
+                font=("Arial", 40),
+                fg="white",
+                bg="#1a73e8"
+            ).pack(pady=(18, 0))
+
+            tk.Label(
+                header_frame,
+                text="ניהול והזנת ציונים",
+                font=("Arial", 24, "bold"),
+                fg="white",
+                bg="#1a73e8"
+            ).pack()
+
+            tk.Label(
+                header_frame,
+                text="ממשק מורה לעדכון והוספת ציוני תלמידים",
+                font=("Arial", 11),
+                fg="#dbeafe",
+                bg="#1a73e8"
+            ).pack()
+
+            form_frame = tk.Frame(main_frame, bg="#f8fafc")
+            form_frame.pack(fill="both", expand=True, padx=25, pady=15)
+            
+            class_students = []
+
+            SERVER_IP = '127.0.0.1'
+            PORT = 9999
+
+            with create_secure_socket() as s:
+                print(f"Connecting to {SERVER_IP}:{PORT}...")
+                s.connect((SERVER_IP, PORT))
+
+                subject = f"get_class_students|{current_user_class}"
+                s.sendall(subject.encode("utf-8"))
+
+                raw_data = s.recv(1024)
+                if not raw_data:
+                    messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                    return
+
+                dataFromServer = raw_data.decode("utf-8").strip()
+                print(f"Received from server: {dataFromServer}")
+                
+                if dataFromServer.startswith("class_students_response|"):
+                    res_parts = dataFromServer.split("|")
+                    if res_parts[1]:
+                        class_students = res_parts[1].split(",") 
+                else:
+                    messagebox.showerror("שגיאה", f"התקבלה תשובה לא תקינה מהשרת: {dataFromServer}")
+                    return
+
+            tk.Label(form_frame, text=":שם התלמיד", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(25, 2))
+            student_entry = ttk.Combobox(form_frame, font=("Arial", 12), values=class_students)
+            student_entry.pack(fill="x", padx=25, ipady=6)
+
+            tk.Label(form_frame, text=":מקצוע", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(15, 2))
+            subject_entry = tk.Entry(form_frame, font=("Arial", 12), bd=1, relief="solid", fg="#1e293b")
+            subject_entry.pack(fill="x", padx=25, ipady=6)
+
+            tk.Label(form_frame, text=":ציון חדש", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(15, 2))
+            grade_entry = tk.Entry(form_frame, font=("Arial", 12), bd=1, relief="solid", fg="#1e293b")
+            grade_entry.pack(fill="x", padx=25, ipady=6)
+
+            def submit_grade():
+                student = student_entry.get().strip()
+                sub = subject_entry.get().strip() 
+                grd = grade_entry.get().strip()
+                
+                if not student or not sub or not grd:
+                    messagebox.showwarning("שגיאה", "אנא מלא את כל השדות")
+                    return
+                
+                SERVER_IP = '127.0.0.1'
+                PORT = 9999
+
+                with create_secure_socket() as s:
+                    print(f"Connecting to {SERVER_IP}:{PORT}...")
+                    s.connect((SERVER_IP, PORT))
+
+                    subject = f"insert_new_grade|{current_user_class}|{grd}|{sub}|{student}"
+                    s.sendall(subject.encode("utf-8"))
+
+                    raw_data = s.recv(1024)
+                    if not raw_data:
+                        messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                        return
+
+                    dataFromServer = raw_data.decode("utf-8").strip()
+                    print(f"Received from server: {dataFromServer}")
+                    
+                    if dataFromServer.startswith("insert_grade_response|"):
+                        res_parts = dataFromServer.split("|")
+                        status = res_parts[1]
+                        
+                        if status == "success":
+                            messagebox.showinfo("הצלחה", f"הציון {grd} במקצוע {sub} עודכן בהצלחה עבור {student}")
+                            
+                        
+                        else:
+                            res_for_failure = res_parts[2]
+                            messagebox.showerror("שגיאה", f"{res_for_failure}")
+                    
+                    else:
+                        messagebox.showerror("שגיאה", f"התקבלה תשובה לא תקינה מהשרת: {dataFromServer}")
+                        return
+                
+
+            save_button = tk.Button(
+                form_frame,
+                text="עדכן ציון במערכת",
+                command=submit_grade,
+                font=("Arial", 13, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2"
+            )
+            save_button.pack(fill="x", padx=25, pady=35, ipady=10)
+
+            footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
+            footer_frame.pack(fill="x", side="bottom")
+            footer_frame.pack_propagate(False)
+
+            tk.Button(
+                footer_frame,
+                text="חזרה למסך ראשי",
+                command=lambda: open_main_page(current_username),
+                font=("Arial", 13, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2"
+            ).pack(pady=15, ipadx=18, ipady=8)
+            
+            return 
         
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
@@ -1075,30 +1242,38 @@ try:
             bg="#f8fafc"
         ).pack(pady=(10, 0))
         
-        if current_user_role == "teacher" or current_user_role == "student":
-            grades = [] 
+        grades = []
+        average = 0
         
-        else:
-            grades = [
-                ("מתמטיקה", 95),
-                ("אנגלית", 88),
-                ("מדעים", 91),
-                ("לשון", 84),
-                ("היסטוריה", 90),
-                ("תנ\"ך", 93),
-                ("ספרות", 87),
-                ("גמרא", 97)
-        ] 
-
-        total = 0
-        for sub, grd in grades:
-            total += grd
-        
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
         try:
-            average = round(total / len(grades), 2)
-        except ZeroDivisionError:
-            average = 0
-        
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                subject = f"gradesRequest|{current_user_class}|{current_username}"
+                s.sendall(subject.encode('utf-8'))
+                
+                raw_data = s.recv(4096) 
+                if raw_data:
+                    res_text = raw_data.decode('utf-8').strip()
+                    
+                    response_data = json.loads(res_text)
+                    
+                    if response_data.get("status") == "success":
+                        grades = response_data.get("grades", [])
+                        average = response_data.get("average", 0)
+                    
+                    else:
+                        messagebox.showerror("שגיאה", "שגיאה בקבלת הנתונים מהשרת.")
+                        new_win.destroy()
+                        return
+                    
+        except Exception as e:
+            print(f"Error loading grades: {e}")
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת או לטעון את הציונים.")
+            new_win.destroy()
+            return
+
         tk.Label(
             avg_frame,
             text=str(average),
@@ -1153,7 +1328,7 @@ try:
 
             tk.Label(
                 card,
-                text=grade,
+                text=str(grade),
                 font=("Arial", 14, "bold"),
                 fg="#1a73e8",
                 bg="#eff6ff",
@@ -1176,7 +1351,7 @@ try:
             bd=0,
             cursor="hand2"
         ).pack(pady=15, ipadx=18, ipady=8)
-
+    
     def open_doar():
         if not current_user_role == "teacher" and not current_user_role == "student":
             messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")

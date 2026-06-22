@@ -6,7 +6,10 @@
         "gmail_account": "u@gmail.com",
         "role": "teacher",
         "class": "9th3",
-        "tasks": [],
+        "tasks": [
+            "גכהנגכע",
+            "גכעגכע"
+        ],
         "created_at": "07/06/2026 17:10:55",
         "grades": "is teacher"
     },
@@ -17,8 +20,70 @@
         "gmail_account": "i@gmail.com",
         "role": "student",
         "class": "9th3",
-        "tasks": [],
+        "tasks": [
+            "ret",
+            "tuyjtyjt",
+            "tyjt",
+            "yjtyjtyujt"
+        ],
         "created_at": "07/06/2026 17:11:29",
-        "grades": []
+        "grades": [
+            [
+                "מתמטיקה",
+                95
+            ],
+            [
+                "אנגלית",
+                88
+            ],
+            [
+                "מדעים",
+                91
+            ],
+            [
+                "לשון",
+                82
+            ],
+            [
+                "היסטוריה",
+                90
+            ],
+            [
+                "תנ\"ך",
+                93
+            ],
+            [
+                "ספרות",
+                87
+            ],
+            [
+                "גמרא",
+                97
+            ],
+            [
+                "משנה",
+                56
+            ]
+        ]
+    },
+    "עידו": {
+        "id": 3,
+        "first_name": "עידו",
+        "last_name": "קוואס",
+        "gmail_account": "ido123@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "tasks": [],
+        "created_at": "22/06/2026 12:01:02",
+        "grades": [
+            [
+                "נביא",
+                90
+            ],
+            [
+                "משנה",
+                56
+            ]
+        ]
     }
 }

@@ -1,0 +1,13 @@
+{
+    "אוריה": {
+        "id": 1,
+        "first_name": "אוריה",
+        "last_name": "נרקיסי",
+        "gmail_account": "uria123@gmail.com",
+        "role": "teacher",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "22/06/2026 11:56:18",
+        "grades": "is teacher"
+    }
+}

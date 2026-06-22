@@ -78,5 +78,25 @@
         "role": "student",
         "class": "9th3",
         "created_at": "07/06/2026 17:11:29"
+    },
+    "אוריה": {
+        "id": 9,
+        "password": "226b1ea444466fdc7e467ee444d1f3a0:4db4202057f005d934e12ce00a22c08979c6e0325d63c900bb116dfe24497855d9d8f2cdbe5aec52c982627cc661ddfe580edb02f8d66976de70f59687cb3018",
+        "first_name": "אוריה",
+        "last_name": "נרקיסי",
+        "gmail_account": "uria123@gmail.com",
+        "role": "teacher",
+        "class": "12th3",
+        "created_at": "22/06/2026 11:56:18"
+    },
+    "עידו": {
+        "id": 10,
+        "password": "65226e370f2d8006ac3782b4e31cb0be:7aa4f898e296e7035bd39f47ed0c7450517d0da8a0aec89b5fae4d05fcbc5f9c403eaa33bd3bc498d83fa48301432c3322dc0eec5fe878802a32db6ca8db1fac",
+        "first_name": "עידו",
+        "last_name": "קוואס",
+        "gmail_account": "ido123@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "created_at": "22/06/2026 12:01:02"
     }
 }

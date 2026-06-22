@@ -678,6 +678,159 @@ try:
                 except Exception as e:
                     conn.sendall(f"error|{e}".encode('utf-8'))
         
+        def get_send_current_user_grades(self, conn, dataFromClient):
+            parts = dataFromClient.split("|")
+            current_user_class = parts[1]
+            current_username = parts[2]
+            
+            file_path = f"classesStudents/{current_user_class}/students-{current_user_class}.json"
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception as e:
+                print(f"Server error opening file: {e}")
+                conn.sendall(json.dumps({"status": "error", "message": "file_not_found"}).encode("utf-8"))
+                return
+
+            current_student_data = data.get(current_username)
+
+            grades = current_student_data.get("grades", [])  
+
+            total = 0
+            for sub, grd in grades:
+                total += grd
+            
+            try:
+                average = round(total / len(grades), 2)
+            except ZeroDivisionError:
+                average = 0
+
+            response_payload = {
+                "status": "success",
+                "grades": grades,
+                "average": average
+            }
+
+            conn.sendall(json.dumps(response_payload).encode("utf-8"))
+            return
+
+        def update_student_grade(self, conn, dataFromClient):
+            # פורמט בקשה: updateGrade|כיתה|שם_תלמיד|מקצוע|ציון
+            parts = dataFromClient.split("|")
+            current_user_class = parts[1]
+            target_student = parts[2]
+            subject = parts[3]
+            new_grade = int(parts[4])
+
+            file_path = f"classesStudents/{current_user_class}/students-{current_user_class}.json"
+            
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    
+                if target_student in data:
+                    # שליפת רשימת הציונים הנוכחית של התלמיד
+                    grades = data[target_student].get("grades", [])
+                    
+                    # בדיקה האם המקצוע כבר קיים - אם כן, נעדכן אותו. אם לא, נוסיף חדש.
+                    found = False
+                    for i, (sub, grd) in enumerate(grades):
+                        if sub == subject:
+                            grades[i] = [subject, new_grade] # עדכון ציון קיים
+                            found = True
+                            break
+                    
+                    if not found:
+                        grades.append([subject, new_grade]) # הוספת מקצוע חדש
+                        
+                    data[target_student]["grades"] = grades
+                    
+                    # שמירה חזרה לקובץ ה-JSON
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        json.dump(data, f, ensure_ascii=False, indent=4)
+                        
+                    conn.sendall(json.dumps({"status": "success"}).encode("utf-8"))
+                    
+                else:
+                    conn.sendall(json.dumps({"status": "error", "message": "student_not_found"}).encode("utf-8"))
+                    
+            except Exception as e:
+                print(f"Server error updating grade: {e}")
+                conn.sendall(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+        
+        def handle_class_students_request(self, conn, dataFromClient):
+            class_students = []
+            parts = dataFromClient.split("|")
+            current_client_class = parts[1]
+            file_path = f"classesStudents/{current_client_class}/students-{current_client_class}.json"
+            
+            with self.db_lock:
+                try:
+                    with open(file_path, "r", encoding='utf-8') as f:
+                        class_users = json.load(f)
+                    
+                        for user in class_users:
+                            class_students.append(user)
+                        
+                        if class_students:
+                            del class_students[0]
+                except Exception as e:
+                    print(f"[-] Error loading class students: {e}")
+                    conn.sendall(f"class_students_response|".encode('utf-8'))
+                    return
+            
+            students_string = ",".join(class_students)
+            conn.sendall(f"class_students_response|{students_string}".encode('utf-8'))
+            return
+        
+        def handle_insert_new_grade(self, conn, datsFromClient):
+            try:
+                parts = datsFromClient.split("|")
+                client_class = parts[1]
+                new_grade = parts[2]
+                subject = parts[3]
+                student = parts[4] 
+                
+                try:
+                    new_grade = int(new_grade)
+                except ValueError:
+                    pass
+                    
+                new_grade_payload = [subject, new_grade]
+                file_path = f"classesStudents/{client_class}/students-{client_class}.json"
+
+                with self.db_lock:
+                    try:
+                        with open(file_path, "r", encoding='utf-8') as f:
+                            class_data = json.load(f)
+                    except FileNotFoundError:
+                        conn.sendall("insert_grade_response|error|class file not found".encode('utf-8'))
+                        return
+
+                    if student in class_data:
+                        if class_data[student].get("role") == "student" and isinstance(class_data[student]["grades"], list):
+                            
+                            class_data[student]["grades"].append(new_grade_payload)
+                            
+                            with open(file_path, "w", encoding='utf-8') as f:
+                                json.dump(class_data, f, ensure_ascii=False, indent=4)
+                            
+                            print(f"[+] Successfully added grade {new_grade_payload} to student '{student}'")
+                            conn.sendall("insert_grade_response|success".encode('utf-8'))
+                        else:
+                            print(f"[-] Cannot add grade: user '{student}' is not a student or has invalid grades format")
+                            conn.sendall("insert_grade_response|error|user is not a student".encode('utf-8'))
+                    else:
+                        print(f"[-] Student '{student}' not found in class '{client_class}'")
+                        conn.sendall("insert_grade_response|error|student not found".encode('utf-8'))
+
+            except Exception as e:
+                print(f"[-] Error in handle_insert_new_grade: {e}")
+                try:
+                    conn.sendall("insert_grade_response|error|internal server error".encode('utf-8'))
+                except:
+                    pass
+        
         def handle_client(self, conn, addr):
             with conn:
                 print(f"[+] New connection from {addr}")
@@ -698,7 +851,7 @@ try:
                         print("[+] received sensitive data. cannot show info") 
                         self.handle_signup(conn, addr, dataFromClient)
                     
-                    elif dataFromClient.startswith("send_chat_message|"):
+                    elif dataFromClient.startswith("send_chat_message|"): 
                         self.handle_send_chat_message(conn, dataFromClient)
                         
                     elif dataFromClient.startswith("get_chat_history|"):
@@ -731,6 +884,16 @@ try:
                     elif dataFromClient.startswith("update_tasks|"):
                         print(f"[+] subject received: update_tasks | ({addr})")
                         self.handle_update_tasks(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("get_class_students|"):
+                        self.handle_class_students_request(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("gradesRequest|"):
+                        print(f"[+] subject received: student_get_grades_request | ({addr})")
+                        self.get_send_current_user_grades(conn, dataFromClient)    
+                    
+                    elif dataFromClient.startswith("insert_new_grade|"):
+                        self.handle_insert_new_grade(conn, dataFromClient)
                         
                     elif dataFromClient == "guest":
                         with self.db_lock:
