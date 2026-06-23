@@ -278,6 +278,7 @@ try:
                 return
             
             class_dir = f"classesStudents/{class_name}"
+            client_class_name = class_name
             class_file_path = f"{class_dir}/students-{class_name}.json"
             group_chat_path = f"{class_dir}/group_chat-{class_name}.json"
             freer_requests_path = f"{class_dir}/freerrequests-{class_name}.json"
@@ -387,6 +388,9 @@ try:
 
                     with open("keys/teacher_wait_list_keys.json", "w", encoding='utf-8') as f:  
                         json.dump(data_from_teacher_wait_list, f, indent=4, ensure_ascii=False) 
+                    
+                    with open(f"classesStudents/{client_class_name}/doar_masseges-{client_class_name}.json", "w", encoding='utf-8') as f:
+                        json.dump([], f)
                         
             conn.sendall(f"200 ok|{role}|{class_name}".encode('utf-8'))
             return
@@ -831,6 +835,61 @@ try:
                 except:
                     pass
         
+        def handle_add_class_doar(self, conn, dataFromClient):
+            parts = dataFromClient.split("|", 3)
+            if len(parts) < 4:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+            
+            class_name = parts[1].strip()
+            title = parts[2].strip()
+            content = parts[3].strip()
+            
+            file_path = f"classesStudents/{class_name}/doar_masseges-{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding='utf-8') as f:
+                            class_messages = json.load(f)
+                    else:
+                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                        class_messages = []
+                    
+                    class_messages.insert(0, [title, content])
+                    
+                    with open(file_path, "w", encoding='utf-8') as f:
+                        json.dump(class_messages, f, ensure_ascii=False, indent=4)
+                        
+                    print(f"[+] Message added successfully for class {class_name}")
+                    conn.sendall("200 ok".encode("utf-8"))
+                except Exception as e:
+                    print(f"[-] Error in add_class_doar: {e}")
+                    conn.sendall(f"error|{e}".encode("utf-8"))
+
+        def handle_get_class_doar(self, conn, dataFromClient):
+            parts = dataFromClient.split("|")
+            if len(parts) < 2:
+                conn.sendall("400 bad request".encode('utf-8'))
+                return
+                
+            class_name = parts[1].strip()
+            file_path = f"classesStudents/{class_name}/doar_masseges-{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding='utf-8') as f:
+                            class_messages = json.load(f)
+                    else:
+                        class_messages = []
+                        
+                    response_json = json.dumps(class_messages, ensure_ascii=False)
+                    conn.sendall(response_json.encode("utf-8"))
+                except Exception as e:
+                    print(f"[-] Error in get_class_doar: {e}")
+                    conn.sendall("[]".encode("utf-8"))
+
         def handle_client(self, conn, addr):
             with conn:
                 print(f"[+] New connection from {addr}")
@@ -860,6 +919,12 @@ try:
                     elif dataFromClient.startswith("freer premition"):
                         print(f"[+] subject received: freer premition | ({addr})")
                         self.handle_freer(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("add_class_doar|"):
+                        self.handle_add_class_doar(conn, dataFromClient)
+                        
+                    elif dataFromClient.startswith("get_class_doar|"):
+                        self.handle_get_class_doar(conn, dataFromClient)
                         
                     elif dataFromClient.startswith("get_freer_requests|"):
                         print(f"[+] subject received: get_freer_requests | ({addr})")

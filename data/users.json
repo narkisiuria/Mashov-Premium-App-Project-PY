@@ -98,5 +98,15 @@
         "role": "student",
         "class": "9th3",
         "created_at": "22/06/2026 12:01:02"
+    },
+    "רנן": {
+        "id": 11,
+        "password": "ea35ca89fade8cff4be3ad2b6ab5c01f:1cb6b3890f426e4f2c68e3a4b122ec117e3adcfb45938473779b14c62592dcbc45ae156f898c0c0dc4ede4d2d7d0893e74f3cd5775580b81fa704c0b358e2560",
+        "first_name": "רנן",
+        "last_name": "ערוסי",
+        "gmail_account": "rannen123@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "created_at": "23/06/2026 13:17:44"
     }
 }

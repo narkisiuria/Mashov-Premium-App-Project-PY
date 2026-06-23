@@ -9,5 +9,16 @@
         "tasks": [],
         "created_at": "22/06/2026 11:56:18",
         "grades": "is teacher"
+    },
+    "רנן": {
+        "id": 2,
+        "first_name": "רנן",
+        "last_name": "ערוסי",
+        "gmail_account": "rannen123@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "23/06/2026 13:17:44",
+        "grades": []
     }
 }

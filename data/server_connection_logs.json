@@ -158,3 +158,17 @@
 {"time": "22/06/2026 12:59:12", "address": "('127.0.0.1', 57893)", "username": "אוריה", "status": "failed"}
 {"time": "22/06/2026 12:59:14", "address": "('127.0.0.1', 57894)", "username": "אוריה", "status": "success"}
 {"time": "22/06/2026 13:01:20", "address": "('127.0.0.1', 33589)", "username": "u", "status": "success"}
+{"time": "23/06/2026 12:17:21", "address": "('127.0.0.1', 18482)", "username": "1", "status": "success"}
+{"time": "23/06/2026 12:23:38", "address": "('127.0.0.1', 22660)", "username": "u", "status": "success"}
+{"time": "23/06/2026 12:26:00", "address": "('127.0.0.1', 22748)", "username": "i", "status": "success"}
+{"time": "23/06/2026 12:26:10", "address": "('127.0.0.1', 22752)", "username": "u", "status": "success"}
+{"time": "23/06/2026 13:04:05", "address": "('127.0.0.1', 17137)", "username": "u", "status": "success"}
+{"time": "23/06/2026 13:10:05", "address": "('127.0.0.1', 33676)", "username": "u", "status": "success"}
+{"time": "23/06/2026 13:10:55", "address": "('127.0.0.1', 33689)", "username": "ן", "status": "failed"}
+{"time": "23/06/2026 13:10:58", "address": "('127.0.0.1', 33696)", "username": "i", "status": "success"}
+{"time": "23/06/2026 13:12:40", "address": "('127.0.0.1', 41425)", "username": "i", "status": "success"}
+{"time": "23/06/2026 13:12:58", "address": "('127.0.0.1', 41434)", "username": "u", "status": "success"}
+{"time": "23/06/2026 13:14:23", "address": "('127.0.0.1', 18339)", "username": "אוריה", "status": "failed"}
+{"time": "23/06/2026 13:14:26", "address": "('127.0.0.1', 18340)", "username": "אוריה", "status": "success"}
+{"time": "23/06/2026 13:17:52", "address": "('127.0.0.1', 58969)", "username": "אוריה", "status": "success"}
+{"time": "23/06/2026 13:18:09", "address": "('127.0.0.1', 58977)", "username": "רנן", "status": "success"}

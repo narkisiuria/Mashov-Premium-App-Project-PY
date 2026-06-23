@@ -1353,22 +1353,44 @@ try:
         ).pack(pady=15, ipadx=18, ipady=8)
     
     def open_doar():
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
+        
         if not current_user_role == "teacher" and not current_user_role == "student":
             messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
+
+        # שלב 1: משיכת הנתונים מהשרת
+        try:
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                subject = f"get_class_doar|{current_user_class}"
+                s.sendall(subject.encode('utf-8'))
+                
+                raw_data = s.recv(4096) 
+                if raw_data:
+                    res_text = raw_data.decode('utf-8').strip()
+                    # השרת מחזיר JSON נקי, לכן ה-loads יעבוד פיקס!
+                    messages = json.loads(res_text)
+                else:
+                    messages = []
+                    
+        except Exception as e:
+            print(f"Error loading mail: {e}")
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת או לטעון את ההודעות.")
+            # תיקון: הורדנו את new_win.destroy() מכיוון שהחלון עדיין לא נוצר בשלב זה
+            return
         
+        # שלב 2: יצירת חלון הממשק רק אם המידע נטען בהצלחה
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד דואר")
 
         width, height = 520, 770
-
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
-
         x = (screen_width // 2) - (width // 2)
         y = (screen_height // 2) - (height // 2)
-
         new_win.geometry(f"{width}x{height}+{x}+{y}")
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
@@ -1376,113 +1398,112 @@ try:
         main_frame = tk.Frame(new_win, bg="white")
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
+        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=170)
         header_frame.pack(fill="x")
         header_frame.pack_propagate(False)
 
-        tk.Label(
-            header_frame,
-            text="📨",
-            font=("Arial", 40),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(18, 0))
-
-        tk.Label(
-            header_frame,
-            text="דואר נכנס",
-            font=("Arial", 24, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack()
-
-        tk.Label(
-            header_frame,
-            text="הודעות ועדכונים מבית הספר",
-            font=("Arial", 11),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack()
+        tk.Label(header_frame, text="📨", font=("Arial", 40), fg="white", bg="#1a73e8").pack(pady=(18, 0))
+        tk.Label(header_frame, text="דואר נכנס", font=("Arial", 24, "bold"), fg="white", bg="#1a73e8").pack()
+        tk.Label(header_frame, text="הודעות ועדכונים מבית הספר", font=("Arial", 11), fg="#dbeafe", bg="#1a73e8").pack()
 
         list_container = tk.Frame(main_frame, bg="#f8fafc")
         list_container.pack(fill="both", expand=True, padx=25, pady=20)
 
-        canvas = tk.Canvas(
-            list_container,
-            bg="#f8fafc",
-            highlightthickness=0
-        )
-
-        scrollbar = ttk.Scrollbar(
-            list_container,
-            orient="vertical",
-            command=canvas.yview
-        )
-
+        canvas = tk.Canvas(list_container, bg="#f8fafc", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(list_container, orient="vertical", command=canvas.yview)
         scrollable_frame = tk.Frame(canvas, bg="#f8fafc")
 
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=430)
         canvas.configure(yscrollcommand=scrollbar.set)
-
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        messages = [
-            ("הודעה מהמורה", "יש להביא מחברת לשיעור מחר"),
-            ("מזכירות", "אסיפת הורים ביום חמישי"),
-            ("מערכת", "ציונים חדשים עודכנו"),
-            ("הנהלה", "מחר יום לימודים מקוצר"),
-            ("מחנך הכיתה", "נא להגיע בזמן")
-        ]
+        # פונקציה פנימית לרענון תצוגת ההודעות במסך
+        def refresh_messages():
+            for widget in scrollable_frame.winfo_children():
+                widget.destroy()
+                
+            for sender, msg in messages:
+                mail_card = tk.Frame(scrollable_frame, bg="white", highlightbackground="#e2e8f0", highlightthickness=1)
+                mail_card.pack(fill="x", pady=7, ipady=10)
 
-        for sender, msg in messages:
-            mail_card = tk.Frame(
-                scrollable_frame,
-                bg="white",
-                highlightbackground="#e2e8f0",
-                highlightthickness=1
-            )
-            mail_card.pack(fill="x", pady=7, ipady=10)
+                tk.Label(mail_card, text=sender, font=("Arial", 12, "bold"), fg="#1a73e8", bg="white").pack(anchor="e", padx=15, pady=(5, 0))
+                tk.Label(mail_card, text=msg, font=("Arial", 11), fg="#334155", bg="white", wraplength=380, justify="right").pack(anchor="e", padx=15, pady=(3, 8))
 
-            tk.Label(
-                mail_card,
-                text=sender,
-                font=("Arial", 12, "bold"),
-                fg="#1a73e8",
-                bg="white"
-            ).pack(anchor="e", padx=15, pady=(5, 0))
+        refresh_messages()
 
-            tk.Label(
-                mail_card,
-                text=msg,
-                font=("Arial", 11),
-                fg="#334155",
-                bg="white",
-                wraplength=380,
-                justify="right"
-            ).pack(anchor="e", padx=15, pady=(3, 8))
+        # חלון כתיבת הודעה חדשה (למורים)
+        def open_teacher_compose_window():
+            compose_win = tk.Toplevel(new_win)
+            compose_win.title("פרסום הודעה חדשה")
+            compose_win.geometry("400x450")
+            compose_win.configure(bg="#f0f4f8")
+            compose_win.resizable(False, False)
+            
+            cx = (screen_width // 2) - 200
+            cy = (screen_height // 2) - 225
+            compose_win.geometry(f"400x450+{cx}+{cy}")
+            
+            tk.Label(compose_win, text="יצירת עדכון חדש", font=("Arial", 18, "bold"), bg="#f0f4f8", fg="#1a73e8").pack(pady=15)
+            tk.Label(compose_win, text="כותרת ההודעה (למשל: הודעה ממורה למתמטיקה):", font=("Arial", 11, "bold"), bg="#f0f4f8").pack(anchor="e", padx=20, pady=(10, 2))
+            
+            title_entry = tk.Entry(compose_win, font=("Arial", 12), justify="right", bd=1, relief="solid")
+            title_entry.pack(fill="x", padx=20, ipady=4)
+            
+            tk.Label(compose_win, text="תוכן ההודעה:", font=("Arial", 11, "bold"), bg="#f0f4f8").pack(anchor="e", padx=20, pady=(15, 2))
+            content_text = tk.Text(compose_win, font=("Arial", 11), bd=1, relief="solid", height=8)
+            content_text.pack(fill="x", padx=20)
+            
+            content_text.tag_configure("rtl", justify="right")
+            content_text.bind("<KeyRelease>", lambda event: content_text.tag_add("rtl", "1.0", "end"))
+            
+            def publish_message():
+                title = title_entry.get().strip()
+                content = content_text.get("1.0", tk.END).strip()
+                
+                if not title or not content:
+                    messagebox.showwarning("שגיאה", "נא למלא את כל השדות", parent=compose_win)
+                    return
+                    
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        subject = f"add_class_doar|{current_user_class}|{title}|{content}"
+                        s.sendall(subject.encode('utf-8'))
+                        
+                        server_response = s.recv(1024).decode('utf-8').strip()
+                        
+                        if server_response == "200 ok":
+                            messages.insert(0, (title, content))
+                            messagebox.showinfo("הצלחה", "ההודעה פורסמה בהצלחה!", parent=compose_win)
+                            compose_win.destroy()
+                            refresh_messages()
+                        else:
+                            messagebox.showerror("שגיאה", "השרת נכשל בשמירת ההודעה.", parent=compose_win)
+                except Exception as e:
+                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}", parent=compose_win)
+
+            tk.Button(
+                compose_win, text="פרסם הודעה לכולם", command=publish_message,
+                font=("Arial", 12, "bold"), bg="#10b981", fg="white", relief="flat", cursor="hand2"
+            ).pack(pady=25, ipadx=15, ipady=5)
 
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
 
         tk.Button(
-            footer_frame,
-            text="חזרה למסך ראשי",
-            command=lambda: open_main_page(current_username),
-            font=("Arial", 13, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).pack(pady=15, ipadx=18, ipady=8)
-    
+            footer_frame, text="חזרה למסך ראשי", command=lambda: open_main_page(current_username),
+            font=("Arial", 12, "bold"), bg="#1a73e8", fg="white", relief="flat", bd=0, cursor="hand2"
+        ).pack(side="left", padx=20, pady=12, ipadx=10, ipady=6)
+
+        if current_user_role == "teacher":
+            tk.Button(
+                footer_frame, text="➕ כתיבת הודעה חדשה", command=open_teacher_compose_window,
+                font=("Arial", 12, "bold"), bg="#10b981", fg="white", relief="flat", bd=0, cursor="hand2"
+            ).pack(side="right", padx=20, pady=12, ipadx=10, ipady=6)
+            
         
     def open_class_chat_room():
         global current_username, current_user_class, current_user_role
