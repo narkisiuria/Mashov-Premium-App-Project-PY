@@ -7,8 +7,6 @@ try:
     import threading
     from utils import hashingAlg
 
-    print(os.getcwd())
-
     class Server:
         def __init__(self, host='0.0.0.0', port=9999):
             self.host = host
@@ -331,7 +329,9 @@ try:
                     "class": class_name,
                     "tasks": [],
                     "created_at": timeCreated,
-                    "grades": [] if role == "student" else "is teacher"
+                    "grades": [] if role == "student" else "is teacher",
+                    "attendance": "",
+                    "moodle_tasks": ""
                     }
                 
                 os.makedirs(os.path.dirname(class_file_path), exist_ok=True)
@@ -889,10 +889,177 @@ try:
                 except Exception as e:
                     print(f"[-] Error in get_class_doar: {e}")
                     conn.sendall("[]".encode("utf-8"))
-
+        
+        def handle_save_attendance(self, conn, dataFromClient):
+            parts = dataFromClient.split("|", 3)
+            if len(parts) < 4:
+                conn.sendall("save_attendance_response|error".encode('utf-8'))
+                return
+            
+            class_name = parts[1].strip()
+            subject = parts[2].strip()
+            attendance_data = parts[3].strip()
+            
+            file_path = f"classesStudents/{class_name}/students-{class_name}.json"
+            current_date = datetime.datetime.now().strftime("%d/%m/%Y")
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            class_data = json.load(f)
+                        
+                        records = attendance_data.split(",")
+                        for record in records:
+                            if ":" in record:
+                                student_username, status = record.split(":", 1)
+                                student_username = student_username.strip()
+                                status = status.strip()
+                                
+                                if student_username in class_data:
+                                    if not isinstance(class_data[student_username].get("attendance"), list):
+                                        class_data[student_username]["attendance"] = []
+                                    
+                                    class_data[student_username]["attendance"].append({
+                                        "subject": subject,
+                                        "date": current_date,
+                                        "status": status
+                                    })
+                        
+                        with open(file_path, "w", encoding="utf-8") as f:
+                            json.dump(class_data, f, indent=4, ensure_ascii=False)
+                            
+                        print(f"[+] Attendance saved successfully for class {class_name} | Subject: {subject}")
+                        conn.sendall("save_attendance_response|success".encode('utf-8'))
+                    else:
+                        print(f"[-] Save attendance failed: File {file_path} not found.")
+                        conn.sendall("save_attendance_response|file_not_found".encode('utf-8'))
+                        
+                except Exception as e:
+                    print(f"[-] Error saving attendance: {e}")
+                    conn.sendall("save_attendance_response|error".encode('utf-8'))
+        
+        def handle_get_attendance_history(self, conn, dataFromClient):
+            parts = dataFromClient.split("|")
+            client_class = parts[1]
+            client_username = parts[2]
+            
+            try:
+                with open(f"classesStudents/{client_class}/students-{client_class}.json", "r", encoding='utf-8') as f:
+                    students_data = json.load(f)
+                
+                if client_username in students_data:
+                    student_info = students_data[client_username]
+                    
+                    attendance_history = student_info.get("attendance", [])
+                    
+                    attendance_json_str = json.dumps(attendance_history, ensure_ascii=False)
+                    
+                    response = f"get_attendance_response|SUCCESS|{attendance_json_str}"
+                    conn.sendall(response.encode('utf-8'))
+                    
+                else:
+                    conn.sendall("ERROR|Student not found".encode('utf-8'))
+                    
+            except FileNotFoundError:
+                conn.sendall("ERROR|Class file not found".encode('utf-8'))
+                
+            except Exception as e:
+                conn.sendall(f"ERROR|{str(e)}".encode('utf-8'))
+                
+        def handle_get_moodle_tasks(self, conn, dataFromClient):
+            # פורמט בקשה: get_moodle_tasks|class_name|username|role
+            parts = dataFromClient.split("|")
+            if len(parts) < 4:
+                conn.sendall("get_moodle_tasks_response|error".encode('utf-8'))
+                return
+                
+            class_name = parts[1].strip()
+            username = parts[2].strip()
+            role = parts[3].strip()
+            
+            file_path = f"classesStudents/{class_name}/students-{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            class_data = json.load(f)
+                        
+                        tasks_to_send = []
+                        
+                        # אם זה תלמיד - נשלח רק את המשימות שלו
+                        if role == "student" or "תלמיד" in role:
+                            if username in class_data:
+                                tasks_to_send = class_data[username].get("moodle_tasks", [])
+                                if not isinstance(tasks_to_send, list):
+                                    tasks_to_send = []
+                        
+                        # אם זה מורה - נאסוף את כל המשימות הייחודיות שקיימות כרגע אצל התלמידים בכיתה
+                        else:
+                            unique_tasks = {}
+                            for u_name, u_info in class_data.items():
+                                if u_info.get("role") == "student":
+                                    student_tasks = u_info.get("moodle_tasks", [])
+                                    if isinstance(student_tasks, list):
+                                        for task in student_tasks:
+                                            if isinstance(task, dict) and "name" in task:
+                                                unique_tasks[task["name"]] = task.get("url", "")
+                            tasks_to_send = [{"name": name, "url": url} for name, url in unique_tasks.items()]
+                        
+                        # הפיכת הרשימה לסטרינג של JSON ושליחה ללקוח
+                        response_json = json.dumps(tasks_to_send, ensure_ascii=False)
+                        conn.sendall(f"get_moodle_tasks_response|success|{response_json}".encode('utf-8'))
+                    else:
+                        conn.sendall("get_moodle_tasks_response|file_not_found".encode('utf-8'))
+                except Exception as e:
+                    print(f"[-] Error fetching moodle tasks: {e}")
+                    conn.sendall("get_moodle_tasks_response|error".encode('utf-8'))
+        
+        def handle_publish_moodle_task(self, conn, dataFromClient):
+            parts = dataFromClient.split("|", 3)
+            if len(parts) < 4:
+                conn.sendall("publish_moodle_task_response|error".encode('utf-8'))
+                return
+            
+            class_name = parts[1].strip()
+            url = parts[2].strip()
+            name = parts[3].strip()
+            
+            file_path = f"classesStudents/{class_name}/students-{class_name}.json"
+            
+            with self.db_lock:
+                try:
+                    if os.path.exists(file_path):
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            class_data = json.load(f)
+                        
+                        for username, user_info in class_data.items():
+                            if user_info.get("role") == "student":
+                                if not isinstance(user_info.get("moodle_tasks"), list):
+                                    user_info["moodle_tasks"] = []
+                                
+                                user_info["moodle_tasks"].append({
+                                    "url": url,
+                                    "name": name
+                                })
+                        
+                        with open(file_path, "w", encoding="utf-8") as f:
+                            json.dump(class_data, f, indent=4, ensure_ascii=False)
+                            
+                        print(f"[+] Moodle task '{name}' published successfully for all students in class {class_name}")
+                        conn.sendall("publish_moodle_task_response|success".encode('utf-8'))
+                    else:
+                        print(f"[-] Publish task failed: File {file_path} not found.")
+                        conn.sendall("publish_moodle_task_response|file_not_found".encode('utf-8'))
+                        
+                except Exception as e:
+                    print(f"[-] Error publishing moodle task: {e}")
+                    conn.sendall("publish_moodle_task_response|error".encode('utf-8'))
+        
         def handle_client(self, conn, addr):
             with conn:
-                print(f"[+] New connection from {addr}")
+                print(f"[+] New connection from address: {addr}")
                 try:
                     rawDataFromClient = conn.recv(1024)
                     print("[+] handling client")
@@ -936,7 +1103,11 @@ try:
                         
                     elif dataFromClient.startswith("update_request_status|"):
                         print(f"[+] subject received: update_request_status | ({addr})")
-                        self.handle_update_request_status(conn, dataFromClient)
+                        self.handle_update_request_status(conn, dataFromClient)   
+                         
+                    elif dataFromClient.startswith("save_attendance|"):
+                        print(f"[+] subject received: save_attendance | ({addr})")
+                        self.handle_save_attendance(conn, dataFromClient)
                         
                     elif dataFromClient.startswith("get_schedule|"):
                         print(f"[+] subject received: get_schedule | ({addr})")
@@ -959,6 +1130,15 @@ try:
                     
                     elif dataFromClient.startswith("insert_new_grade|"):
                         self.handle_insert_new_grade(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("get_attendance_history|"):
+                        self.handle_get_attendance_history(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("get_moodle_tasks|"):
+                        self.handle_get_moodle_tasks(conn, dataFromClient)
+                    
+                    elif dataFromClient.startswith("publish_moodle_task|"):
+                        self.handle_publish_moodle_task(conn, dataFromClient)
                         
                     elif dataFromClient == "guest":
                         with self.db_lock:

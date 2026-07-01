@@ -11,7 +11,8 @@
             "גכעגכע"
         ],
         "created_at": "07/06/2026 17:10:55",
-        "grades": "is teacher"
+        "grades": "is teacher",
+        "attendance": ""
     },
     "i": {
         "id": 2,
@@ -64,6 +65,33 @@
                 "משנה",
                 56
             ]
+        ],
+        "attendance": [
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "28/06/2026",
+                "status": "איחור"
+            },
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "28/06/2026",
+                "status": "נוכח"
+            },
+            {
+                "subject": "שיעור עברית",
+                "date": "28/06/2026",
+                "status": "חוסר ציוד"
+            }
+        ],
+        "moodle_tasks": [
+            {
+                "url": "https://chess.com",
+                "name": "שחמט אימון"
+            },
+            {
+                "url": "https://youtube.com/shorts",
+                "name": "שורטס"
+            }
         ]
     },
     "עידו": {
@@ -84,6 +112,33 @@
                 "משנה",
                 56
             ]
+        ],
+        "attendance": [
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "28/06/2026",
+                "status": "חיסור"
+            },
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "28/06/2026",
+                "status": "נוכח"
+            },
+            {
+                "subject": "שיעור עברית",
+                "date": "28/06/2026",
+                "status": "חיסור"
+            }
+        ],
+        "moodle_tasks": [
+            {
+                "url": "https://chess.com",
+                "name": "שחמט אימון"
+            },
+            {
+                "url": "https://youtube.com/shorts",
+                "name": "שורטס"
+            }
         ]
     }
 }

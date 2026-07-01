@@ -16,3 +16,5 @@ def hash_password_no_salt(password):
     hashed_password = hash_object.hexdigest()
     
     return hashed_password
+
+

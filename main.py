@@ -239,14 +239,14 @@ try:
     def open_main_page(username):
         global current_username, current_user_role
 
-
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         current_username = username
 
         new_win.title("עמוד ראשי")
 
-        width, height = 520, 770
+        # הגדלנו את הגובה מ-770 ל-880 כדי שארבע שורות כפתורים ייכנסו בצורה יפה
+        width, height = 520, 880
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
 
@@ -257,8 +257,9 @@ try:
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
 
+        # הגדלנו את גובה ה-frame המרכזי מ-730 ל-840
         main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=840)
 
         header_frame = tk.Frame(main_frame, bg="#1a73e8", height=170)
         header_frame.pack(fill="x", padx=0, pady=0)
@@ -289,7 +290,7 @@ try:
         ).pack()
 
         content_frame = tk.Frame(main_frame, bg="white")
-        content_frame.pack(expand=True, pady=40)
+        content_frame.pack(expand=True, pady=20) # הקטנה קלה של ה-pady כדי לתת עוד מרווח אנכי
 
         button_style = {
             "fg": "white",
@@ -351,17 +352,19 @@ try:
 
         tk.Button(
             content_frame,
-            text="🤖 עזרה והדרכה",
-            bg="#7c3aed",
-            command=open_chatbot_help,   
-            fg="white",
-            font=("Arial", 14, "bold"),
-            width=30,
-            height=4,
-            bd=0,
-            cursor="hand2",
-            relief="flat"
-        ).grid(row=3, column=0, columnspan=2, padx=0, pady=0)
+            text="נוכחות בשיעור",
+            bg="#0284c7", 
+            command=open_attendance,
+            **button_style
+        ).grid(row=3, column=0, padx=15, pady=15)
+
+        tk.Button(
+            content_frame,
+            text="Moodle משימות",
+            bg="#0369a1", 
+            command=open_moodle_tasks,
+            **button_style
+        ).grid(row=3, column=1, padx=15, pady=15)
 
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=10)
         footer_frame.pack(fill="x", side="bottom")
@@ -2957,7 +2960,7 @@ try:
 
         tk.Label(
             selector_frame,
-            text="בחר כיתה ויום:",
+            text=":בחר יום וכיתה",
             font=("Arial", 11, "bold"),
             bg="#f8fafc",
             fg="#334155"
@@ -3018,7 +3021,7 @@ try:
 
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False)
+        footer_frame.pack_propagate(False) 
 
         tk.Button(
             footer_frame,
@@ -3031,13 +3034,229 @@ try:
             bd=0,
             cursor="hand2"
         ).pack(pady=15, ipadx=18, ipady=8)
-    
-    def open_chatbot_help():
-        new_win = tk.Toplevel()
-        destroy_and_set_new_window(new_win)
-        new_win.title("מערכת שעות")
 
-        width, height = 520, 770
+
+    def open_moodle_tasks():
+        global current_username, current_user_role, current_user_class
+
+        role = current_user_role if 'current_user_role' in globals() else "student"
+        username = current_username if 'current_username' in globals() else "תלמיד"
+        class_name = current_user_class if 'current_user_class' in globals() else "9th3"
+
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
+        fetched_tasks = []
+
+        # ---------------------------------------------------------
+        # שלב א': שליפת המשימות האמיתיות מהשרת בזמן אמת
+        # ---------------------------------------------------------
+        try:
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                request_msg = f"get_moodle_tasks|{class_name}|{username}|{role}"
+                s.sendall(request_msg.encode('utf-8'))
+                
+                raw_data = s.recv(4096) # שימוש בבאפר גדול יותר עבור ה-JSON
+                if raw_data:
+                    dataFromServer = raw_data.decode('utf-8').strip()
+                    if dataFromServer.startswith("get_moodle_tasks_response|success|"):
+                        json_str = dataFromServer.split("|", 2)[2]
+                        fetched_tasks = json.loads(json_str)
+        except Exception as e:
+            print(f"גילוי שגיאה בטעינת נתונים: {e}")
+            # במקרה של שגיאה הרשימה תישאר ריקה ולא תתקע את פתיחת החלון
+
+        # ---------------------------------------------------------
+        # שלב ב': בניית ממשק המשתמש (UI)
+        # ---------------------------------------------------------
+        new_win = tk.Toplevel()
+        new_win.title("מרכז משימות ולמידה דיגיטלית")
+
+        width, height = 550, 750
+        screen_width = new_win.winfo_screenwidth()
+        screen_height = new_win.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        new_win.geometry(f"{width}x{height}+{x}+{y}")
+        new_win.configure(bg="#f0f4f8")
+        new_win.resizable(False, False)
+
+        main_frame = tk.Frame(new_win, bg="white")
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=510, height=710)
+
+        header_color = "#0369a1" 
+        header_frame = tk.Frame(main_frame, bg=header_color, height=130)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+
+        tk.Label(header_frame, text="🎓", font=("Arial", 32), fg="white", bg=header_color).pack(pady=(10, 0))
+
+        title_text = "ניהול והעלאת קישורי משימות" if "teacher" in role or "מורה" in role else "משימות ומטלות פתוחות"
+        tk.Label(header_frame, text=title_text, font=("Arial", 18, "bold"), fg="white", bg=header_color).pack()
+        tk.Label(header_frame, text=f"{username} שלום (כיתה {class_name})", font=("Arial", 11), fg="#e0f2fe", bg=header_color).pack()
+
+        # --- מסך מורה ---
+        if "teacher" in role or "מורה" in role:
+            form_frame = tk.LabelFrame(main_frame, text=" יצירת משימה חדשה לכיתה ", font=("Arial", 11, "bold"), bg="white", fg="#0369a1", padx=15, pady=15)
+            form_frame.pack(fill="x", padx=20, pady=20)
+
+            tk.Label(form_frame, text="שם המשימה / נושא הלימוד:", font=("Arial", 11), bg="white", fg="#334155").pack(anchor="e", pady=(0, 2))
+            task_name_entry = tk.Entry(form_frame, font=("Arial", 12), bg="#f8fafc", bd=1, relief="solid", justify="right")
+            task_name_entry.pack(fill="x", pady=(0, 15))
+
+            tk.Label(form_frame, text="קישור למטלה (אופק מטח / Moodle / סרטון):", font=("Arial", 11), bg="white", fg="#334155").pack(anchor="e", pady=(0, 2))
+            task_url_entry = tk.Entry(form_frame, font=("Arial", 11), bg="#f8fafc", bd=1, relief="solid", justify="left")
+            task_url_entry.insert(0, "https://")
+            task_url_entry.pack(fill="x", pady=(0, 15))
+
+            def publish_task():
+                name = task_name_entry.get().strip()
+                url = task_url_entry.get().strip()
+                if not name or url == "https://" or not url:
+                    tk.messagebox.showwarning("שדה חסר", "אנא מלא שם משימה וקישור תקין")
+                    return
+                
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        subject = f"publish_moodle_task|{class_name}|{url}|{name}"
+                        s.sendall(subject.encode('utf-8'))
+
+                        while True:
+                            raw_data = s.recv(1024)
+                            if not raw_data: break
+                            dataFromServer = raw_data.decode('utf-8').strip()
+
+                            if dataFromServer.startswith("publish_moodle_task_response|"):
+                                parts = dataFromServer.split("|")
+                                if len(parts) > 1 and parts[1] == "success":
+                                    tk.messagebox.showinfo("משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
+                                    new_win.destroy() # סגירה ורענון החלון
+                                    open_moodle_tasks()
+                                else:
+                                    tk.messagebox.showerror("שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
+                                break
+                except Exception as e:
+                    tk.messagebox.showerror("שגיאה", f"אירעה שגיאה בתקשורת: {e}")
+
+            publish_btn = tk.Button(form_frame, text="➕ פרסם קישור למשימה", font=("Arial", 12, "bold"), bg="#10b981", fg="white", bd=0, cursor="hand2", command=publish_task, pady=8)
+            publish_btn.pack(fill="x")
+
+            tk.Label(main_frame, text="משימות פעילות כרגע בכיתה:", font=("Arial", 12, "bold"), bg="white", fg="#1e293b").pack(anchor="e", padx=25, pady=(10, 5))
+            
+            # לולאה דינמית על המשימות שהתקבלו מהשרת
+            for index, task in enumerate(fetched_tasks):
+                t_name = task.get("name", "משימה ללא שם")
+                t_url = task.get("url", "#")
+                row_bg = "#f8fafc" if index % 2 == 0 else "white"
+                t_row = tk.Frame(main_frame, bg=row_bg, height=45)
+                t_row.pack(fill="x", padx=20, pady=2)
+                t_row.pack_propagate(False)
+
+                tk.Label(t_row, text=f"• {t_name}", font=("Arial", 11), fg="#475569", bg=row_bg).pack(side="right", padx=10, pady=10)
+                tk.Button(t_row, text="פתח קישור 🔗", font=("Arial", 9), fg="#2563eb", bg=row_bg, bd=0, cursor="hand2", command=lambda url=t_url: webbrowser.open(url)).pack(side="left", padx=10, pady=8)
+
+        # --- מסך תלמיד ---
+        else:
+            # חישוב אחוזים דינמי
+            total_tasks = len(fetched_tasks)
+            completed_tasks = sum(1 for t in fetched_tasks if t.get("status") == "✅ בוצע")
+            pct = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 100
+
+            progress_frame = tk.Frame(main_frame, bg="#f0fdf4", bd=0, height=50)
+            progress_frame.pack(fill="x", padx=20, pady=15)
+            progress_frame.pack_propagate(False)
+            
+            tk.Label(
+                progress_frame, 
+                text=f"📈 הספק המשימות השבוע: {completed_tasks} מתוך {total_tasks} בוצעו ({pct}%)", 
+                font=("Arial", 11, "bold"), fg="#166534", bg="#f0fdf4"
+            ).pack(side="right", padx=15, pady=15)
+
+            tk.Label(main_frame, text="רשימת קישורים ומטלות לביצוע:", font=("Arial", 12, "bold"), bg="white", fg="#1e293b").pack(anchor="e", padx=22, pady=(5, 5))
+
+            def toggle_status(btn, task_obj):
+                # כאן תוכל בהמשך להוסיף שליחה לשרת כדי לעדכן באמת ב-JSON, כרגע זה משנה לוקאלית בחלון
+                if btn.cget("text") == "❌ לא בוצע":
+                    btn.config(text="✅ בוצע", bg="#10b981", activebackground="#10b981")
+                    task_obj["status"] = "✅ בוצע"
+                else:
+                    btn.config(text="❌ לא בוצע", bg="#f43f5e", activebackground="#f43f5e")
+                    task_obj["status"] = "❌ לא בוצע"
+
+            # לולאה דינמית על משימות התלמיד מהשרת
+            for index, task in enumerate(fetched_tasks):
+                title = task.get("name", "משימה כללית")
+                link_url = task.get("url", "#")
+                start_status = task.get("status", "❌ לא בוצע") # ברירת מחדל אם אין סטטוס ב-JSON
+                start_color = "#10b981" if start_status == "✅ בוצע" else "#f43f5e"
+
+                row_bg = "#f8fafc" if index % 2 == 0 else "white"
+                item_row = tk.Frame(main_frame, bg=row_bg, height=65)
+                item_row.pack(fill="x", padx=20, pady=4)
+                item_row.pack_propagate(False)
+
+                text_sub_frame = tk.Frame(item_row, bg=row_bg)
+                text_sub_frame.pack(side="right", padx=10, pady=10)
+                tk.Label(text_sub_frame, text=title, font=("Arial", 11, "bold"), fg="#1e293b", bg=row_bg).pack(anchor="e")
+
+                status_btn = tk.Button(item_row, text=start_status, font=("Arial", 10, "bold"), fg="white", bg=start_color, activebackground=start_color, bd=0, width=10, cursor="hand2")
+                status_btn.config(command=lambda b=status_btn, t=task: toggle_status(b, t))
+                status_btn.pack(side="left", padx=10, pady=18)
+
+                link_btn = tk.Button(item_row, text="🔗 פתח משימה", font=("Arial", 10, "bold"), fg="white", bg="#2563eb", bd=0, cursor="hand2", command=lambda url=link_url: webbrowser.open(url))
+                link_btn.pack(side="left", padx=5, pady=18)
+
+        close_btn = tk.Button(main_frame, text="סגור חלון", font=("Arial", 12, "bold"), bg="#f1f5f9", fg="#475569", bd=0, cursor="hand2", command=new_win.destroy)
+        close_btn.pack(side="bottom", fill="x", padx=20, pady=20)
+    
+    def open_attendance():
+        global current_username, current_user_role, current_user_class
+
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
+        
+        class_students = []
+
+        try:
+            with create_secure_socket() as s:
+                print(f"Connecting to {SERVER_IP}:{PORT}...")
+                s.connect((SERVER_IP, PORT))
+                
+                subject = f"get_class_students|{current_user_class}"
+                s.sendall(subject.encode('utf-8'))
+
+                while True:
+                    raw_data = s.recv(1024)
+                    if not raw_data:
+                        break
+
+                    dataFromServer = raw_data.decode('utf-8').strip()
+
+                    if dataFromServer.startswith("class_students_response|"):
+                        parts = dataFromServer.split("|")
+                        if len(parts) > 1 and parts[1]:
+                            class_students = parts[1].split(",")
+                        break
+                    
+                    else:
+                        messagebox.showerror("שגיאה!", "שגיאת שרת")
+                        break
+
+        except ConnectionRefusedError:
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            
+        except Exception as e:
+            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+        
+        role = current_user_role if 'current_user_role' in globals() else "student"
+        username = current_username if 'current_username' in globals() else "תלמיד"
+
+        new_win = tk.Toplevel()
+        new_win.title("מערכת נוכחות - משוב")
+        destroy_and_set_new_window(new_win)
+
+        width, height = 550, 750
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
 
@@ -3047,6 +3266,343 @@ try:
         new_win.geometry(f"{width}x{height}+{x}+{y}")
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
+
+        main_frame = tk.Frame(new_win, bg="white")
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=510, height=710)
+
+        header_color = "#0284c7" if "teacher" in role or "מורה" in role else "#0ea5e9"
+        header_frame = tk.Frame(main_frame, bg=header_color, height=130)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+
+        tk.Label(
+            header_frame,
+            text="📝",
+            font=("Arial", 32),
+            fg="white",
+            bg=header_color
+        ).pack(pady=(10, 0))
+
+        title_text = "ניהול נוכחות כיתתית" if "teacher" in role or "מורה" in role else "מצב נוכחות אישי"
+        tk.Label(
+            header_frame,
+            text=title_text,
+            font=("Arial", 20, "bold"),
+            fg="white",
+            bg=header_color
+        ).pack()
+
+        subtitle_text = f"משתמש מחובר: {username}"
+        tk.Label(
+            header_frame,
+            text=subtitle_text,
+            font=("Arial", 11),
+            fg="#e0f2fe",
+            bg=header_color
+        ).pack()
+
+        subjects_list = ["שיעור מתמטיקה", "שיעור נביא", "שיעור גמרא", "שיעור אנגלית", "שיעור עברית", "שיעור לשון", "שיעור היסטוריה", "שיעור מדעים", "שיעור תורה", "שיעור ספורט"]
+
+        if "teacher" in role or "מורה" in role:
+            class_frame = tk.Frame(main_frame, bg="#f8fafc", height=45)
+            class_frame.pack(fill="x", padx=15, pady=15)
+            class_frame.pack_propagate(False)
+            
+            tk.Label(
+                class_frame, 
+                text=f":בחר מקצוע", 
+                font=("Arial", 11, "bold"), 
+                fg="#1e293b", 
+                bg="#f8fafc"
+            ).pack(side="right", padx=(10, 5), pady=10)
+
+            teacher_subject_var = tk.StringVar(value=subjects_list[0])
+            subject_dropdown = ttk.Combobox(
+                class_frame, 
+                textvariable=teacher_subject_var, 
+                values=subjects_list, 
+                state="readonly", 
+                width=12,
+                font=("Arial", 10)
+            )
+            subject_dropdown.pack(side="right", padx=5, pady=10)
+
+            labels_frame = tk.Frame(main_frame, bg="white")
+            labels_frame.pack(fill="x", padx=20)
+            tk.Label(labels_frame, text="שם התלמיד", font=("Arial", 11, "bold"), fg="#64748b", bg="white").pack(side="right")
+            tk.Label(labels_frame, text="סטטוס הגעה וציוד", font=("Arial", 11, "bold"), fg="#64748b", bg="white").pack(side="left", padx=55)
+
+            students = class_students if class_students else ["שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה"]
+            attendance_vars = {}
+
+            for index, student_name in enumerate(students):
+                row_bg = "#f8fafc" if index % 2 == 0 else "white"
+                row_frame = tk.Frame(main_frame, bg=row_bg, height=50)
+                row_frame.pack(fill="x", padx=15, pady=2)
+                row_frame.pack_propagate(False)
+
+                tk.Label(
+                    row_frame, 
+                    text=student_name, 
+                    font=("Arial", 12), 
+                    fg="#334155", 
+                    bg=row_bg
+                ).pack(side="right", padx=10, pady=12)
+
+                status_var = tk.StringVar(value="נוכח")
+                attendance_vars[student_name] = status_var
+
+                btn_container = tk.Frame(row_frame, bg=row_bg)
+                btn_container.pack(side="left", padx=5, pady=10)
+
+                options = [
+                    ("חוסר ציוד", "#3B50C5"), 
+                    ("חיסור", "#ef4444"), 
+                    ("איחור", "#f59e0b"), 
+                    ("נוכח", "#10b981")
+                ]
+                
+                for text, active_color in options:
+                    rb = tk.Radiobutton(
+                        btn_container,
+                        text=text,
+                        variable=status_var,
+                        value=text,
+                        indicatoron=0, 
+                        font=("Arial", 9, "bold"),
+                        fg="#475569",
+                        bg="#e2e8f0",
+                        selectcolor=active_color,
+                        activebackground=active_color,
+                        bd=0,
+                        width=7,
+                        cursor="hand2"
+                    )
+                    rb.pack(side="left", padx=1)
+
+            def save_attendance_action():
+                selected_sub = teacher_subject_var.get()
+                
+                # 1. מפת כיתות מקומית כדי לתרגם את השם עבור השרת וה-JSON (למשל "ט3" ל-"9th3")
+                class_map = {
+                    "ז1": "7th1", "ז2": "7th2", "ז3": "7th3", "ז4": "7th4", "ז5": "7th5", "ז6": "7th6",
+                    "ח1": "8th1", "ח2": "8th2", "ח3": "8th3", "ח4": "8th4", "ח5": "8th5", "ח6": "8th6",
+                    "ט1": "9th1", "ט2": "9th2", "ט3": "9th3", "ט4": "9th4", "ט5": "9th5", "ט6": "9th6",
+                    "י1": "10th1", "י2": "10th2", "י3": "10th3", "י4": "10th4", "י5": "10th5", "י6": "10th6",
+                    "יא1": "11th1", "יא2": "11th2", "יא3": "11th3", "יא4": "11th4", "יא5": "11th5", "יא6": "11th6",
+                    "יב1": "12th1", "יב2": "12th2", "יב3": "12th3", "יב4": "12th4", "יב5": "12th5", "יב6": "12th6"
+                }
+                server_class_name = class_map.get(current_user_class, current_user_class)
+                
+                attendance_records = []
+                for s_name, s_var in attendance_vars.items():
+                    attendance_records.append(f"{s_name}:{s_var.get()}")
+                attendance_data_str = ",".join(attendance_records)
+                
+                SERVER_IP = '127.0.0.1' 
+                PORT = 9999
+                
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        
+                        msg = f"save_attendance|{server_class_name}|{selected_sub}|{attendance_data_str}"
+                        s.sendall(msg.encode('utf-8'))
+                        
+                        raw_response = s.recv(1024)
+                        if raw_response:
+                            response = raw_response.decode('utf-8').strip()
+                            if response == "save_attendance_response|success":
+                                messagebox.showinfo("הצלחה", f"יומן הנוכחות עבור שיעור {selected_sub} נשמר בהצלחה בשרת!")
+
+                            else:
+                                messagebox.showerror("שגיאה", "השרת נכשל בשמירת הנתונים בקובץ.")
+                        else:
+                            messagebox.showerror("שגיאה", "לא התקבלה תגובה מהשרת.")
+                            
+                except Exception as e:
+                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+
+            save_btn = tk.Button(
+                main_frame,
+                text="💾 שמור נוכחות ביומן",
+                font=("Arial", 14, "bold"),
+                bg="#0284c7",
+                fg="white",
+                bd=0,
+                cursor="hand2",
+                command=save_attendance_action
+            )
+            save_btn.pack(side="bottom", fill="x", padx=20, pady=20)
+            
+            tk.Button(
+                main_frame,
+                text="חזרה למסך ראשי",
+                command=lambda: open_main_page(current_username),
+                font=("Arial", 13, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2"
+            ).pack(side="bottom", pady=15, ipadx=18, ipady=4)
+
+        else:
+            stats_frame = tk.Frame(main_frame, bg="white")
+            stats_frame.pack(fill="x", padx=10, pady=15)
+            stats_frame.columnconfigure((0, 1, 2, 3, 4), weight=1, uniform="equal")
+
+            cards_data = [
+                ("נוכחות", "92%", "#e0f2fe", "#0369a1"),
+                ("איחורים", "2", "#fef3c7", "#b45309"),
+                ("חיסורים", "1", "#fee2e2", "#b91c1c"),
+                ("חוסר ציוד", "3", "#f3e8ff", "#6b21a8"), 
+                ("מוצדק", "2", "#f1f5f9", "#475569")
+            ]
+
+            for i, (label, val, bg_c, fg_c) in enumerate(cards_data):
+                card = tk.Frame(stats_frame, bg=bg_c, bd=0, height=75)
+                card.grid(row=0, column=i, padx=3)
+                card.pack_propagate(False)
+
+                tk.Label(card, text=val, font=("Arial", 16, "bold"), fg=fg_c, bg=bg_c).pack(pady=(10, 0))
+                tk.Label(card, text=label, font=("Arial", 9, "bold"), fg=fg_c, bg=bg_c).pack()
+
+            # אזור סנן המקצועות החכם של התלמיד
+            filter_frame = tk.Frame(main_frame, bg="white")
+            filter_frame.pack(fill="x", padx=20, pady=(10, 5))
+
+            tk.Label(
+                filter_frame, 
+                text="היסטוריית אירועי נוכחות", 
+                font=("Arial", 13, "bold"), 
+                fg="#1e293b", 
+                bg="white"
+            ).pack(side="right")
+
+            tk.Label(filter_frame, text=":סנן לפי מקצוע",
+                     font=("Arial", 10),
+                     fg="#64748b",
+                     bg="white").pack(side="left", padx=(5, 2))
+            
+            student_filter_var = tk.StringVar(value="הכול")
+            filter_dropdown = ttk.Combobox(
+                filter_frame, 
+                textvariable=student_filter_var, 
+                values=["הכול"] + subjects_list, 
+                state="readonly", 
+                width=10,
+                font=("Arial", 10)
+            )
+            filter_dropdown.pack(side="left")
+
+            history_container = tk.Frame(main_frame, bg="white")
+            history_container.pack(fill="both", expand=True, padx=5)
+            
+            SERVER_IP = '127.0.0.1' 
+            PORT = 9999
+
+            history_events = []
+
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                
+                msg = f"get_attendance_history|{current_user_class}|{current_username}"
+                s.sendall(msg.encode('utf-8'))
+                
+                raw_response = s.recv(4096) 
+                if raw_response:
+                    response = raw_response.decode('utf-8').strip()
+                    
+                    parts = response.split("|")
+                    
+                    if len(parts) >= 3 and parts[0] == "get_attendance_response":
+                        if parts[1] == "SUCCESS":
+                            parts_limited = response.split("|", 2)
+                            history_events = json.loads(parts_limited[2])
+                        elif parts[1] == "ERROR":
+                            messagebox.showerror("שגיאה", f"שגיאת שרת: {parts[2]}")
+                        else:
+                            messagebox.showerror("שגיאה", f"תגובה לא צפויה מהשרת: {response}")
+                            
+                    elif len(parts) >= 2 and parts[0] == "get_attendance_response":
+                        parts_limited = response.split("|", 1)
+                        history_events = json.loads(parts_limited[1])
+                        
+                    elif parts[0] == "SUCCESS":
+                        parts_limited = response.split("|", 1)
+                        history_events = json.loads(parts_limited[1])
+                    elif parts[0] == "ERROR":
+                        parts_limited = response.split("|", 1)
+                        messagebox.showerror("שגיאה", f"שגיאת שרת: {parts_limited[1]}")
+                        
+                    else:
+                        try:
+                            history_events = json.loads(response)
+                        except json.JSONDecodeError:
+                            messagebox.showerror("שגיאה", f"תגובה לא מוכרת מהשרת: {response}")
+                else:
+                    messagebox.showerror("שגיאה", "לא התקבלה תגובה מהשרת.")
+
+            def update_filtered_history(event=None):
+                for widget in history_container.winfo_children():
+                    widget.destroy()
+
+                selected_filter = student_filter_var.get()
+                row_index = 0
+
+                for event_data in history_events:
+                    subject = event_data.get("subject", "שיעור כללי")
+                    date = event_data.get("date", "")
+                    status = event_data.get("status", "")
+                    
+                    if "חיסור" in status or "חוסר" in status:
+                        status_color = "#ef4444" 
+                    elif "איחור" in status:
+                        status_color = "#f59e0b" 
+                    else:
+                        status_color = "#10b981" 
+
+                    if selected_filter == "הכול" or subject == selected_filter:
+                        row_bg = "#f8fafc" if row_index % 2 == 0 else "white"
+                        event_row = tk.Frame(history_container, bg=row_bg, height=42)
+                        event_row.pack(fill="x", padx=15, pady=2)
+                        event_row.pack_propagate(False)
+
+                        tk.Label(
+                            event_row, 
+                            text=f"{subject}   •   {date}", 
+                            font=("Arial", 11, "bold" if "חיסור" in status or "חוסר" in status else "normal"), 
+                            fg="#334155", 
+                            bg=row_bg
+                        ).pack(side="right", padx=15, pady=9)
+
+                        tk.Label(
+                            event_row, 
+                            text=status, 
+                            font=("Arial", 11, "bold"), 
+                            fg=status_color, 
+                            bg=row_bg
+                        ).pack(side="left", padx=15, pady=9)
+                        
+                        row_index += 1
+
+            filter_dropdown.bind("<<ComboboxSelected>>", update_filtered_history)
+            
+            update_filtered_history()
+
+            close_btn = tk.Button(
+                main_frame,
+                text="סגור חלון",
+                font=("Arial", 12, "bold"),
+                bg="#f1f5f9",
+                fg="#475569",
+                bd=0,
+                cursor="hand2",
+                command=new_win.destroy
+            )
+            close_btn.pack(side="bottom", fill="x", padx=20, pady=15)
+        
     
     if __name__ == "__main__":
         open_splash_screen()
