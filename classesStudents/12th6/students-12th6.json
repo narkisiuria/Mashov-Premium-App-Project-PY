@@ -9,5 +9,20 @@
         "tasks": [],
         "created_at": "13/05/2026 21:20:13",
         "grades": "is teacher"
+    },
+    "סבא": {
+        "id": 2,
+        "first_name": "סבא",
+        "last_name": "נרקיסי",
+        "gmail_account": "sababa@gmail.com",
+        "role": "student",
+        "class": "12th6",
+        "tasks": [
+            "וחלכאלוטכ"
+        ],
+        "created_at": "08/07/2026 12:21:19",
+        "grades": [],
+        "attendance": "",
+        "moodle_tasks": ""
     }
 }

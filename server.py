@@ -1139,6 +1139,10 @@ try:
                     
                     elif dataFromClient.startswith("publish_moodle_task|"):
                         self.handle_publish_moodle_task(conn, dataFromClient)
+                    
+                    elif dataFromClient == "ping":
+                        conn.sendall("pong".encode('utf-8'))
+                        return 
                         
                     elif dataFromClient == "guest":
                         with self.db_lock:

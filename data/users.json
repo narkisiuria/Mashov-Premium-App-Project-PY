@@ -128,5 +128,15 @@
         "role": "student",
         "class": "12th3",
         "created_at": "01/07/2026 11:11:35"
+    },
+    "סבא": {
+        "id": 14,
+        "password": "9a3f8f0c753a7086579910cd1d6c0332:cbc6ab86035ba680976b00b38b71a3a1a92463994ae69617b0b5f3fe55f5096574fc5b4729a0494f40118eb2cc0af8e204713949e8581b226c5701f9c05bdd12",
+        "first_name": "סבא",
+        "last_name": "נרקיסי",
+        "gmail_account": "sababa@gmail.com",
+        "role": "student",
+        "class": "12th6",
+        "created_at": "08/07/2026 12:21:19"
     }
 }

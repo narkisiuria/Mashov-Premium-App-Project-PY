@@ -7,6 +7,7 @@ try:
     from tkinter import messagebox
     from tkinter import ttk
     import json
+    import threading
     import os
     import webbrowser
     import random
@@ -18,6 +19,8 @@ try:
     entry_username = None
     entry_password = None
 
+    print("connecting to server...")
+    
     print("reciving dataFromServer...")
     print("loading app...")
     print("importing assets...")
@@ -27,6 +30,49 @@ try:
     current_user_role = ""
     current_user_class = ""
     splash_root = None
+    
+    def verify_server_health(splash_root):
+        """פונקציה שרצה ברקע ובודקת אם השרת בחיים - בלי לסגור את החלון אוטומטית"""
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
+        
+        try:
+            with create_secure_socket() as s:
+                s.connect((SERVER_IP, PORT))
+                s.sendall("ping".encode('utf-8'))
+                
+                s.settimeout(3.0) 
+                response = s.recv(1024).decode('utf-8').strip()
+                
+                if response == "pong":
+                    print("Server health check: OK (Ready for user input)")
+                    return 
+                else:
+                    raise Exception("תשובה לא מוכרת מהשרת")
+                    
+        except Exception as e:
+            splash_root.after(0, lambda: handle_health_failure(splash_root))
+
+    def handle_health_failure(splash_root):
+        tk.messagebox.showerror(
+            "שגיאת תקשורת", 
+            "לא ניתן להתחבר לשרת המשוב המרכזי.\nאנא וודא שהשרת פועל ושהחיבור לרשת תקין."
+        )
+        
+        try:
+            if splash_root and splash_root.winfo_exists():
+                splash_root.destroy()
+        except Exception:
+            pass
+
+    def proceed_to_app(splash_root):
+        try:
+            if splash_root and splash_root.winfo_exists():
+                splash_root.destroy()
+        except Exception:
+            pass
+            
+        open_login_window() 
     
     def create_secure_socket():
         context = ssl.create_default_context(cafile="keys/server.crt")
@@ -180,6 +226,8 @@ try:
         y = (h/2) - (height/2)
         splash_root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
 
+
+        threading.Thread(target=lambda: verify_server_health(splash_root), daemon=True).start()
         splash_root.mainloop()
         
     ###########################################################
@@ -240,6 +288,7 @@ try:
         global current_username, current_user_role
 
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
         destroy_and_set_new_window(new_win)
         current_username = username
 
@@ -402,6 +451,7 @@ try:
             
         login_win = tk.Toplevel(root)
         login_win.title("משוב / התחברות")
+        login_win.overrideredirect(True)
         
         destroy_and_set_new_window(login_win)
 
@@ -551,6 +601,7 @@ try:
     def ask_teacher_code(username):
         code_win = tk.Toplevel(root)
         code_win.title("אימות מורה")
+        code_win.overrideredirect(True)
 
         width, height = 400, 250
         x = (code_win.winfo_screenwidth() // 2) - (width // 2)
@@ -663,6 +714,7 @@ try:
         def open_teacher_setup(username):
             win = tk.Toplevel(root)
             destroy_and_set_new_window(win)
+            win.overrideredirect(True)
 
             win.title("הגדרת מורה")
             width, height = 520, 770
@@ -769,6 +821,8 @@ try:
 
         def open_student_setup(username):
             win = tk.Toplevel(root)
+            win.overrideredirect(True)
+
             destroy_and_set_new_window(win)
 
             win.title("כניסת תלמיד")
@@ -874,6 +928,7 @@ try:
 
         new_win = tk.Toplevel(root)
         new_win.title("MashovApp / הרשמה")
+        new_win.overrideredirect(True)
 
         width, height = 520, 860
         x = (new_win.winfo_screenwidth() // 2) - (width // 2)
@@ -1022,6 +1077,8 @@ try:
         # --- ממשק מורה ---
         if current_user_role == "teacher":
             new_win = tk.Toplevel()
+            new_win.overrideredirect(True)
+
             destroy_and_set_new_window(new_win)
             new_win.title("ניהול ציונים - מורה")
 
@@ -1187,6 +1244,8 @@ try:
             return 
         
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
+
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד ציונים")
 
@@ -1386,6 +1445,8 @@ try:
         
         # שלב 2: יצירת חלון הממשק רק אם המידע נטען בהצלחה
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
+
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד דואר")
 
@@ -1439,6 +1500,8 @@ try:
         # חלון כתיבת הודעה חדשה (למורים)
         def open_teacher_compose_window():
             compose_win = tk.Toplevel(new_win)
+            compose_win.overrideredirect(True)
+
             compose_win.title("פרסום הודעה חדשה")
             compose_win.geometry("400x450")
             compose_win.configure(bg="#f0f4f8")
@@ -1528,6 +1591,8 @@ try:
         simplified_class = hebrew_display_map.get(class_raw, class_raw)
         
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
+
         destroy_and_set_new_window(new_win)
         new_win.title("צ'אט כיתתי")
         
@@ -1624,7 +1689,6 @@ try:
         loaded_message_count = 0
         
         def render_bubble(msg_data):
-            """ פונקציה שמציירת בועת צ'אט בודדת לפי סוג השולח """
             user = msg_data.get("username", "Unknown")
             text = msg_data.get("message", "")
             time_str = msg_data.get("time", "")
@@ -1799,6 +1863,8 @@ try:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
                 
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
+
         destroy_and_set_new_window(new_win)
         new_win.title("To Do List")
 
@@ -1981,6 +2047,8 @@ try:
     def open_reminder():
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
+        new_win.overrideredirect(True)
+
         new_win.title("עמוד תזכורון")
         width = 400
         height = 620
@@ -2418,6 +2486,8 @@ try:
         
         if current_user_role == "teacher":
             new_win = tk.Toplevel()
+            new_win.overrideredirect(True)
+
             destroy_and_set_new_window(new_win)
             new_win.title("ניהול בקשות שחרור - ממשק מורה")
 
@@ -2678,6 +2748,8 @@ try:
                 
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
+        new_win.overrideredirect(True)
+
         new_win.title("עמוד שיחרורון")
 
         width, height = 520, 770
@@ -2885,6 +2957,8 @@ try:
         
     def open_marechet():
         new_win = tk.Toplevel()
+        new_win.overrideredirect(True)
+
         destroy_and_set_new_window(new_win)
         new_win.title("מערכת שעות")
 
@@ -3071,6 +3145,8 @@ try:
         # ---------------------------------------------------------
         new_win = tk.Toplevel()
         new_win.title("מרכז משימות ולמידה דיגיטלית")
+        destroy_and_set_new_window(new_win)
+        new_win.overrideredirect(True)
 
         width, height = 550, 750
         screen_width = new_win.winfo_screenwidth()
@@ -3207,8 +3283,17 @@ try:
                 link_btn = tk.Button(item_row, text="🔗 פתח משימה", font=("Arial", 10, "bold"), fg="white", bg="#2563eb", bd=0, cursor="hand2", command=lambda url=link_url: webbrowser.open(url))
                 link_btn.pack(side="left", padx=5, pady=18)
 
-        close_btn = tk.Button(main_frame, text="סגור חלון", font=("Arial", 12, "bold"), bg="#f1f5f9", fg="#475569", bd=0, cursor="hand2", command=new_win.destroy)
-        close_btn.pack(side="bottom", fill="x", padx=20, pady=20)
+            tk.Button(
+                new_win,
+                text="חזרה למסך ראשי",
+                command=lambda: open_main_page(current_username),
+                font=("Arial", 13, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2"
+            ).pack(side="bottom", pady=20, ipadx=18, ipady=4)
     
     def open_attendance():
         global current_username, current_user_role, current_user_class
@@ -3254,6 +3339,8 @@ try:
 
         new_win = tk.Toplevel()
         new_win.title("מערכת נוכחות - משוב")
+        new_win.overrideredirect(True)
+ 
         destroy_and_set_new_window(new_win)
 
         width, height = 550, 750
@@ -3599,7 +3686,7 @@ try:
                 fg="#475569",
                 bd=0,
                 cursor="hand2",
-                command=new_win.destroy
+                command=lambda: open_main_page(current_username)
             )
             close_btn.pack(side="bottom", fill="x", padx=20, pady=15)
         
