@@ -968,7 +968,6 @@ try:
                 conn.sendall(f"ERROR|{str(e)}".encode('utf-8'))
                 
         def handle_get_moodle_tasks(self, conn, dataFromClient):
-            # פורמט בקשה: get_moodle_tasks|class_name|username|role
             parts = dataFromClient.split("|")
             if len(parts) < 4:
                 conn.sendall("get_moodle_tasks_response|error".encode('utf-8'))
@@ -988,14 +987,12 @@ try:
                         
                         tasks_to_send = []
                         
-                        # אם זה תלמיד - נשלח רק את המשימות שלו
                         if role == "student" or "תלמיד" in role:
                             if username in class_data:
                                 tasks_to_send = class_data[username].get("moodle_tasks", [])
                                 if not isinstance(tasks_to_send, list):
                                     tasks_to_send = []
                         
-                        # אם זה מורה - נאסוף את כל המשימות הייחודיות שקיימות כרגע אצל התלמידים בכיתה
                         else:
                             unique_tasks = {}
                             for u_name, u_info in class_data.items():
@@ -1007,7 +1004,6 @@ try:
                                                 unique_tasks[task["name"]] = task.get("url", "")
                             tasks_to_send = [{"name": name, "url": url} for name, url in unique_tasks.items()]
                         
-                        # הפיכת הרשימה לסטרינג של JSON ושליחה ללקוח
                         response_json = json.dumps(tasks_to_send, ensure_ascii=False)
                         conn.sendall(f"get_moodle_tasks_response|success|{response_json}".encode('utf-8'))
                     else:

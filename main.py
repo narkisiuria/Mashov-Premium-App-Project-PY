@@ -47,8 +47,9 @@ try:
                 if response == "pong":
                     print("Server health check: OK (Ready for user input)")
                     return 
+                
                 else:
-                    raise Exception("תשובה לא מוכרת מהשרת")
+                    raise Exception("תשובה לא מוכרת מהשרת")     
                     
         except Exception as e:
             splash_root.after(0, lambda: handle_health_failure(splash_root))
@@ -3252,7 +3253,6 @@ try:
             tk.Label(main_frame, text="רשימת קישורים ומטלות לביצוע:", font=("Arial", 12, "bold"), bg="white", fg="#1e293b").pack(anchor="e", padx=22, pady=(5, 5))
 
             def toggle_status(btn, task_obj):
-                # כאן תוכל בהמשך להוסיף שליחה לשרת כדי לעדכן באמת ב-JSON, כרגע זה משנה לוקאלית בחלון
                 if btn.cget("text") == "❌ לא בוצע":
                     btn.config(text="✅ בוצע", bg="#10b981", activebackground="#10b981")
                     task_obj["status"] = "✅ בוצע"
@@ -3260,11 +3260,10 @@ try:
                     btn.config(text="❌ לא בוצע", bg="#f43f5e", activebackground="#f43f5e")
                     task_obj["status"] = "❌ לא בוצע"
 
-            # לולאה דינמית על משימות התלמיד מהשרת
             for index, task in enumerate(fetched_tasks):
                 title = task.get("name", "משימה כללית")
                 link_url = task.get("url", "#")
-                start_status = task.get("status", "❌ לא בוצע") # ברירת מחדל אם אין סטטוס ב-JSON
+                start_status = task.get("status", "❌ לא בוצע") 
                 start_color = "#10b981" if start_status == "✅ בוצע" else "#f43f5e"
 
                 row_bg = "#f8fafc" if index % 2 == 0 else "white"
@@ -3293,7 +3292,7 @@ try:
                 relief="flat",
                 bd=0,
                 cursor="hand2"
-            ).pack(side="bottom", pady=20, ipadx=18, ipady=4)
+            ).pack()
     
     def open_attendance():
         global current_username, current_user_role, current_user_class
