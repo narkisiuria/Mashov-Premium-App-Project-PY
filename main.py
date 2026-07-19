@@ -2975,7 +2975,7 @@ try:
         new_win.resizable(False, False)
 
         try:
-            with open("data/schedule.json", "r", encoding="utf-8") as f:
+            with open("data/schedules_z_to_yb.json", "r", encoding="utf-8") as f:
                 schedule_data = json.load(f)
         except Exception as e:
             messagebox.showerror("שגיאה", f"שגיאה בטעינת המערכת: {e}")
@@ -3010,10 +3010,18 @@ try:
             font=("Arial", 11),
             fg="#dbeafe",
             bg="#1a73e8"
-        ).pack()
+        ).pack(pady=2)
 
         selector_frame = tk.Frame(main_frame, bg="#f8fafc")
         selector_frame.pack(fill="x", padx=25, pady=20)
+
+        tk.Label(
+            selector_frame,
+            text=":בחר יום וכיתה",
+            font=("Arial", 14, "bold"),
+            bg="#f8fafc",
+            fg="#334155"
+        ).pack(side="right", padx=10)
 
         class_cb = ttk.Combobox(
             selector_frame,
@@ -3033,13 +3041,16 @@ try:
         )
         day_cb.pack(side="right", padx=8)
 
-        tk.Label(
-            selector_frame,
-            text=":בחר יום וכיתה",
-            font=("Arial", 11, "bold"),
-            bg="#f8fafc",
-            fg="#334155"
-        ).pack(side="right", padx=10)
+        # set defaults: user's class + today's day
+        hebrew_days = {6: "ראשון", 0: "שני", 1: "שלישי", 2: "רביעי", 3: "חמישי", 4: "שישי"}
+        today_name = hebrew_days.get(datetime.datetime.now().weekday(), "ראשון")
+
+        if current_user_class in schedule_data:
+            class_cb.set(current_user_class)
+        else:
+            class_cb.set(list(schedule_data.keys())[0])
+
+        day_cb.set(today_name)
 
         list_container = tk.Frame(main_frame, bg="#f8fafc")
         list_container.pack(fill="both", expand=True, padx=25, pady=10)
@@ -3094,9 +3105,11 @@ try:
         class_cb.bind("<<ComboboxSelected>>", refresh_schedule)
         day_cb.bind("<<ComboboxSelected>>", refresh_schedule)
 
+        refresh_schedule()  # show right away with the defaults set above
+
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False) 
+        footer_frame.pack_propagate(False)
 
         tk.Button(
             footer_frame,
@@ -3130,8 +3143,8 @@ try:
                 s.connect((SERVER_IP, PORT))
                 request_msg = f"get_moodle_tasks|{class_name}|{username}|{role}"
                 s.sendall(request_msg.encode('utf-8'))
-                
-                raw_data = s.recv(4096) # שימוש בבאפר גדול יותר עבור ה-JSON
+
+                raw_data = s.recv(4096)
                 if raw_data:
                     dataFromServer = raw_data.decode('utf-8').strip()
                     if dataFromServer.startswith("get_moodle_tasks_response|success|"):
@@ -3139,7 +3152,6 @@ try:
                         fetched_tasks = json.loads(json_str)
         except Exception as e:
             print(f"גילוי שגיאה בטעינת נתונים: {e}")
-            # במקרה של שגיאה הרשימה תישאר ריקה ולא תתקע את פתיחת החלון
 
         # ---------------------------------------------------------
         # שלב ב': בניית ממשק המשתמש (UI)
@@ -3149,7 +3161,7 @@ try:
         destroy_and_set_new_window(new_win)
         new_win.overrideredirect(True)
 
-        width, height = 550, 750
+        width, height = 520, 770
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
         x = (screen_width // 2) - (width // 2)
@@ -3158,33 +3170,77 @@ try:
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=510, height=710)
+        BLUE = "#1a73e8"
+        BG = "#f8fafc"
+        BORDER = "#e2e8f0"
+        GREEN = "#10b981"
+        RED = "#f43f5e"
+        LINK = "#2563eb"
+        TEXT_DARK = "#1e293b"
+        TEXT_MUTED = "#475569"
 
-        header_color = "#0369a1" 
-        header_frame = tk.Frame(main_frame, bg=header_color, height=130)
+        main_frame = tk.Frame(new_win, bg="white")
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+
+        # ---------- header ----------
+        header_frame = tk.Frame(main_frame, bg=BLUE, height=150)
         header_frame.pack(fill="x")
         header_frame.pack_propagate(False)
 
-        tk.Label(header_frame, text="🎓", font=("Arial", 32), fg="white", bg=header_color).pack(pady=(10, 0))
+        tk.Label(header_frame, text="🎓", font=("Arial", 40), fg="white", bg=BLUE).pack(pady=(18, 0))
 
-        title_text = "ניהול והעלאת קישורי משימות" if "teacher" in role or "מורה" in role else "משימות ומטלות פתוחות"
-        tk.Label(header_frame, text=title_text, font=("Arial", 18, "bold"), fg="white", bg=header_color).pack()
-        tk.Label(header_frame, text=f"{username} שלום (כיתה {class_name})", font=("Arial", 11), fg="#e0f2fe", bg=header_color).pack()
+        is_teacher = "teacher" in role or "מורה" in role
+        title_text = "ניהול והעלאת קישורי משימות" if is_teacher else "משימות ומטלות פתוחות"
+        tk.Label(header_frame, text=title_text, font=("Arial", 20, "bold"), fg="white", bg=BLUE).pack()
+        tk.Label(
+            header_frame,
+            text=f"{username} שלום  •  כיתה {class_name}",
+            font=("Arial", 11),
+            fg="#dbeafe",
+            bg=BLUE
+        ).pack(pady=2)
 
-        # --- מסך מורה ---
-        if "teacher" in role or "מורה" in role:
-            form_frame = tk.LabelFrame(main_frame, text=" יצירת משימה חדשה לכיתה ", font=("Arial", 11, "bold"), bg="white", fg="#0369a1", padx=15, pady=15)
-            form_frame.pack(fill="x", padx=20, pady=20)
+        # ---------- scrollable body ----------
+        body_container = tk.Frame(main_frame, bg=BG)
+        body_container.pack(fill="both", expand=True)
 
-            tk.Label(form_frame, text="שם המשימה / נושא הלימוד:", font=("Arial", 11), bg="white", fg="#334155").pack(anchor="e", pady=(0, 2))
-            task_name_entry = tk.Entry(form_frame, font=("Arial", 12), bg="#f8fafc", bd=1, relief="solid", justify="right")
-            task_name_entry.pack(fill="x", pady=(0, 15))
+        canvas = tk.Canvas(body_container, bg=BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(body_container, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg=BG)
 
-            tk.Label(form_frame, text="קישור למטלה (אופק מטח / Moodle / סרטון):", font=("Arial", 11), bg="white", fg="#334155").pack(anchor="e", pady=(0, 2))
-            task_url_entry = tk.Entry(form_frame, font=("Arial", 11), bg="#f8fafc", bd=1, relief="solid", justify="left")
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=480)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True, padx=(20, 0), pady=15)
+        scrollbar.pack(side="right", fill="y", pady=15)
+
+        def card(parent, **kwargs):
+            f = tk.Frame(parent, bg="white", highlightbackground=BORDER, highlightthickness=1)
+            f.pack(fill="x", pady=6, padx=(0, 15), **kwargs)
+            return f
+
+        # ---------- teacher view ----------
+        if is_teacher:
+            form_card = card(scrollable_frame, ipady=15)
+
+            tk.Label(
+                form_card, text="יצירת משימה חדשה לכיתה",
+                font=("Arial", 13, "bold"), bg="white", fg=BLUE
+            ).pack(anchor="e", padx=18, pady=(15, 10))
+
+            tk.Label(form_card, text="שם המשימה / נושא הלימוד:", font=("Arial", 10), bg="white", fg=TEXT_MUTED).pack(anchor="e", padx=18)
+            task_name_entry = tk.Entry(form_card, font=("Arial", 12), bg=BG, bd=1, relief="solid", justify="right")
+            task_name_entry.pack(fill="x", padx=18, pady=(2, 12))
+
+            tk.Label(form_card, text="קישור למטלה (אופק מטח / Moodle / סרטון):", font=("Arial", 10), bg="white", fg=TEXT_MUTED).pack(anchor="e", padx=18)
+            task_url_entry = tk.Entry(form_card, font=("Arial", 11), bg=BG, bd=1, relief="solid", justify="left")
             task_url_entry.insert(0, "https://")
-            task_url_entry.pack(fill="x", pady=(0, 15))
+            task_url_entry.pack(fill="x", padx=18, pady=(2, 14))
 
             def publish_task():
                 name = task_name_entry.get().strip()
@@ -3192,7 +3248,7 @@ try:
                 if not name or url == "https://" or not url:
                     tk.messagebox.showwarning("שדה חסר", "אנא מלא שם משימה וקישור תקין")
                     return
-                
+
                 try:
                     with create_secure_socket() as s:
                         s.connect((SERVER_IP, PORT))
@@ -3201,14 +3257,15 @@ try:
 
                         while True:
                             raw_data = s.recv(1024)
-                            if not raw_data: break
+                            if not raw_data:
+                                break
                             dataFromServer = raw_data.decode('utf-8').strip()
 
                             if dataFromServer.startswith("publish_moodle_task_response|"):
                                 parts = dataFromServer.split("|")
                                 if len(parts) > 1 and parts[1] == "success":
                                     tk.messagebox.showinfo("משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
-                                    new_win.destroy() # סגירה ורענון החלון
+                                    new_win.destroy()
                                     open_moodle_tasks()
                                 else:
                                     tk.messagebox.showerror("שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
@@ -3216,83 +3273,117 @@ try:
                 except Exception as e:
                     tk.messagebox.showerror("שגיאה", f"אירעה שגיאה בתקשורת: {e}")
 
-            publish_btn = tk.Button(form_frame, text="➕ פרסם קישור למשימה", font=("Arial", 12, "bold"), bg="#10b981", fg="white", bd=0, cursor="hand2", command=publish_task, pady=8)
-            publish_btn.pack(fill="x")
+            publish_btn = tk.Button(
+                form_card, text="➕  פרסם קישור למשימה",
+                font=("Arial", 12, "bold"), bg=GREEN, fg="white",
+                bd=0, cursor="hand2", command=publish_task, pady=9
+            )
+            publish_btn.pack(fill="x", padx=18)
 
-            tk.Label(main_frame, text="משימות פעילות כרגע בכיתה:", font=("Arial", 12, "bold"), bg="white", fg="#1e293b").pack(anchor="e", padx=25, pady=(10, 5))
-            
-            # לולאה דינמית על המשימות שהתקבלו מהשרת
-            for index, task in enumerate(fetched_tasks):
+            tk.Label(
+                scrollable_frame, text="משימות פעילות כרגע בכיתה:",
+                font=("Arial", 12, "bold"), bg=BG, fg=TEXT_DARK
+            ).pack(anchor="e", padx=3, pady=(15, 5))
+
+            if not fetched_tasks:
+                tk.Label(scrollable_frame, text="אין משימות פעילות כרגע", font=("Arial", 10), bg=BG, fg="#94a3b8").pack(anchor="e", padx=3, pady=10)
+
+            for task in fetched_tasks:
                 t_name = task.get("name", "משימה ללא שם")
                 t_url = task.get("url", "#")
-                row_bg = "#f8fafc" if index % 2 == 0 else "white"
-                t_row = tk.Frame(main_frame, bg=row_bg, height=45)
-                t_row.pack(fill="x", padx=20, pady=2)
-                t_row.pack_propagate(False)
 
-                tk.Label(t_row, text=f"• {t_name}", font=("Arial", 11), fg="#475569", bg=row_bg).pack(side="right", padx=10, pady=10)
-                tk.Button(t_row, text="פתח קישור 🔗", font=("Arial", 9), fg="#2563eb", bg=row_bg, bd=0, cursor="hand2", command=lambda url=t_url: webbrowser.open(url)).pack(side="left", padx=10, pady=8)
+                row = card(scrollable_frame, ipady=6)
+                inner = tk.Frame(row, bg="white")
+                inner.pack(fill="x", padx=15, pady=6)
 
-        # --- מסך תלמיד ---
+                tk.Label(inner, text=f"• {t_name}", font=("Arial", 11, "bold"), fg=TEXT_DARK, bg="white").pack(side="right")
+                tk.Button(
+                    inner, text="פתח קישור 🔗", font=("Arial", 9, "bold"),
+                    fg="white", bg=LINK, bd=0, cursor="hand2", padx=10, pady=4,
+                    command=lambda url=t_url: webbrowser.open(url)
+                ).pack(side="left")
+
+        # ---------- student view ----------
         else:
-            # חישוב אחוזים דינמי
             total_tasks = len(fetched_tasks)
             completed_tasks = sum(1 for t in fetched_tasks if t.get("status") == "✅ בוצע")
             pct = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 100
 
-            progress_frame = tk.Frame(main_frame, bg="#f0fdf4", bd=0, height=50)
-            progress_frame.pack(fill="x", padx=20, pady=15)
-            progress_frame.pack_propagate(False)
-            
+            progress_card = card(scrollable_frame, ipady=12)
             tk.Label(
-                progress_frame, 
-                text=f"📈 הספק המשימות השבוע: {completed_tasks} מתוך {total_tasks} בוצעו ({pct}%)", 
-                font=("Arial", 11, "bold"), fg="#166534", bg="#f0fdf4"
-            ).pack(side="right", padx=15, pady=15)
+                progress_card,
+                text=f"📈 הספק המשימות השבוע: {completed_tasks} מתוך {total_tasks} בוצעו ({pct}%)",
+                font=("Arial", 11, "bold"), fg="#166534", bg="white"
+            ).pack(anchor="e", padx=15, pady=(10, 6))
 
-            tk.Label(main_frame, text="רשימת קישורים ומטלות לביצוע:", font=("Arial", 12, "bold"), bg="white", fg="#1e293b").pack(anchor="e", padx=22, pady=(5, 5))
+            bar_bg = tk.Frame(progress_card, bg="#e2e8f0", height=10)
+            bar_bg.pack(fill="x", padx=15, pady=(0, 10))
+            bar_bg.pack_propagate(False)
+            fill_width = max(int(4.6 * pct), 2) if pct > 0 else 0
+            bar_fill = tk.Frame(bar_bg, bg=GREEN, width=fill_width, height=10)
+            bar_fill.place(x=0, y=0, relheight=1)
+
+            tk.Label(
+                scrollable_frame, text="רשימת קישורים ומטלות לביצוע:",
+                font=("Arial", 12, "bold"), bg=BG, fg=TEXT_DARK
+            ).pack(anchor="e", padx=3, pady=(10, 5))
 
             def toggle_status(btn, task_obj):
                 if btn.cget("text") == "❌ לא בוצע":
-                    btn.config(text="✅ בוצע", bg="#10b981", activebackground="#10b981")
+                    btn.config(text="✅ בוצע", bg=GREEN, activebackground=GREEN)
                     task_obj["status"] = "✅ בוצע"
                 else:
-                    btn.config(text="❌ לא בוצע", bg="#f43f5e", activebackground="#f43f5e")
+                    btn.config(text="❌ לא בוצע", bg=RED, activebackground=RED)
                     task_obj["status"] = "❌ לא בוצע"
 
-            for index, task in enumerate(fetched_tasks):
+            if not fetched_tasks:
+                tk.Label(scrollable_frame, text="אין משימות כרגע 🎉", font=("Arial", 10), bg=BG, fg="#94a3b8").pack(anchor="e", padx=3, pady=10)
+
+            for task in fetched_tasks:
                 title = task.get("name", "משימה כללית")
                 link_url = task.get("url", "#")
-                start_status = task.get("status", "❌ לא בוצע") 
-                start_color = "#10b981" if start_status == "✅ בוצע" else "#f43f5e"
+                start_status = task.get("status", "❌ לא בוצע")
+                start_color = GREEN if start_status == "✅ בוצע" else RED
 
-                row_bg = "#f8fafc" if index % 2 == 0 else "white"
-                item_row = tk.Frame(main_frame, bg=row_bg, height=65)
-                item_row.pack(fill="x", padx=20, pady=4)
-                item_row.pack_propagate(False)
+                row = card(scrollable_frame, ipady=8)
+                inner = tk.Frame(row, bg="white")
+                inner.pack(fill="x", padx=15, pady=6)
 
-                text_sub_frame = tk.Frame(item_row, bg=row_bg)
-                text_sub_frame.pack(side="right", padx=10, pady=10)
-                tk.Label(text_sub_frame, text=title, font=("Arial", 11, "bold"), fg="#1e293b", bg=row_bg).pack(anchor="e")
+                tk.Label(inner, text=title, font=("Arial", 11, "bold"), fg=TEXT_DARK, bg="white").pack(side="right")
 
-                status_btn = tk.Button(item_row, text=start_status, font=("Arial", 10, "bold"), fg="white", bg=start_color, activebackground=start_color, bd=0, width=10, cursor="hand2")
+                btn_frame = tk.Frame(inner, bg="white")
+                btn_frame.pack(side="left")
+
+                status_btn = tk.Button(
+                    btn_frame, text=start_status, font=("Arial", 9, "bold"),
+                    fg="white", bg=start_color, activebackground=start_color,
+                    bd=0, width=9, cursor="hand2", pady=4
+                )
                 status_btn.config(command=lambda b=status_btn, t=task: toggle_status(b, t))
-                status_btn.pack(side="left", padx=10, pady=18)
+                status_btn.pack(side="right", padx=4)
 
-                link_btn = tk.Button(item_row, text="🔗 פתח משימה", font=("Arial", 10, "bold"), fg="white", bg="#2563eb", bd=0, cursor="hand2", command=lambda url=link_url: webbrowser.open(url))
-                link_btn.pack(side="left", padx=5, pady=18)
+                tk.Button(
+                    btn_frame, text="🔗 פתח", font=("Arial", 9, "bold"),
+                    fg="white", bg=LINK, bd=0, cursor="hand2", padx=8, pady=4,
+                    command=lambda url=link_url: webbrowser.open(url)
+                ).pack(side="right")
 
-            tk.Button(
-                new_win,
-                text="חזרה למסך ראשי",
-                command=lambda: open_main_page(current_username),
-                font=("Arial", 13, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                relief="flat",
-                bd=0,
-                cursor="hand2"
-            ).pack()
+        # ---------- footer ----------
+        footer_frame = tk.Frame(main_frame, bg=BG, height=70)
+        footer_frame.pack(fill="x", side="bottom")
+        footer_frame.pack_propagate(False)
+
+        tk.Button(
+            footer_frame,
+            text="חזרה למסך ראשי",
+            command=lambda: open_main_page(current_username),
+            font=("Arial", 13, "bold"),
+            bg=BLUE,
+            fg="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        ).pack(pady=15, ipadx=18, ipady=8)
     
     def open_attendance():
         global current_username, current_user_role, current_user_class
