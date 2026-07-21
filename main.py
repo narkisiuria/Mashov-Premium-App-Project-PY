@@ -13,6 +13,7 @@ try:
     import random
     from utils import hashingAlg
     from tkinter import simpledialog
+    import customtkinter as ctk
     
     root = tk.Tk()
     root.withdraw() 
@@ -95,139 +96,155 @@ try:
     
     def open_splash_screen():
         global splash_root
-        splash_root = tk.Tk()
+        
+        splash_root = ctk.CTk()
         splash_root.overrideredirect(True)
         
         width, height = 520, 770 
-        splash_root.geometry(f"{width}x{height}")
-        splash_root.configure(bg="#f0f4f8") 
+        splash_root.configure(fg_color="#0f172a")
 
-        main_frame = tk.Frame(splash_root,
-                              bg="white", bd=0)
-        
-        main_frame.place(relx=0.5,
-                         rely=0.5,
-                         anchor="center",
-                         width=520,
-                         height=770)
+        screen_w = splash_root.winfo_screenwidth()
+        screen_h = splash_root.winfo_screenheight()
+        x = (screen_w // 2) - (width // 2)
+        y = (screen_h // 2) - (height // 2)
+        splash_root.geometry(f"{width}x{height}+{x}+{y}")
 
-        header_frame = tk.Frame(main_frame,
-                                bg="#1a73e8",
-                                height=220)
-        
-        header_frame.pack(fill="x")
+        main_frame = ctk.CTkFrame(
+            splash_root,
+            fg_color="#1e293b",
+            corner_radius=20,
+            width=520,
+            height=770
+        )
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
+
+        header_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#1d4ed8",
+            corner_radius=16,
+            height=210
+        )
+        header_frame.pack(fill="x", padx=16, pady=(16, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(header_frame, text="📊",
-                 font=("Arial", 55), 
-                 fg="white",
-                 bg="#1a73e8").pack(pady=(40, 0))
-        
-        tk.Label(header_frame,
-                 text="מערכת משוב",
-                 font=("Arial",
-                       36,
-                       "bold"),
-                 fg="white",
-                 bg="#1a73e8").pack()
-        
-        tk.Label(header_frame,
-                 text="הדרך החכמה לנהל את הלימודים",
-                 font=("Arial", 12),
-                 fg="#bbdefb",
-                 bg="#1a73e8").pack()
+        ctk.CTkLabel(
+            header_frame,
+            text="📊",
+            font=("Segoe UI", 55),
+            text_color="#ffffff"
+        ).pack(pady=(25, 0))
 
-        content_frame = tk.Frame(main_frame,
-                                 bg="white")
-        
-        content_frame.pack(fill="both",
-                           expand=True, padx=50)
+        ctk.CTkLabel(
+            header_frame,
+            text="מערכת משוב",
+            font=("Segoe UI", 32, "bold"),
+            text_color="#ffffff"
+        ).pack()
 
-        tk.Label(content_frame,
-                 text="ברוכים הבאים",
-                 font=("Arial",
-                       22,
-                       "bold"),
-                 fg="#202124",
-                 bg="white").pack(pady=(40, 10))
-        
-        features_frame = tk.Frame(content_frame,
-                                  bg="white")
-        
-        features_frame.pack(pady=30)
+        ctk.CTkLabel(
+            header_frame,
+            text="הדרך החכמה לנהל את הלימודים",
+            font=("Segoe UI", 12),
+            text_color="#93c5fd"
+        ).pack(pady=(2, 0))
 
-        features = [("🕒", 
-                     "לו\"ז בזמן אמת"),
-                    ("📝", "מעקב ציונים"),
-                    ("✅", "ניהול משימות")]
-        
+        # 2. Content Frame
+        content_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        content_frame.pack(fill="both", expand=True, padx=40, pady=15)
+
+        ctk.CTkLabel(
+            content_frame,
+            text="ברוכים הבאים",
+            font=("Segoe UI", 24, "bold"),
+            text_color="#f8fafc"
+        ).pack(pady=(20, 10))
+
+        # 3. Features Cards
+        features_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        features_frame.pack(pady=20)
+
+        features = [
+            ("🕒", "לו\"ז בזמן אמת"),
+            ("📝", "מעקב ציונים"),
+            ("✅", "ניהול משימות")
+        ]
+
         for icon, txt in features:
-            f_row = tk.Frame(features_frame, bg="white")
-            f_row.pack(side="left", padx=15)
-            tk.Label(f_row, text=icon,
-                     font=("Arial", 20),
-                     bg="white").pack()
-            
-            tk.Label(f_row,
-                     text=txt,
-                     font=("Arial", 10, "bold"),
-                     fg="#5f6368",
-                     bg="white").pack()
+            card = ctk.CTkFrame(
+                features_frame,
+                fg_color="#0f172a",
+                corner_radius=12,
+                width=110,
+                height=90
+            )
+            card.pack(side="right", padx=6)
+            card.pack_propagate(False)
 
-        btn_frame = tk.Frame(content_frame, bg="white")
-        btn_frame.pack(fill="x", pady=20)
+            ctk.CTkLabel(
+                card,
+                text=icon,
+                font=("Segoe UI", 24)
+            ).pack(pady=(12, 2))
 
-        login_btn = tk.Button(
+            ctk.CTkLabel(
+                card,
+                text=txt,
+                font=("Segoe UI", 11, "bold"),
+                text_color="#cbd5e1"
+            ).pack()
+
+        # 4. Buttons Section
+        btn_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        btn_frame.pack(fill="x", pady=(15, 0))
+
+        login_btn = ctk.CTkButton(
             btn_frame,
             text="כניסה למערכת",
-            font=("Arial", 16, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
+            font=("Segoe UI", 16, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            height=52,
+            corner_radius=10,
             cursor="hand2",
             command=open_login_window
         )
-        login_btn.pack(fill="x", ipady=15, pady=(0, 15))
+        login_btn.pack(fill="x", pady=(0, 12))
 
-        peak_btn = tk.Button(
+        peak_btn = ctk.CTkButton(
             btn_frame,
-            text="כניסה כאורח  ",
-            font=("Arial", 14),
-            bg="white",
-            fg="#1a73e8",
-            highlightthickness=2,
-            highlightbackground="#1a73e8",
-            relief="flat",
+            text="כניסה כאורח",
+            font=("Segoe UI", 15, "bold"),
+            fg_color="transparent",
+            border_color="#3b82f6",
+            border_width=2,
+            hover_color="#0f172a",
+            text_color="#60a5fa",
+            height=50,
+            corner_radius=10,
             cursor="hand2",
             command=open_peak
         )
-        peak_btn.pack(fill="x", ipady=14)
+        peak_btn.pack(fill="x")
 
-        footer_frame = tk.Frame(main_frame,
-                                bg="#f8f9fa",
-                                height=80)
-        
-        footer_frame.pack(side="bottom",
-                          fill="x")
-        
+        # 5. Footer מותאם בתחתית
+        footer_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#0f172a",
+            corner_radius=12,
+            height=50
+        )
+        footer_frame.pack(side="bottom", fill="x", padx=16, pady=(0, 16))
         footer_frame.pack_propagate(False)
 
-        tk.Label(
-            footer_frame, 
-            text="פותח ע\"י אוריה נרקיסי • גרסה 1.0", 
-            fg="#70757a", 
-            bg="#f8f9fa", 
-            font=("Arial", 10)
+        ctk.CTkLabel(
+            footer_frame,
+            text="פותח ע\"י אוריה נרקיסי • גרסה 2.0",
+            font=("Segoe UI", 11),
+            text_color="#64748b"
         ).pack(expand=True)
 
-        splash_root.update_idletasks()
-        w = splash_root.winfo_screenwidth()
-        h = splash_root.winfo_screenheight()
-        x = (w/2) - (width/2)
-        y = (h/2) - (height/2)
-        splash_root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
-
-
+        # הפעלת ה-Thread לבדיקת השרת והרצת ה-Mainloop
         threading.Thread(target=lambda: verify_server_health(splash_root), daemon=True).start()
         splash_root.mainloop()
         
@@ -288,14 +305,13 @@ try:
     def open_main_page(username):
         global current_username, current_user_role
 
-        new_win = tk.Toplevel()
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
         destroy_and_set_new_window(new_win)
         current_username = username
 
         new_win.title("עמוד ראשי")
 
-        # הגדלנו את הגובה מ-770 ל-880 כדי שארבע שורות כפתורים ייכנסו בצורה יפה
         width, height = 520, 880
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
@@ -304,128 +320,96 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a")  # Dark Background
 
-        # הגדלנו את גובה ה-frame המרכזי מ-730 ל-840
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=840)
+        # Container ראשי לכל גובה החלון
+        main_frame = ctk.CTkFrame(
+            new_win,
+            fg_color="#1e293b",
+            corner_radius=20,
+            width=520,
+            height=880
+        )
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=170)
-        header_frame.pack(fill="x", padx=0, pady=0)
+        # 1. Header כחול מודרני
+        header_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#1d4ed8",
+            corner_radius=16,
+            height=170
+        )
+        header_frame.pack(fill="x", padx=16, pady=(16, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
             text="🏠",
-            font=("Arial", 42),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(15, 0))
+            font=("Segoe UI", 42),
+            text_color="#ffffff"
+        ).pack(pady=(16, 0))
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text=f"שלום {username}",
-            font=("Arial", 22, "bold"),
-            fg="white",
-            bg="#1a73e8"
+            text=f"שלום, {username}",
+            font=("Segoe UI", 24, "bold"),
+            text_color="#ffffff"
         ).pack()
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text="?מה ברצונך לעשות",
-            font=("Arial", 12),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack()
+            text="מה ברצונך לעשות היום?",
+            font=("Segoe UI", 12),
+            text_color="#93c5fd"
+        ).pack(pady=(2, 0))
 
-        content_frame = tk.Frame(main_frame, bg="white")
-        content_frame.pack(expand=True, pady=20) # הקטנה קלה של ה-pady כדי לתת עוד מרווח אנכי
+        # 2. Grid Frame עבור הכפתורים - מתפרס בצורה שווה במרכז
+        content_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        content_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        button_style = {
-            "fg": "white",
-            "font": ("Arial", 14, "bold"),
-            "width": 14,
-            "height": 4,
-            "bd": 0,
-            "cursor": "hand2",
-            "relief": "flat"
-        }
+        # הגדרת משקל שווה לשורות ולעמודות כדי שימלאו את השטח בצורה מאוזנת
+        for i in range(4):
+            content_frame.rowconfigure(i, weight=1)
+        content_frame.columnconfigure(0, weight=1)
+        content_frame.columnconfigure(1, weight=1)
 
-        tk.Button(
-            content_frame,
-            text="מערכת שעות",
-            bg="#1a73e8",
-            command=open_marechet,
-            **button_style
-        ).grid(row=0, column=0, padx=15, pady=15)
+        # הגדרת פונקציית עזר ליצירת כפתור אחיד ומעוצב
+        def create_menu_button(parent, text, command, icon, row, col, fg_color, hover_color):
+            btn = ctk.CTkButton(
+                parent,
+                text=f"{icon}\n{text}",
+                command=command,
+                font=("Segoe UI", 14, "bold"),
+                fg_color=fg_color,
+                hover_color=hover_color,
+                corner_radius=14,
+                cursor="hand2"
+            )
+            btn.grid(row=row, column=col, padx=8, pady=8, sticky="nsew")
+            return btn
 
-        tk.Button(
-            content_frame,
-            text="דואר נכנס",
-            bg="#2563eb",
-            command=open_doar,
-            **button_style
-        ).grid(row=0, column=1, padx=15, pady=15)
+        create_menu_button(content_frame, "מערכת שעות", open_marechet, "📅", 0, 1, "#2563eb", "#1d4ed8")
+        create_menu_button(content_frame, "דואר נכנס", open_doar, "📨", 0, 0, "#1d4ed8", "#1e40af")
 
-        tk.Button(
-            content_frame,
-            text="ציונים שוטפים",
-            bg="#3b82f6",
-            command=open_grades,
-            **button_style
-        ).grid(row=1, column=0, padx=15, pady=15)
+        create_menu_button(content_frame, "ציונים שוטפים", open_grades, "📊", 1, 1, "#0284c7", "#0369a1")
+        create_menu_button(content_frame, "צ'אט כיתתי", open_class_chat_room, "💬", 1, 0, "#0369a1", "#075985")
 
-        tk.Button(
-            content_frame,
-            text="צאט כיתתי",
-            bg="#60a5fa",
-            command=open_class_chat_room,
-            **button_style
-        ).grid(row=1, column=1, padx=15, pady=15)
-        
-        tk.Button(
-            content_frame,
-            text="משימון",
-            bg="#1d4ed8",
-            command=open_todo_list,
-            **button_style
-        ).grid(row=2, column=0, padx=15, pady=15)
+        create_menu_button(content_frame, "משימון", open_todo_list, "📝", 2, 1, "#0f766e", "#115e59")
+        create_menu_button(content_frame, "שחרורון", open_freer, "🚀", 2, 0, "#0d9488", "#0f766e")
 
-        tk.Button(
-            content_frame,
-            text="שיחרורון",
-            bg="#0ea5e9",
-            command=open_freer,
-            **button_style
-        ).grid(row=2, column=1, padx=15, pady=15)
+        create_menu_button(content_frame, "נוכחות בשיעור", open_attendance, "✋", 3, 1, "#4f46e5", "#4338ca")
+        create_menu_button(content_frame, "משימות Moodle", open_moodle_tasks, "📚", 3, 0, "#6366f1", "#4f46e5")
 
-        tk.Button(
-            content_frame,
-            text="נוכחות בשיעור",
-            bg="#0284c7", 
-            command=open_attendance,
-            **button_style
-        ).grid(row=3, column=0, padx=15, pady=15)
-
-        tk.Button(
-            content_frame,
-            text="Moodle משימות",
-            bg="#0369a1", 
-            command=open_moodle_tasks,
-            **button_style
-        ).grid(row=3, column=1, padx=15, pady=15)
-
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=10)
-        footer_frame.pack(fill="x", side="bottom")
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12, height=45)
+        footer_frame.pack(side="bottom", fill="x", padx=16, pady=(0, 16))
         footer_frame.pack_propagate(False)
 
-        tk.Label(
+        ctk.CTkLabel(
             footer_frame,
-            text="Mashov מערכת ניהול לימודים • גרסה 1.0",
-            font=("Arial", 10),
-            fg="#64748b",
-            bg="#f8fafc"
+            text="Mashov מערכת ניהול לימודים • גרסה 2.0",
+            font=("Segoe UI", 11),
+            text_color="#64748b"
         ).pack(expand=True)
             
         
@@ -447,155 +431,183 @@ try:
             try:
                 if splash_root.winfo_exists():
                     splash_root.destroy()
-            except:
+            except Exception:
                 pass
             
-        login_win = tk.Toplevel(root)
+        login_win = ctk.CTkToplevel(root)
         login_win.title("משוב / התחברות")
         login_win.overrideredirect(True)
         
         destroy_and_set_new_window(login_win)
 
         width, height = 520, 770 
-        x = (login_win.winfo_screenwidth() // 2) - (width // 2)
-        y = (login_win.winfo_screenheight() // 2) - (height // 2)
+        screen_width = login_win.winfo_screenwidth()
+        screen_height = login_win.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        
         login_win.geometry(f"{width}x{height}+{x}+{y}")
-        login_win.configure(bg="#f0f4f8")
-        login_win.resizable(False, False)
+        login_win.configure(fg_color="#0f172a")
 
-        main_frame = tk.Frame(login_win,
-                              bg="white",
-                              bd=0)
-        main_frame.place(relx=0.5,
-                         rely=0.5,
-                         anchor="center",
-                         width=520, height=755)
+        main_frame = ctk.CTkFrame(
+            login_win,
+            fg_color="#1e293b",
+            corner_radius=20,
+            width=520,
+            height=770
+        )
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame,
-                                bg="#1a73e8",
-                                height=160)
-        header_frame.pack(fill="x")
+        header_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#1d4ed8",
+            corner_radius=16,
+            height=180
+        )
+        header_frame.pack(fill="x", padx=16, pady=(16, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(header_frame,
-                 text="🔒",
-                 font=("Arial", 45),
-                 fg="white",
-                 bg="#1a73e8").pack(pady=(25, 0))
-        tk.Label(header_frame,
-                 text="משוב - מערכת עדכונים",
-                 font=("Arial",
-                       28,
-                       "bold"),
-                 fg="white",
-                 bg="#1a73e8").pack()
+        ctk.CTkLabel(
+            header_frame,
+            text="🔒",
+            font=("Segoe UI", 48),
+            text_color="#ffffff"
+        ).pack(pady=(22, 0))
 
-        form_frame = tk.Frame(main_frame,
-                              bg="white")
-        form_frame.pack(fill="both",
-                        expand=True,
-                        padx=45,
-                        pady=25)
+        ctk.CTkLabel(
+            header_frame,
+            text="משוב - מערכת עדכונים",
+            font=("Segoe UI", 26, "bold"),
+            text_color="#ffffff"
+        ).pack()
 
-        tk.Label(form_frame,
-                 text="שם משתמש",
-                 font=("Arial", 12, "bold"),
-                 fg="#333333",
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(10, 5))
-                 
-        entry_username = tk.Entry(form_frame,
-                                  font=("Arial", 16),
-                                  bg="#f8f9fa",
-                                  relief="solid",
-                                  bd=1,
-                                  justify="right")
-        entry_username.pack(fill="x",
-                            ipady=12)
+        card_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#0f172a", 
+            corner_radius=16
+        )
+        card_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        tk.Label(form_frame,
-                 text="סיסמה",
-                 font=("Arial", 12, "bold"),
-                 fg="#333333",
-                 bg="white",
-                 anchor="e").pack(fill="x", pady=(20, 5))
-        entry_password = tk.Entry(form_frame,
-                                  font=("Arial", 16),
-                                  bg="#f8f9fa",
-                                  relief="solid",
-                                  bd=1,
-                                  show="●",
-                                  justify="right")
-        entry_password.pack(fill="x",
-                            ipady=12)
+        form_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
+        form_frame.pack(fill="both", expand=True, padx=25, pady=20)
 
-        tk.Button(
+        ctk.CTkLabel(
+            form_frame,
+            text="שם משתמש",
+            font=("Segoe UI", 13, "bold"),
+            text_color="#cbd5e1"
+        ).pack(anchor="e", pady=(10, 6))
+
+        entry_username = ctk.CTkEntry(
+            form_frame,
+            font=("Segoe UI", 14),
+            height=48,
+            corner_radius=10,
+            fg_color="#1e293b",
+            border_color="#334155",
+            text_color="#f8fafc",
+            justify="right"
+        )
+        entry_username.pack(fill="x")
+
+        ctk.CTkLabel(
+            form_frame,
+            text="סיסמה",
+            font=("Segoe UI", 13, "bold"),
+            text_color="#cbd5e1"
+        ).pack(anchor="e", pady=(18, 6))
+
+        entry_password = ctk.CTkEntry(
+            form_frame,
+            font=("Segoe UI", 14),
+            height=48,
+            corner_radius=10,
+            fg_color="#1e293b",
+            border_color="#334155",
+            text_color="#f8fafc",
+            show="●",
+            justify="right"
+        )
+        entry_password.pack(fill="x")
+
+        ctk.CTkButton(
             form_frame,
             text="התחברות למערכת",
-            font=("Arial",
-                  16, "bold"), fg="white", bg="#1a73e8",
-            activebackground="#1557b0",
-            relief="flat",
+            font=("Segoe UI", 15, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            height=52,
+            corner_radius=10,
             cursor="hand2",
             command=attempt_login
-        ).pack(fill="x",
-               pady=(45, 15),
-               ipady=15)
+        ).pack(fill="x", pady=(28, 15))
 
-        nav_frame = tk.Frame(form_frame, bg="white")
-        nav_frame.pack(pady=10)
+        nav_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+        nav_frame.pack(pady=5)
         
-        tk.Button(nav_frame, 
-                  text="שכחת סיסמה",
-                  font=("Arial", 14,
-                        "bold"),
-                  fg="#1a73e8",
-                  bg="white",
-                  bd=0,
-                  cursor="hand2", 
-                command=forgotPass).pack(side="right", padx=10)
+        ctk.CTkButton(
+            nav_frame, 
+            text="שכחת סיסמה",
+            font=("Segoe UI", 13, "bold"),
+            text_color="#60a5fa",
+            fg_color="transparent",
+            hover_color="#1e293b",
+            height=30,
+            corner_radius=6,
+            cursor="hand2", 
+            command=forgotPass
+        ).pack(side="right", padx=4)
         
-        tk.Label(nav_frame,
-                 text="|",
-                 fg="#040404",
-                 bg="white",
-                 font=("Arial", 11)).pack(side="right")
+        ctk.CTkLabel(
+            nav_frame,
+            text="|",
+            text_color="#64748b",
+            font=("Segoe UI", 13)
+        ).pack(side="right")
         
-        tk.Button(nav_frame,
-                  text="יצירת חשבון חדש",
-                  font=("Arial",
-                        14, "bold"),
-                  fg="#1a73e8",
-                  bg="white",
-                  bd=0,
-                  cursor="hand2", 
-                command=signUp).pack(side="right", padx=10)
+        ctk.CTkButton(
+            nav_frame,
+            text="יצירת חשבון חדש",
+            font=("Segoe UI", 13, "bold"),
+            text_color="#60a5fa",
+            fg_color="transparent",
+            hover_color="#1e293b",
+            height=30,
+            corner_radius=6,
+            cursor="hand2", 
+            command=signUp
+        ).pack(side="right", padx=4)
 
-        footer_frame = tk.Frame(main_frame,
-                                bg="white")
-        footer_frame.pack(side="bottom",
-                          pady=2) 
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer_frame.pack(side="bottom", pady=(0, 20)) 
         
-        tk.Label(footer_frame,
-                 text="בכניסה למערכת הנך מסכים לכל", 
-                 font=("Arial", 11),
-                 fg="#999999",
-                 bg="white").pack()
+        ctk.CTkLabel(
+            footer_frame,
+            text="בכניסה למערכת הנך מסכים לכל", 
+            font=("Segoe UI", 11),
+            text_color="#94a3b8"
+        ).pack()
         
-        tk.Button(footer_frame,
-                  text="תנאי השימוש ומדיניות הפרטיות שלנו", 
-                  font=("Arial", 11, "underline"),
-                  fg="#1a73e8", bg="white", 
-                  bd=0,
-                  cursor="hand2", 
-                  command=lambda: webbrowser.open("https://www.mashov.info/privacypolicy/")).pack(pady=(0, 15))
+        ctk.CTkButton(
+            footer_frame,
+            text="תנאי השימוש ומדיניות הפרטיות שלנו", 
+            font=("Segoe UI", 11, "underline"),
+            text_color="#60a5fa",
+            fg_color="transparent",
+            hover_color="#0f172a",
+            height=24,
+            corner_radius=4,
+            cursor="hand2", 
+            command=lambda: webbrowser.open("https://www.mashov.info/privacypolicy/")
+        ).pack(pady=(2, 8))
 
-        tk.Label(footer_frame,
-                 text="📖",
-                 fg="#1a73e8",
-                 bg="white", 
-                 font=("Arial", 50)).pack()    
+        ctk.CTkLabel(
+            footer_frame,
+            text="📖",
+            text_color="#3b82f6",
+            font=("Segoe UI", 40)
+        ).pack()    
         
         return login_win
     
@@ -685,19 +697,16 @@ try:
                 messagebox.showerror("שגיאה", "נא למלא את כל השדות")
                 return
 
-            if class_box.get().strip() == "":
+            if class_box.get().strip() in ["בחר כיתה", ""]:
                 messagebox.showerror("שגיאה", "נא לבחור כיתה")
                 return
 
-            if role_box.get().strip() == "":
+            if role_box.get().strip() in ["בחר תפקיד", ""]:
                 messagebox.showerror("שגיאה", "נא לבחור תפקיד")
                 return
 
-            if "@" not in gmail.get():
-                messagebox.showerror("שגיאה", "אימייל לא תקין")
-                return
-
-            if gmail.get().startswith("@") or gmail.get().endswith("@"):
+            user_email = gmail.get().strip()
+            if "@" not in user_email or user_email.startswith("@") or user_email.endswith("@"):
                 messagebox.showerror("שגיאה", "אימייל לא תקין")
                 return
 
@@ -707,18 +716,16 @@ try:
             
             if role == "teacher":
                 open_teacher_setup(newUsername.get())
-            
-            if role == "student":
+            elif role == "student":
                 open_student_setup(newUsername.get())
 
-
         def open_teacher_setup(username):
-            win = tk.Toplevel(root)
+            win = ctk.CTkToplevel()
             destroy_and_set_new_window(win)
             win.overrideredirect(True)
 
             win.title("הגדרת מורה")
-            width, height = 520, 770
+            width, height = 480, 520
             screen_width = win.winfo_screenwidth()
             screen_height = win.winfo_screenheight()
 
@@ -726,28 +733,38 @@ try:
             y = (screen_height // 2) - (height // 2)
 
             win.geometry(f"{width}x{height}+{x}+{y}")
-            win.configure(bg="#f0f4f8")
+            win.configure(fg_color="#0f172a")
 
-            frame = tk.Frame(win, bg="white")
-            frame.place(relx=0.5, rely=0.5, anchor="center", width=480, height=450)
+            frame = ctk.CTkFrame(win, fg_color="#1e293b", corner_radius=20, width=480, height=520)
+            frame.place(relx=0.5, rely=0.5, anchor="center")
+            frame.pack_propagate(False)
 
-            tk.Label(frame, text="🔑", font=("Arial", 40), bg="white", fg="#1a73e8").pack(pady=10)
+            ctk.CTkLabel(frame, text="🔑", font=("Segoe UI", 42), text_color="#3b82f6").pack(pady=(25, 5))
+            ctk.CTkLabel(frame, text="אימות מורה", font=("Segoe UI", 22, "bold"), text_color="#ffffff").pack()
 
-            tk.Label(frame, text="אימות מורה", font=("Arial", 22, "bold"), bg="white").pack()
+            form_sub = ctk.CTkFrame(frame, fg_color="transparent")
+            form_sub.pack(fill="x", padx=40, pady=20)
 
-            tk.Label(frame, text="קוד מורים", bg="white").pack(pady=(20,5))
-            teacher_code = tk.Entry(frame, show="*")
-            teacher_code.pack(ipady=8, fill="x", padx=40)
+            ctk.CTkLabel(form_sub, text="קוד מורים", font=("Segoe UI", 12, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(5, 4))
+            teacher_code = ctk.CTkEntry(
+                form_sub, font=("Segoe UI", 13), height=42, corner_radius=8,
+                fg_color="#334155", border_color="#475569", text_color="#f8fafc", show="*", justify="right"
+            )
+            teacher_code.pack(fill="x")
 
-            tk.Label(frame, text="קוד כיתה (לשיתוף)", bg="white").pack(pady=(20,5))
-            class_code = tk.Entry(frame)
-            class_code.pack(ipady=8, fill="x", padx=40)
+            ctk.CTkLabel(form_sub, text="קוד כיתה (לשיתוף)", font=("Segoe UI", 12, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(15, 4))
+            class_code = ctk.CTkEntry(
+                form_sub, font=("Segoe UI", 13), height=42, corner_radius=8,
+                fg_color="#334155", border_color="#475569", text_color="#f8fafc", justify="right"
+            )
+            class_code.pack(fill="x")
 
             def submit():
                 teachers_code = teacher_code.get()
                 new_class_code = class_code.get()
 
-                if not teacher_code or not class_code:
+                if not teachers_code or not new_class_code:
+                    messagebox.showerror("שגיאה", "נא למלא את כל השדות")
                     return
 
                 SERVER_IP = '127.0.0.1'
@@ -755,7 +772,6 @@ try:
 
                 try:
                     with create_secure_socket() as s:
-                        print(f"Connecting to {SERVER_IP}:{PORT}...")
                         s.connect((SERVER_IP, PORT))
 
                         subject = (
@@ -768,7 +784,7 @@ try:
                             f"{class_box.get()}|"
                             f"{role_box.get()}|"
                             f"{teachers_code}|"
-                            f"{class_code.get()}"
+                            f"{new_class_code}"
                         )
 
                         s.sendall(subject.encode("utf-8"))
@@ -779,55 +795,44 @@ try:
                             return
 
                         dataFromServer = raw_data.decode("utf-8").strip()
-                        print(f"Received from server: {dataFromServer}")
 
                         if dataFromServer.startswith("200"):
-                            parts = dataFromServer.split("|")
-                            role = parts[1]
-                            class_name = parts[2]
-                            
                             messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
-                            new_win.destroy()                       
+                            win.destroy()       
                             open_login_window()
-
                         elif dataFromServer == "gmail already exists":
                             messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
-
                         elif dataFromServer == "username already exists":
                             messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
-
                         elif dataFromServer == "invalid teacher code":
                             messagebox.showerror("שגיאה", "קוד מורה שגוי")
-
                         elif dataFromServer == "invalid student code":
                             messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
-                        
                         elif dataFromServer.startswith("teacher"):
                             messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
-                        
                         elif dataFromServer.startswith("error|"):
                             messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
-                        
                         elif dataFromServer.startswith("404"):
                             messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
-                        
                         else:
                             messagebox.showerror("שגיאה", dataFromServer)
 
                 except ConnectionRefusedError:
                     messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
-        
-            tk.Button(frame, text="המשך", bg="#1a73e8", fg="white",
-                    command=submit).pack(pady=30, ipady=10, ipadx=20)
+
+            ctk.CTkButton(
+                frame, text="המשך", font=("Segoe UI", 14, "bold"),
+                fg_color="#2563eb", hover_color="#1d4ed8", height=45, corner_radius=8,
+                cursor="hand2", command=submit
+            ).pack(fill="x", padx=40, pady=20)
 
         def open_student_setup(username):
-            win = tk.Toplevel(root)
+            win = ctk.CTkToplevel()
             win.overrideredirect(True)
-
             destroy_and_set_new_window(win)
 
             win.title("כניסת תלמיד")
-            width, height = 520, 770
+            width, height = 480, 420
             screen_width = win.winfo_screenwidth()  
             screen_height = win.winfo_screenheight()
 
@@ -835,22 +840,29 @@ try:
             y = (screen_height // 2) - (height // 2)
 
             win.geometry(f"{width}x{height}+{x}+{y}")
-            win.configure(bg="#f0f4f8")
+            win.configure(fg_color="#0f172a")
 
-            frame = tk.Frame(win, bg="white")
-            frame.place(relx=0.5, rely=0.5, anchor="center", width=480, height=350)
+            frame = ctk.CTkFrame(win, fg_color="#1e293b", corner_radius=20, width=480, height=420)
+            frame.place(relx=0.5, rely=0.5, anchor="center")
+            frame.pack_propagate(False)
 
-            tk.Label(frame, text="🎓", font=("Arial", 40), bg="white", fg="#1a73e8").pack(pady=10)
+            ctk.CTkLabel(frame, text="🎓", font=("Segoe UI", 42), text_color="#3b82f6").pack(pady=(25, 5))
+            ctk.CTkLabel(frame, text="הכנס קוד כיתה", font=("Segoe UI", 20, "bold"), text_color="#ffffff").pack()
 
-            tk.Label(frame, text="הכנס קוד כיתה", font=("Arial", 20, "bold"), bg="white").pack(pady=10)
+            form_sub = ctk.CTkFrame(frame, fg_color="transparent")
+            form_sub.pack(fill="x", padx=40, pady=20)
 
-            code_entry = tk.Entry(frame)
-            code_entry.pack(ipady=10, fill="x", padx=40)
+            code_entry = ctk.CTkEntry(
+                form_sub, font=("Segoe UI", 13), height=45, corner_radius=8,
+                fg_color="#334155", border_color="#475569", text_color="#f8fafc", justify="right"
+            )
+            code_entry.pack(fill="x")
 
             def submit():
                 class_code = code_entry.get()
 
                 if not class_code:
+                    messagebox.showerror("שגיאה", "נא להזין קוד כיתה")
                     return
 
                 SERVER_IP = '127.0.0.1'
@@ -858,7 +870,6 @@ try:
 
                 try:
                     with create_secure_socket() as s:
-                        print(f"Connecting to {SERVER_IP}:{PORT}...")
                         s.connect((SERVER_IP, PORT))
 
                         subject = (
@@ -882,52 +893,35 @@ try:
                             return
 
                         dataFromServer = raw_data.decode("utf-8").strip()
-                        print(f"Received from server: {dataFromServer}")
 
                         if dataFromServer.startswith("200"):
-                            parts = dataFromServer.split("|")
-                            role = parts[1]
-                            class_name = parts[2]
-                            
                             messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
-                            new_win.destroy()                  
+                            win.destroy()                  
                             open_login_window()
-
                         elif dataFromServer == "gmail already exists":
                             messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
-
                         elif dataFromServer == "username already exists":
                             messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
-
-                        elif dataFromServer == "invalid teacher code":
-                            messagebox.showerror("שגיאה", "קוד מורה שגוי")
-
                         elif dataFromServer == "invalid student code":
                             messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
-                        
-                        elif dataFromServer.startswith("teacher"):
-                            messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
-                        
-                        elif dataFromServer.startswith("error|"):
-                            messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
-                        
                         elif dataFromServer.startswith("404"):
                             messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
-
                         else:
                             messagebox.showerror("שגיאה", dataFromServer)
 
                 except ConnectionRefusedError:
                     messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
-                    
                 except Exception as e:
                     messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
-            
 
-            tk.Button(frame, text="כניסה", bg="#1a73e8", fg="white", 
-                    command=submit).pack(pady=30, ipady=10, ipadx=20)
+            ctk.CTkButton(
+                frame, text="כניסה", font=("Segoe UI", 14, "bold"),
+                fg_color="#2563eb", hover_color="#1d4ed8", height=45, corner_radius=8,
+                cursor="hand2", command=submit
+            ).pack(fill="x", padx=40, pady=10)
 
-        new_win = tk.Toplevel(root)
+        # חלון הרשמה ראשי
+        new_win = ctk.CTkToplevel()
         new_win.title("MashovApp / הרשמה")
         new_win.overrideredirect(True)
 
@@ -936,131 +930,89 @@ try:
         y = (new_win.winfo_screenheight() // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a")
 
-        main_frame = tk.Frame(new_win, bg="white", bd=0)
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=840)
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=520, height=860)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=160)
-        header_frame.pack(fill="x")
+        # Header מודרני
+        header_frame = ctk.CTkFrame(main_frame, fg_color="#1d4ed8", corner_radius=16, height=140)
+        header_frame.pack(fill="x", padx=12, pady=(12, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(
-            header_frame,
-            text="📝",
-            font=("Arial", 45),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(25, 0))
+        ctk.CTkLabel(header_frame, text="📝", font=("Segoe UI", 40), text_color="#ffffff").pack(pady=(15, 0))
+        ctk.CTkLabel(header_frame, text="יצירת חשבון חדש", font=("Segoe UI", 22, "bold"), text_color="#ffffff").pack()
 
-        tk.Label(
-            header_frame,
-            text="יצירת חשבון חדש",
-            font=("Arial", 24, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack()
-
-        form_frame = tk.Frame(main_frame, bg="white")
-        form_frame.pack(fill="both", expand=True, padx=45, pady=10)
-
-        label_style = {
-            "font": ("Arial", 10, "bold"),
-            "fg": "#333333",
-            "bg": "white",
-            "anchor": "e"
-        }
-
-        entry_style = {
-            "font": ("Arial", 12),
-            "bg": "#f8f9fa",
-            "relief": "solid",
-            "bd": 1,
-            "justify": "right"
-        }
+        # Form
+        form_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        form_frame.pack(fill="both", expand=True, padx=35, pady=10)
 
         fields = [
-            ("שם פרטי", "firstName"),
-            ("שם משפחה", "lastName"),
-            ("אימייל", "gmail"),
-            ("שם משתמש", "newUsername"),
-            ("סיסמה", "newPassword")
+            ("שם פרטי", "firstName", False),
+            ("שם משפחה", "lastName", False),
+            ("אימייל", "gmail", False),
+            ("שם משתמש", "newUsername", False),
+            ("סיסמה", "newPassword", True)
         ]
 
         entries = {}
 
-        for label_text, var_name in fields:
-            tk.Label(form_frame, text=label_text, **label_style).pack(fill="x", pady=(10, 2))
-            ent = tk.Entry(form_frame, **entry_style)
-            ent.pack(fill="x", ipady=6)
+        for label_text, var_name, is_pass in fields:
+            ctk.CTkLabel(form_frame, text=label_text, font=("Segoe UI", 11, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(6, 2))
+            ent = ctk.CTkEntry(
+                form_frame, font=("Segoe UI", 13), height=38, corner_radius=8,
+                fg_color="#334155", border_color="#475569", text_color="#f8fafc",
+                show="●" if is_pass else "", justify="right"
+            )
+            ent.pack(fill="x")
             entries[var_name] = ent
 
         firstName, lastName, gmail, newUsername, newPassword = entries.values()
+        gmail.configure(placeholder_text="example@gmail.com")
 
-        gmail.insert(0, "example@gmail.com")
-
-        tk.Label(form_frame, text="כיתה", **label_style).pack(fill="x", pady=(10, 2))
-        class_box = ttk.Combobox(
-            form_frame,
-            values=["ז1", "ז2", "ז3", "ז4", "ז5", "ז6", "ח1", "ח2", "ח3", "ח4", "ח5", "ח6", "ט1", "ט2", "ט3", "ט4", "ט5", "ט6", "י1", "י2", "י3", "י4", "י5", "י6", "יא1", "יא2", "יא3", "יא4", "יא5", "יא6", "יב1", "יב2", "יב3", "יב4", "יב5", "יב6"],
-            state="readonly",
-            font=("Arial", 12)
-        )
-        class_box.pack(fill="x", ipady=6)
-
-        tk.Label(form_frame, text="תפקיד", **label_style).pack(fill="x", pady=(10, 2))
-        role_box = ttk.Combobox(
-            form_frame,
-            values=["student", "teacher"],
-            state="readonly",
-            font=("Arial", 12)
-        )
-        role_box.pack(fill="x", ipady=6)
-
-        tk.Button(
-            form_frame,
-            text="צור חשבון עכשיו",
-            font=("Arial", 16, "bold"),
-            fg="white",
-            bg="#1a73e8",
-            activebackground="#1557b0",
-            relief="flat",
-            cursor="hand2",
-            command=attemptSignUp
-        ).pack(fill="x", pady=(25, 10), ipady=12)
-
-        footer_frame = tk.Frame(main_frame, bg="white")
-        footer_frame.pack(side="bottom", pady=20)
-
-        tk.Label(
-            footer_frame,
-            text="?כבר יש לך חשבון",
-            font=("Arial", 11),
-            fg="#999999",
-            bg="white"
-        ).pack()
+        # כיתה
+        ctk.CTkLabel(form_frame, text="כיתה", font=("Segoe UI", 11, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(8, 2))
+        classes_list = ["ז1", "ז2", "ז3", "ז4", "ז5", "ז6", "ח1", "ח2", "ח3", "ח4", "ח5", "ח6", "ט1", "ט2", "ט3", "ט4", "ט5", "ט6", "י1", "י2", "י3", "י4", "י5", "י6", "יא1", "יא2", "יא3", "יא4", "יא5", "יא6", "יב1", "יב2", "יב3", "יב4", "יב5", "יב6"]
         
-        def back_to_login_window():
-            new_win.destroy()
+        class_box = ctk.CTkOptionMenu(
+            form_frame, values=classes_list, font=("Segoe UI", 12),
+            dropdown_font=("Segoe UI", 12), fg_color="#334155", button_color="#475569",
+            button_hover_color="#64748b", text_color="#f8fafc", height=38, corner_radius=8
+        )
+        class_box.set("בחר כיתה")
+        class_box.pack(fill="x")
 
-        tk.Button(
-            footer_frame,
-            text="חזור למסך ההתחברות",
-            font=("Arial", 11, "underline", "bold"),
-            fg="#1a73e8",
-            bg="white",
-            bd=0,
-            cursor="hand2",
-            command=back_to_login_window,
-        ).pack()
+        # תפקיד
+        ctk.CTkLabel(form_frame, text="תפקיד", font=("Segoe UI", 11, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(8, 2))
+        role_box = ctk.CTkOptionMenu(
+            form_frame, values=["student", "teacher"], font=("Segoe UI", 12),
+            dropdown_font=("Segoe UI", 12), fg_color="#334155", button_color="#475569",
+            button_hover_color="#64748b", text_color="#f8fafc", height=38, corner_radius=8
+        )
+        role_box.set("בחר תפקיד")
+        role_box.pack(fill="x")
 
-        tk.Label(
-            footer_frame,
-            text="🏫",
-            font=("Arial", 40),
-            bg="white"
-        ).pack(pady=10)
+        # כפתור יצירת חשבון
+        ctk.CTkButton(
+            form_frame, text="צור חשבון עכשיו", font=("Segoe UI", 15, "bold"),
+            fg_color="#2563eb", hover_color="#1d4ed8", height=46, corner_radius=8,
+            cursor="hand2", command=attemptSignUp
+        ).pack(fill="x", pady=(20, 5))
+
+        # Footer
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer_frame.pack(side="bottom", pady=(0, 15))
+
+        ctk.CTkLabel(footer_frame, text="כבר יש לך חשבון?", font=("Segoe UI", 11), text_color="#94a3b8").pack()
+        
+        ctk.CTkButton(
+            footer_frame, text="חזור למסך ההתחברות", font=("Segoe UI", 11, "underline", "bold"),
+            text_color="#60a5fa", fg_color="transparent", hover_color="#334155",
+            height=22, corner_radius=4, cursor="hand2", command=lambda: new_win.destroy()
+        ).pack(pady=(0, 4))
+
+        ctk.CTkLabel(footer_frame, text="🏫", font=("Segoe UI", 32), text_color="#3b82f6").pack()
 
         return new_win
 
@@ -1071,20 +1023,19 @@ try:
     
 
     def open_grades():
-        if not current_user_role == "teacher" and not current_user_role == "student":
+        if current_user_role not in ["teacher", "student"]:
             messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
-                
-        # --- ממשק מורה ---
+
+        # --- ממשק מורה (Dark Theme) ---
         if current_user_role == "teacher":
-            new_win = tk.Toplevel()
+            new_win = ctk.CTkToplevel()
             new_win.overrideredirect(True)
 
             destroy_and_set_new_window(new_win)
             new_win.title("ניהול ציונים - מורה")
 
             width, height = 520, 770
-
             screen_width = new_win.winfo_screenwidth()
             screen_height = new_win.winfo_screenheight()
 
@@ -1092,166 +1043,183 @@ try:
             y = (screen_height // 2) - (height // 2)
 
             new_win.geometry(f"{width}x{height}+{x}+{y}")
-            new_win.configure(bg="#f0f4f8")
-            new_win.resizable(False, False)
+            new_win.configure(fg_color="#0f172a")  # Dark Background
 
-            main_frame = tk.Frame(new_win, bg="white")
-            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+            # Container ראשי כהה
+            main_frame = ctk.CTkFrame(
+                new_win,
+                fg_color="#1e293b",
+                corner_radius=20,
+                width=520,
+                height=770
+            )
+            main_frame.place(relx=0.5, rely=0.5, anchor="center")
+            main_frame.pack_propagate(False)
 
-            header_frame = tk.Frame(main_frame, bg="#1a73e8", height=160)
-            header_frame.pack(fill="x")
+            # Header כחול מודרני
+            header_frame = ctk.CTkFrame(
+                main_frame,
+                fg_color="#1d4ed8",
+                corner_radius=16,
+                height=190
+            )
+            header_frame.pack(fill="x", padx=12, pady=(12, 0))
             header_frame.pack_propagate(False)
 
-            tk.Label(
+            ctk.CTkLabel(
                 header_frame,
                 text="📝",
-                font=("Arial", 40),
-                fg="white",
-                bg="#1a73e8"
-            ).pack(pady=(18, 0))
+                font=("Segoe UI", 46),
+                text_color="#ffffff"
+            ).pack(pady=(20, 0))
 
-            tk.Label(
+            ctk.CTkLabel(
                 header_frame,
                 text="ניהול והזנת ציונים",
-                font=("Arial", 24, "bold"),
-                fg="white",
-                bg="#1a73e8"
+                font=("Segoe UI", 26, "bold"),
+                text_color="#ffffff"
             ).pack()
 
-            tk.Label(
+            ctk.CTkLabel(
                 header_frame,
                 text="ממשק מורה לעדכון והוספת ציוני תלמידים",
-                font=("Arial", 11),
-                fg="#dbeafe",
-                bg="#1a73e8"
-            ).pack()
+                font=("Segoe UI", 12),
+                text_color="#93c5fd"
+            ).pack(pady=(2, 0))
 
-            form_frame = tk.Frame(main_frame, bg="#f8fafc")
-            form_frame.pack(fill="both", expand=True, padx=25, pady=15)
-            
+            # טופס להזנת נתונים בעיצוב כהה
+            form_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            form_frame.pack(fill="both", expand=True, padx=35, pady=20)
+
             class_students = []
-
             SERVER_IP = '127.0.0.1'
             PORT = 9999
 
-            with create_secure_socket() as s:
-                print(f"Connecting to {SERVER_IP}:{PORT}...")
-                s.connect((SERVER_IP, PORT))
-
-                subject = f"get_class_students|{current_user_class}"
-                s.sendall(subject.encode("utf-8"))
-
-                raw_data = s.recv(1024)
-                if not raw_data:
-                    messagebox.showerror("שגיאה", "אין תגובה מהשרת")
-                    return
-
-                dataFromServer = raw_data.decode("utf-8").strip()
-                print(f"Received from server: {dataFromServer}")
-                
-                if dataFromServer.startswith("class_students_response|"):
-                    res_parts = dataFromServer.split("|")
-                    if res_parts[1]:
-                        class_students = res_parts[1].split(",") 
-                else:
-                    messagebox.showerror("שגיאה", f"התקבלה תשובה לא תקינה מהשרת: {dataFromServer}")
-                    return
-
-            tk.Label(form_frame, text=":שם התלמיד", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(25, 2))
-            student_entry = ttk.Combobox(form_frame, font=("Arial", 12), values=class_students)
-            student_entry.pack(fill="x", padx=25, ipady=6)
-
-            tk.Label(form_frame, text=":מקצוע", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(15, 2))
-            subject_entry = tk.Entry(form_frame, font=("Arial", 12), bd=1, relief="solid", fg="#1e293b")
-            subject_entry.pack(fill="x", padx=25, ipady=6)
-
-            tk.Label(form_frame, text=":ציון חדש", font=("Arial", 12, "bold"), fg="#334155", bg="#f8fafc").pack(anchor="e", padx=25, pady=(15, 2))
-            grade_entry = tk.Entry(form_frame, font=("Arial", 12), bd=1, relief="solid", fg="#1e293b")
-            grade_entry.pack(fill="x", padx=25, ipady=6)
-
-            def submit_grade():
-                student = student_entry.get().strip()
-                sub = subject_entry.get().strip() 
-                grd = grade_entry.get().strip()
-                
-                if not student or not sub or not grd:
-                    messagebox.showwarning("שגיאה", "אנא מלא את כל השדות")
-                    return
-                
-                SERVER_IP = '127.0.0.1'
-                PORT = 9999
-
+            try:
                 with create_secure_socket() as s:
-                    print(f"Connecting to {SERVER_IP}:{PORT}...")
                     s.connect((SERVER_IP, PORT))
-
-                    subject = f"insert_new_grade|{current_user_class}|{grd}|{sub}|{student}"
+                    subject = f"get_class_students|{current_user_class}"
                     s.sendall(subject.encode("utf-8"))
 
                     raw_data = s.recv(1024)
-                    if not raw_data:
-                        messagebox.showerror("שגיאה", "אין תגובה מהשרת")
-                        return
+                    if raw_data:
+                        dataFromServer = raw_data.decode("utf-8").strip()
+                        if dataFromServer.startswith("class_students_response|"):
+                            res_parts = dataFromServer.split("|")
+                            if res_parts[1]:
+                                class_students = res_parts[1].split(",")
+            except Exception as e:
+                messagebox.showerror("שגיאה", f"שגיאה בהתחברות לשרת: {e}")
+                return
 
-                    dataFromServer = raw_data.decode("utf-8").strip()
-                    print(f"Received from server: {dataFromServer}")
-                    
-                    if dataFromServer.startswith("insert_grade_response|"):
-                        res_parts = dataFromServer.split("|")
-                        status = res_parts[1]
-                        
-                        if status == "success":
-                            messagebox.showinfo("הצלחה", f"הציון {grd} במקצוע {sub} עודכן בהצלחה עבור {student}")
-                            
-                        
-                        else:
-                            res_for_failure = res_parts[2]
-                            messagebox.showerror("שגיאה", f"{res_for_failure}")
-                    
-                    else:
-                        messagebox.showerror("שגיאה", f"התקבלה תשובה לא תקינה מהשרת: {dataFromServer}")
-                        return
-                
+            # שדות הקלט כהים
+            ctk.CTkLabel(form_frame, text="שם התלמיד", font=("Segoe UI", 12, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(8, 4))
+            student_entry = ctk.CTkComboBox(
+                form_frame,
+                font=("Segoe UI", 13),
+                values=class_students,
+                height=45,
+                corner_radius=10,
+                fg_color="#334155",
+                border_color="#475569",
+                button_color="#2563eb",
+                dropdown_fg_color="#1e293b",
+                text_color="#f8fafc"
+            )
+            student_entry.pack(fill="x")
 
-            save_button = tk.Button(
+            ctk.CTkLabel(form_frame, text="מקצוע", font=("Segoe UI", 12, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(12, 4))
+            subject_entry = ctk.CTkEntry(
+                form_frame,
+                font=("Segoe UI", 13),
+                height=45,
+                corner_radius=10,
+                fg_color="#334155",
+                border_color="#475569",
+                text_color="#f8fafc"
+            )
+            subject_entry.pack(fill="x")
+
+            ctk.CTkLabel(form_frame, text="ציון חדש", font=("Segoe UI", 12, "bold"), text_color="#cbd5e1").pack(anchor="e", pady=(12, 4))
+            grade_entry = ctk.CTkEntry(
+                form_frame,
+                font=("Segoe UI", 13),
+                height=45,
+                corner_radius=10,
+                fg_color="#334155",
+                border_color="#475569",
+                text_color="#f8fafc"
+            )
+            grade_entry.pack(fill="x")
+
+            def submit_grade():
+                student = student_entry.get().strip()
+                sub = subject_entry.get().strip()
+                grd = grade_entry.get().strip()
+
+                if not student or not sub or not grd:
+                    messagebox.showwarning("שגיאה", "אנא מלא את כל השדות")
+                    return
+
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        subject_data = f"insert_new_grade|{current_user_class}|{grd}|{sub}|{student}"
+                        s.sendall(subject_data.encode("utf-8"))
+
+                        raw_data = s.recv(1024)
+                        if raw_data:
+                            dataFromServer = raw_data.decode("utf-8").strip()
+                            if dataFromServer.startswith("insert_grade_response|"):
+                                res_parts = dataFromServer.split("|")
+                                if res_parts[1] == "success":
+                                    messagebox.showinfo("הצלחה", f"הציון {grd} במקצוע {sub} עודכן בהצלחה עבור {student}")
+                                else:
+                                    messagebox.showerror("שגיאה", f"{res_parts[2]}")
+                except Exception as e:
+                    messagebox.showerror("שגיאה", f"שגיאה בהעברת הנתונים: {e}")
+
+            save_button = ctk.CTkButton(
                 form_frame,
                 text="עדכן ציון במערכת",
                 command=submit_grade,
-                font=("Arial", 13, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                relief="flat",
-                bd=0,
+                font=("Segoe UI", 15, "bold"),
+                fg_color="#2563eb",
+                hover_color="#1d4ed8",
+                height=48,
+                corner_radius=10,
                 cursor="hand2"
             )
-            save_button.pack(fill="x", padx=25, pady=35, ipady=10)
+            save_button.pack(fill="x", pady=(22, 0))
 
-            footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-            footer_frame.pack(fill="x", side="bottom")
+            # Footer
+            footer_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12, height=55)
+            footer_frame.pack(side="bottom", fill="x", padx=12, pady=12)
             footer_frame.pack_propagate(False)
 
-            tk.Button(
+            ctk.CTkButton(
                 footer_frame,
                 text="חזרה למסך ראשי",
                 command=lambda: open_main_page(current_username),
-                font=("Arial", 13, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                relief="flat",
-                bd=0,
+                font=("Segoe UI", 13, "bold"),
+                fg_color="transparent",
+                hover_color="#1e293b",
+                text_color="#60a5fa",
+                height=38,
+                corner_radius=8,
                 cursor="hand2"
-            ).pack(pady=15, ipadx=18, ipady=8)
-            
-            return 
-        
-        new_win = tk.Toplevel()
+            ).pack(expand=True)
+
+            return
+
+        # --- ממשק תלמיד (Dark Theme) ---
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד ציונים")
 
         width, height = 520, 770
-
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
 
@@ -1259,55 +1227,53 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a")
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+        main_frame = ctk.CTkFrame(
+            new_win,
+            fg_color="#1e293b",
+            corner_radius=20,
+            width=520,
+            height=770
+        )
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
-        header_frame.pack(fill="x")
+        # Header מודרני כהה
+        header_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#1d4ed8",
+            corner_radius=16,
+            height=180
+        )
+        header_frame.pack(fill="x", padx=12, pady=(12, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
             text="📊",
-            font=("Arial", 40),
-            fg="white",
-            bg="#1a73e8"
+            font=("Segoe UI", 46),
+            text_color="#ffffff"
         ).pack(pady=(18, 0))
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
             text="ציונים שוטפים",
-            font=("Arial", 24, "bold"),
-            fg="white",
-            bg="#1a73e8"
+            font=("Segoe UI", 26, "bold"),
+            text_color="#ffffff"
         ).pack()
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text="צפייה בכל הציונים והממוצע",
-            font=("Arial", 11),
-            fg="#dbeafe",
-            bg="#1a73e8"
+            text="צפייה בכל הציונים והממוצע הכללי",
+            font=("Segoe UI", 12),
+            text_color="#93c5fd"
         ).pack()
 
-        avg_frame = tk.Frame(main_frame, bg="#f8fafc", height=90)
-        avg_frame.pack(fill="x", padx=25, pady=20)
-        avg_frame.pack_propagate(False)
-
-        tk.Label(
-            avg_frame,
-            text="ממוצע כללי",
-            font=("Arial", 14, "bold"),
-            fg="#334155",
-            bg="#f8fafc"
-        ).pack(pady=(10, 0))
-        
+        # טעינת נתונים
         grades = []
         average = 0
-        
+
         SERVER_IP = '127.0.0.1'
         PORT = 9999
         try:
@@ -1315,111 +1281,104 @@ try:
                 s.connect((SERVER_IP, PORT))
                 subject = f"gradesRequest|{current_user_class}|{current_username}"
                 s.sendall(subject.encode('utf-8'))
-                
-                raw_data = s.recv(4096) 
+
+                raw_data = s.recv(4096)
                 if raw_data:
                     res_text = raw_data.decode('utf-8').strip()
-                    
                     response_data = json.loads(res_text)
-                    
+
                     if response_data.get("status") == "success":
                         grades = response_data.get("grades", [])
                         average = response_data.get("average", 0)
-                    
                     else:
                         messagebox.showerror("שגיאה", "שגיאה בקבלת הנתונים מהשרת.")
                         new_win.destroy()
                         return
-                    
         except Exception as e:
-            print(f"Error loading grades: {e}")
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת או לטעון את הציונים.")
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת.")
             new_win.destroy()
             return
 
-        tk.Label(
-            avg_frame,
+        # כרטיסיית ממוצע כהה ומובלטת
+        avg_card = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=16, height=88)
+        avg_card.pack(fill="x", padx=30, pady=15)
+        avg_card.pack_propagate(False)
+
+        ctk.CTkLabel(
+            avg_card,
+            text="ממוצע כללי",
+            font=("Segoe UI", 12, "bold"),
+            text_color="#94a3b8"
+        ).pack(pady=(10, 0))
+
+        ctk.CTkLabel(
+            avg_card,
             text=str(average),
-            font=("Arial", 28, "bold"),
-            fg="#1a73e8",
-            bg="#f8fafc",
+            font=("Segoe UI", 30, "bold"),
+            text_color="#38bdf8"
         ).pack()
 
-        list_container = tk.Frame(main_frame, bg="#f8fafc")
-        list_container.pack(fill="both", expand=True, padx=25, pady=10)
-
-        canvas = tk.Canvas(
-            list_container,
-            bg="#f8fafc",
-            highlightthickness=0
+        # רשימת ציונים כהה בגלילה
+        scroll_frame = ctk.CTkScrollableFrame(
+            main_frame,
+            fg_color="transparent",
+            scrollbar_button_color="#334155",
+            scrollbar_button_hover_color="#475569"
         )
-        scrollbar = ttk.Scrollbar(
-            list_container,
-            orient="vertical",
-            command=canvas.yview
-        )
+        scroll_frame.pack(fill="both", expand=True, padx=30, pady=(0, 10))
 
-        scrollable_frame = tk.Frame(canvas, bg="#f8fafc")
-
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=430)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        for subject, grade in grades:
-            card = tk.Frame(
-                scrollable_frame,
-                bg="white",
-                highlightbackground="#e2e8f0",
-                highlightthickness=1
+        for item_subject, grade_val in grades:
+            card = ctk.CTkFrame(
+                scroll_frame,
+                fg_color="#334155",
+                corner_radius=12,
+                height=56
             )
-            card.pack(fill="x", pady=6, ipady=12)
+            card.pack(fill="x", pady=5)
+            card.pack_propagate(False)
 
-            tk.Label(
+            # מקצוע מימין
+            ctk.CTkLabel(
                 card,
-                text=subject,
-                font=("Arial", 13, "bold"),
-                fg="#1e293b",
-                bg="white"
-            ).pack(side="right", padx=18)
+                text=item_subject,
+                font=("Segoe UI", 14, "bold"),
+                text_color="#f8fafc"
+            ).pack(side="right", padx=20)
 
-            tk.Label(
-                card,
-                text=str(grade),
-                font=("Arial", 14, "bold"),
-                fg="#1a73e8",
-                bg="#eff6ff",
-                padx=14,
-                pady=4
-            ).pack(side="left", padx=18)
+            # ציון משמאל בתגית כחולה מובלטת
+            badge = ctk.CTkFrame(card, fg_color="#1d4ed8", corner_radius=8)
+            badge.pack(side="left", padx=15, pady=9)
 
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-        footer_frame.pack(fill="x", side="bottom")
+            ctk.CTkLabel(
+                badge,
+                text=str(grade_val),
+                font=("Segoe UI", 14, "bold"),
+                text_color="#ffffff"
+            ).pack(padx=12, pady=3)
+
+        # Footer
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12, height=55)
+        footer_frame.pack(side="bottom", fill="x", padx=12, pady=12)
         footer_frame.pack_propagate(False)
 
-        tk.Button(
+        ctk.CTkButton(
             footer_frame,
             text="חזרה למסך ראשי",
             command=lambda: open_main_page(current_username),
-            font=("Arial", 13, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
-            bd=0,
+            font=("Segoe UI", 13, "bold"),
+            fg_color="transparent",
+            hover_color="#1e293b",
+            text_color="#60a5fa",
+            height=38,
+            corner_radius=8,
             cursor="hand2"
-        ).pack(pady=15, ipadx=18, ipady=8)
+        ).pack(expand=True)
     
     def open_doar():
         SERVER_IP = '127.0.0.1'
         PORT = 9999
         
-        if not current_user_role == "teacher" and not current_user_role == "student":
+        if current_user_role not in ["teacher", "student"]:
             messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
 
@@ -1433,7 +1392,6 @@ try:
                 raw_data = s.recv(4096) 
                 if raw_data:
                     res_text = raw_data.decode('utf-8').strip()
-                    # השרת מחזיר JSON נקי, לכן ה-loads יעבוד פיקס!
                     messages = json.loads(res_text)
                 else:
                     messages = []
@@ -1441,11 +1399,10 @@ try:
         except Exception as e:
             print(f"Error loading mail: {e}")
             messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת או לטעון את ההודעות.")
-            # תיקון: הורדנו את new_win.destroy() מכיוון שהחלון עדיין לא נוצר בשלב זה
             return
-        
-        # שלב 2: יצירת חלון הממשק רק אם המידע נטען בהצלחה
-        new_win = tk.Toplevel()
+
+        # שלב 2: יצירת חלון הממשק (Dark Theme)
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
         destroy_and_set_new_window(new_win)
@@ -1457,74 +1414,148 @@ try:
         x = (screen_width // 2) - (width // 2)
         y = (screen_height // 2) - (height // 2)
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a")  # Dark Background
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+        # Container ראשי כהה
+        main_frame = ctk.CTkFrame(
+            new_win,
+            fg_color="#1e293b",
+            corner_radius=20,
+            width=520,
+            height=770
+        )
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=170)
-        header_frame.pack(fill="x")
+        # Header מודרני כחול
+        header_frame = ctk.CTkFrame(
+            main_frame,
+            fg_color="#1d4ed8",
+            corner_radius=16,
+            height=180
+        )
+        header_frame.pack(fill="x", padx=12, pady=(12, 0))
         header_frame.pack_propagate(False)
 
-        tk.Label(header_frame, text="📨", font=("Arial", 40), fg="white", bg="#1a73e8").pack(pady=(18, 0))
-        tk.Label(header_frame, text="דואר נכנס", font=("Arial", 24, "bold"), fg="white", bg="#1a73e8").pack()
-        tk.Label(header_frame, text="הודעות ועדכונים מבית הספר", font=("Arial", 11), fg="#dbeafe", bg="#1a73e8").pack()
+        ctk.CTkLabel(
+            header_frame,
+            text="📨",
+            font=("Segoe UI", 46),
+            text_color="#ffffff"
+        ).pack(pady=(18, 0))
 
-        list_container = tk.Frame(main_frame, bg="#f8fafc")
-        list_container.pack(fill="both", expand=True, padx=25, pady=20)
+        ctk.CTkLabel(
+            header_frame,
+            text="דואר נכנס",
+            font=("Segoe UI", 26, "bold"),
+            text_color="#ffffff"
+        ).pack()
 
-        canvas = tk.Canvas(list_container, bg="#f8fafc", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(list_container, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg="#f8fafc")
+        ctk.CTkLabel(
+            header_frame,
+            text="הודעות ועדכונים מבית הספר",
+            font=("Segoe UI", 12),
+            text_color="#93c5fd"
+        ).pack(pady=(2, 0))
 
-        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=430)
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # רשימת הודעות בגלילה (Scrollable Frame)
+        scroll_frame = ctk.CTkScrollableFrame(
+            main_frame,
+            fg_color="transparent",
+            scrollbar_button_color="#334155",
+            scrollbar_button_hover_color="#475569"
+        )
+        scroll_frame.pack(fill="both", expand=True, padx=20, pady=15)
 
-        # פונקציה פנימית לרענון תצוגת ההודעות במסך
         def refresh_messages():
-            for widget in scrollable_frame.winfo_children():
+            for widget in scroll_frame.winfo_children():
                 widget.destroy()
                 
             for sender, msg in messages:
-                mail_card = tk.Frame(scrollable_frame, bg="white", highlightbackground="#e2e8f0", highlightthickness=1)
-                mail_card.pack(fill="x", pady=7, ipady=10)
+                mail_card = ctk.CTkFrame(
+                    scroll_frame,
+                    fg_color="#334155",
+                    corner_radius=12
+                )
+                mail_card.pack(fill="x", pady=6, padx=5)
 
-                tk.Label(mail_card, text=sender, font=("Arial", 12, "bold"), fg="#1a73e8", bg="white").pack(anchor="e", padx=15, pady=(5, 0))
-                tk.Label(mail_card, text=msg, font=("Arial", 11), fg="#334155", bg="white", wraplength=380, justify="right").pack(anchor="e", padx=15, pady=(3, 8))
+                ctk.CTkLabel(
+                    mail_card,
+                    text=sender,
+                    font=("Segoe UI", 13, "bold"),
+                    text_color="#60a5fa"
+                ).pack(anchor="e", padx=15, pady=(10, 2))
+
+                ctk.CTkLabel(
+                    mail_card,
+                    text=msg,
+                    font=("Segoe UI", 12),
+                    text_color="#f8fafc",
+                    wraplength=380,
+                    justify="right"
+                ).pack(anchor="e", padx=15, pady=(0, 10))
 
         refresh_messages()
 
-        # חלון כתיבת הודעה חדשה (למורים)
+        # חלון כתיבת הודעה חדשה (למורים - Dark Mode)
         def open_teacher_compose_window():
-            compose_win = tk.Toplevel(new_win)
+            compose_win = ctk.CTkToplevel(new_win)
             compose_win.overrideredirect(True)
 
             compose_win.title("פרסום הודעה חדשה")
-            compose_win.geometry("400x450")
-            compose_win.configure(bg="#f0f4f8")
-            compose_win.resizable(False, False)
+            compose_win.configure(fg_color="#0f172a")
             
             cx = (screen_width // 2) - 200
             cy = (screen_height // 2) - 225
-            compose_win.geometry(f"400x450+{cx}+{cy}")
+            compose_win.geometry(f"400x470+{cx}+{cy}")
+
+            card_bg = ctk.CTkFrame(compose_win, fg_color="#1e293b", corner_radius=16)
+            card_bg.pack(fill="both", expand=True, padx=10, pady=10)
+
+            ctk.CTkLabel(
+                card_bg,
+                text="יצירת עדכון חדש",
+                font=("Segoe UI", 18, "bold"),
+                text_color="#38bdf8"
+            ).pack(pady=(15, 5))
+
+            ctk.CTkLabel(
+                card_bg,
+                text="כותרת ההודעה (למשל: הודעה ממורה למתמטיקה):",
+                font=("Segoe UI", 11, "bold"),
+                text_color="#cbd5e1"
+            ).pack(anchor="e", padx=20, pady=(10, 4))
             
-            tk.Label(compose_win, text="יצירת עדכון חדש", font=("Arial", 18, "bold"), bg="#f0f4f8", fg="#1a73e8").pack(pady=15)
-            tk.Label(compose_win, text="כותרת ההודעה (למשל: הודעה ממורה למתמטיקה):", font=("Arial", 11, "bold"), bg="#f0f4f8").pack(anchor="e", padx=20, pady=(10, 2))
-            
-            title_entry = tk.Entry(compose_win, font=("Arial", 12), justify="right", bd=1, relief="solid")
-            title_entry.pack(fill="x", padx=20, ipady=4)
-            
-            tk.Label(compose_win, text="תוכן ההודעה:", font=("Arial", 11, "bold"), bg="#f0f4f8").pack(anchor="e", padx=20, pady=(15, 2))
-            content_text = tk.Text(compose_win, font=("Arial", 11), bd=1, relief="solid", height=8)
+            title_entry = ctk.CTkEntry(
+                card_bg,
+                font=("Segoe UI", 12),
+                height=40,
+                corner_radius=8,
+                fg_color="#334155",
+                border_color="#475569",
+                text_color="#f8fafc",
+                justify="right"
+            )
+            title_entry.pack(fill="x", padx=20)
+
+            ctk.CTkLabel(
+                card_bg,
+                text="תוכן ההודעה:",
+                font=("Segoe UI", 11, "bold"),
+                text_color="#cbd5e1"
+            ).pack(anchor="e", padx=20, pady=(12, 4))
+
+            content_text = ctk.CTkTextbox(
+                card_bg,
+                font=("Segoe UI", 12),
+                height=130,
+                corner_radius=8,
+                fg_color="#334155",
+                border_color="#475569",
+                text_color="#f8fafc"
+            )
             content_text.pack(fill="x", padx=20)
-            
-            content_text.tag_configure("rtl", justify="right")
-            content_text.bind("<KeyRelease>", lambda event: content_text.tag_add("rtl", "1.0", "end"))
-            
+
             def publish_message():
                 title = title_entry.get().strip()
                 content = content_text.get("1.0", tk.END).strip()
@@ -1551,31 +1582,67 @@ try:
                 except Exception as e:
                     messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}", parent=compose_win)
 
-            tk.Button(
-                compose_win, text="פרסם הודעה לכולם", command=publish_message,
-                font=("Arial", 12, "bold"), bg="#10b981", fg="white", relief="flat", cursor="hand2"
-            ).pack(pady=25, ipadx=15, ipady=5)
+            # כפתור פרסום ירוק מודרני
+            ctk.CTkButton(
+                card_bg,
+                text="פרסום הודעה לכולם",
+                command=publish_message,
+                font=("Segoe UI", 13, "bold"),
+                fg_color="#10b981",
+                hover_color="#059669",
+                height=42,
+                corner_radius=8,
+                cursor="hand2"
+            ).pack(pady=(20, 10), padx=20, fill="x")
 
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-        footer_frame.pack(fill="x", side="bottom")
+            # כפתור ביטול/סגירה
+            ctk.CTkButton(
+                card_bg,
+                text="ביטול",
+                command=compose_win.destroy,
+                font=("Segoe UI", 12),
+                fg_color="transparent",
+                hover_color="#334155",
+                text_color="#94a3b8",
+                height=30,
+                cursor="hand2"
+            ).pack()
+
+        # Footer
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12, height=58)
+        footer_frame.pack(side="bottom", fill="x", padx=12, pady=12)
         footer_frame.pack_propagate(False)
 
-        tk.Button(
-            footer_frame, text="חזרה למסך ראשי", command=lambda: open_main_page(current_username),
-            font=("Arial", 12, "bold"), bg="#1a73e8", fg="white", relief="flat", bd=0, cursor="hand2"
-        ).pack(side="left", padx=20, pady=12, ipadx=10, ipady=6)
+        ctk.CTkButton(
+            footer_frame,
+            text="חזרה למסך ראשי",
+            command=lambda: open_main_page(current_username),
+            font=("Segoe UI", 12, "bold"),
+            fg_color="transparent",
+            hover_color="#1e293b",
+            text_color="#60a5fa",
+            height=38,
+            corner_radius=8,
+            cursor="hand2"
+        ).pack(side="left", padx=15, pady=10)
 
         if current_user_role == "teacher":
-            tk.Button(
-                footer_frame, text="➕ כתיבת הודעה חדשה", command=open_teacher_compose_window,
-                font=("Arial", 12, "bold"), bg="#10b981", fg="white", relief="flat", bd=0, cursor="hand2"
-            ).pack(side="right", padx=20, pady=12, ipadx=10, ipady=6)
-            
+            ctk.CTkButton(
+                footer_frame,
+                text="➕ כתיבת הודעה חדשה",
+                command=open_teacher_compose_window,
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#10b981",
+                hover_color="#059669",
+                height=38,
+                corner_radius=8,
+                cursor="hand2"
+            ).pack(side="right", padx=15, pady=10)
         
     def open_class_chat_room():
         global current_username, current_user_class, current_user_role
         
-        if not current_user_role in ["student", "teacher"]:
+        if current_user_role not in ["student", "teacher"]:
             messagebox.showerror("שגיאה", "פיצ'ר זה זמין למשתמשים רשומים בלבד")
             return
 
@@ -1591,62 +1658,104 @@ try:
         class_raw = current_user_class
         simplified_class = hebrew_display_map.get(class_raw, class_raw)
         
-        new_win = tk.Toplevel()
+        # חלון עליון מבית CustomTkinter
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
         destroy_and_set_new_window(new_win)
         new_win.title("צ'אט כיתתי")
         
-        width, height = 550, 780
+        width, height = 480, 720
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
         x = (screen_width // 2) - (width // 2)
         y = (screen_height // 2) - (height // 2)
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f8fafc") 
-        new_win.resizable(False, False)
-        
-        main_frame = tk.Frame(new_win, bg="white", relief="solid", bd=1)
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=740)
-        
-        # כותרת
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=90) 
-        header_frame.pack(fill="x")
+        new_win.configure(fg_color="#0f172a") # רקע כהה ויוקרתי
+
+        # ------------------ כותרת עליונה (Header) ------------------
+        header_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=15, height=75)
+        header_frame.pack(fill="x", padx=10, pady=(10, 5))
         header_frame.pack_propagate(False)
-        
-        tk.Label(header_frame, text=f"צ'אט כיתה {simplified_class}", font=("Arial", 16, "bold"), fg="white", bg="#1a73e8").pack(pady=(22, 2))
-        tk.Label(header_frame, text="מוצפן מקצה לקצה", font=("Arial", 10), fg="#e8f0fe", bg="#1a73e8").pack()
-        
-        # אזור הצ'אט (Canvas דינמי לבועות)
-        chat_container = tk.Frame(main_frame, bg="#e2e8f0")
-        chat_container.pack(fill="both", expand=True)
-        
-        canvas = tk.Canvas(chat_container, bg="#e2e8f0", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg="#e2e8f0")
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+
+        # כפתור יציאה מודרני ועגול
+        btn_back = ctk.CTkButton(
+            header_frame, 
+            text="✕", 
+            width=36,
+            height=36,
+            corner_radius=18,
+            font=("Segoe UI", 14, "bold"), 
+            fg_color="#334155", 
+            hover_color="#ef4444", # הופך לאדום בריחוף!
+            text_color="#f8fafc",
+            command=lambda: open_main_page(current_username)
         )
+        btn_back.pack(side="left", padx=15, pady=18)
+
+        # פרטי הצ'אט
+        title_info_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        title_info_frame.pack(side="right", padx=15, pady=10)
+
+        ctk.CTkLabel(
+            title_info_frame, 
+            text=f"צ'אט כיתה {simplified_class}", 
+            font=("Segoe UI", 16, "bold"), 
+            text_color="#f8fafc"
+        ).pack(anchor="e")
         
-        canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        
-        def on_canvas_configure(event):
-            canvas.itemconfig(canvas_window, width=event.width)
-        canvas.bind("<Configure>", on_canvas_configure)
-        
-        canvas.pack(side="right", fill="both", expand=True)
-        scrollbar.pack(side="left", fill="y")
-        
-        # אזור הקלט
-        input_frame = tk.Frame(main_frame, bg="white")
-        input_frame.pack(fill="x", ipady=5)
-        
-        msg_entry = tk.Entry(input_frame, font=("Arial", 13), bg="#f1f5f9", relief="flat", justify="right", fg="#1e293b")
-        msg_entry.pack(side="right", fill="x", expand=True, padx=12, pady=10, ipady=8)
+        ctk.CTkLabel(
+            title_info_frame, 
+            text="🔒 מוצפן מקצה לקצה", 
+            font=("Segoe UI", 11), 
+            text_color="#38bdf8"
+        ).pack(anchor="e")
+
+        # ------------------ אזור הצ'אט (Scrollable Frame מודרני) ------------------
+        chat_scroll_frame = ctk.CTkScrollableFrame(
+            new_win, 
+            fg_color="#0f172a", 
+            scrollbar_button_color="#334155",
+            scrollbar_button_hover_color="#475569"
+        )
+        chat_scroll_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+        # ------------------ סרגל קלט הודעה ------------------
+        input_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, height=65)
+        input_frame.pack(fill="x", padx=10, pady=(5, 10))
+        input_frame.pack_propagate(False)
+
+        # כפתור שליחה מעוגל
+        btn_send = ctk.CTkButton(
+            input_frame, 
+            text="שליחה ➔", 
+            width=85,
+            height=40,
+            corner_radius=15,
+            font=("Segoe UI", 12, "bold"), 
+            fg_color="#2563eb", 
+            hover_color="#1d4ed8",
+            text_color="white",
+            command=lambda: send_message()
+        )
+        btn_send.pack(side="left", padx=10, pady=12)
+
+        # תיבת טקסט מעוצבת
+        msg_entry = ctk.CTkEntry(
+            input_frame, 
+            placeholder_text="כתיבת הודעה...",
+            font=("Segoe UI", 13), 
+            fg_color="#0f172a", 
+            border_color="#334155",
+            border_width=1,
+            corner_radius=15,
+            justify="right",
+            text_color="#f8fafc",
+            placeholder_text_color="#64748b"
+        )
+        msg_entry.pack(side="right", fill="x", expand=True, padx=(5, 10), pady=12)
         msg_entry.focus_set()
-        
+
         def send_message(event=None):
             msg_text = msg_entry.get().strip()
             if not msg_text:
@@ -1659,7 +1768,6 @@ try:
             try:
                 with create_secure_socket() as s:
                     s.connect((SERVER_IP, PORT))
-                    # שולח עכשיו גם את תפקיד המשתמש!
                     subject = f"send_chat_message|{class_raw}|{current_username}|{current_user_role}|{msg_text}"
                     s.sendall(subject.encode('utf-8'))
                     raw_data = s.recv(1024)
@@ -1670,25 +1778,12 @@ try:
                             load_chat_history()
             except Exception as e:
                 print(f"Error sending message: {e}")
-                
+
         msg_entry.bind("<Return>", send_message)
-        
-        btn_send = tk.Button(
-            input_frame, 
-            text="שלח", 
-            font=("Arial", 11, "bold"), 
-            bg="#1a73e8", 
-            fg="white", 
-            relief="flat", 
-            bd=0, 
-            cursor="hand2", 
-            command=send_message, 
-            width=8
-        )
-        btn_send.pack(side="left", padx=10, pady=10, ipady=6)
-        
+
         loaded_message_count = 0
-        
+
+        # ------------------ ציור בועת הודעה מעוגלת ------------------
         def render_bubble(msg_data):
             user = msg_data.get("username", "Unknown")
             text = msg_data.get("message", "")
@@ -1697,61 +1792,74 @@ try:
             
             is_me = (user == current_username)
             is_teacher = (role == "teacher")
-            
-            # שורת מעטפת להודעה
-            row = tk.Frame(scrollable_frame, bg="#e2e8f0")
-            row.pack(fill="x", padx=15, pady=6)
-            
-            # הגדרות עיצוב לבועה
+
+            row = ctk.CTkFrame(chat_scroll_frame, fg_color="transparent")
+            row.pack(fill="x", pady=4)
+
+            # עיצוב הבועה לפי זהות השולח
             if is_teacher:
-                bg_color = "#fef08a" # צהוב-זהב להבלטת מורה
-                fg_color = "#854d0e" # צבע טקסט כהה-זהוב
-                border_color = "#eab308"
-                anchor_side = "w"
+                bg_color = "#451a03"       # חום-זהב כהה ויוקרתי
+                border_color = "#d97706"   # מסגרת זהב
+                border_width = 1
+                header_text = f"👑 {user} (מורה)"
+                header_color = "#fef08a"
                 pack_side = "left"
-                header = f"{user} (מורה) • {time_str}"
+                align_anchor = "w"
             elif is_me:
-                bg_color = "#dcf8c6" # ירוק וואטסאפ (או כחול מודרני אם תרצה לשנות)
-                fg_color = "#000000"
-                border_color = "#b2e289"
-                anchor_side = "e"
+                bg_color = "#1e3a8a"       # כחול עמוק ומודרני
+                border_color = "#3b82f6"
+                border_width = 0
+                header_text = "אני"
+                header_color = "#93c5fd"
                 pack_side = "right"
-                header = f"{time_str}"
+                align_anchor = "e"
             else:
-                bg_color = "#ffffff" # לבן לתלמידים אחרים
-                fg_color = "#000000"
-                border_color = "#cbd5e1"
-                anchor_side = "w"
+                bg_color = "#1e293b"       # אפור כהה נקי
+                border_color = "#334155"
+                border_width = 1
+                header_text = f"👤 {user}"
+                header_color = "#cbd5e1"
                 pack_side = "left"
-                header = f"{user} • {time_str}"
-            
-            bubble = tk.Frame(row, bg=bg_color, highlightbackground=border_color, highlightthickness=1)
-            bubble.pack(side=pack_side, anchor=anchor_side)
-            
-            # מסגרת פנימית לריווח (Padding)
-            inner_bubble = tk.Frame(bubble, bg=bg_color, padx=10, pady=6)
-            inner_bubble.pack()
-            
-            # כותרת (שם המשתמש + שעה)
-            tk.Label(
-                inner_bubble, 
-                text=header, 
-                font=("Arial", 9, "bold" if is_teacher else "normal"), 
-                bg=bg_color, 
-                fg="#64748b" if not is_teacher else fg_color
-            ).pack(anchor=anchor_side, pady=(0, 2))
-            
+                align_anchor = "w"
+
+            # הבועה המעוגלת!
+            bubble = ctk.CTkFrame(
+                row, 
+                fg_color=bg_color, 
+                border_color=border_color, 
+                border_width=border_width,
+                corner_radius=16
+            )
+            bubble.pack(side=pack_side, anchor=align_anchor, padx=5)
+
+            # כותרת ההודעה (שם + שעה)
+            header_frame_msg = ctk.CTkFrame(bubble, fg_color="transparent")
+            header_frame_msg.pack(fill="x", padx=12, pady=(8, 2))
+
+            ctk.CTkLabel(
+                header_frame_msg, 
+                text=header_text, 
+                font=("Segoe UI", 10, "bold"), 
+                text_color=header_color
+            ).pack(side="right" if is_me else "left")
+
+            ctk.CTkLabel(
+                header_frame_msg, 
+                text=f"  {time_str}", 
+                font=("Segoe UI", 9), 
+                text_color="#64748b"
+            ).pack(side="right" if is_me else "left")
+
             # גוף ההודעה
-            tk.Label(
-                inner_bubble, 
+            ctk.CTkLabel(
+                bubble, 
                 text=text, 
-                font=("Arial", 12), 
-                bg=bg_color, 
-                fg=fg_color, 
+                font=("Segoe UI", 12), 
+                text_color="#f8fafc", 
                 justify="right", 
-                wraplength=320 # שבירת שורות אוטומטית בהודעות ארוכות
-            ).pack(anchor=anchor_side)
-            
+                wraplength=290
+            ).pack(anchor=align_anchor, padx=12, pady=(0, 8))
+
         def load_chat_history():
             nonlocal loaded_message_count
             if not new_win.winfo_exists():
@@ -1778,51 +1886,33 @@ try:
                         
                     history = json.loads(raw_res)
                     
-                    # מצייר רק הודעות חדשות שעוד לא צויירו! יעילות מקסימלית בלי למחוק את המסך
                     if len(history) > loaded_message_count:
                         for msg in history[loaded_message_count:]:
                             render_bubble(msg)
-                            
+                        
                         loaded_message_count = len(history)
                         
-                        # גלילה אוטומטית למטה אחרי שמציירים
-                        canvas.update_idletasks()
-                        canvas.yview_moveto(1.0)
+                        # גלילה אוטומטית חלקות למטה
+                        chat_scroll_frame._parent_canvas.yview_moveto(1.0)
                         
             except Exception as e:
                 print(f"Error loading chat: {e}")
-        
+
         def auto_refresh():
             if new_win.winfo_exists():
                 load_chat_history()
                 new_win.after(2000, auto_refresh)
                 
-        # כפתור תחתון חזרה למסך ראשי
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=60)
-        footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False)
-        
-        tk.Button(
-            footer_frame,
-            text="חזרה למסך ראשי",
-            command=lambda: open_main_page(current_username),
-            font=("Arial", 11, "bold"),
-            bg="#64748b",
-            fg="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).pack(pady=10, ipadx=20, ipady=4)
-        
-        # הפעלה
         load_chat_history()
         auto_refresh()
         
         
     def open_todo_list():
-        global current_username, current_user_class
+        global current_username, current_user_class, current_user_role
         SERVER_IP = '127.0.0.1'
         PORT = 9999
+
+        tasks = []
 
         try:
             with create_secure_socket() as s:
@@ -1830,7 +1920,6 @@ try:
                 s.connect((SERVER_IP, PORT))
 
                 subject = f"tasks|{current_user_class}|{current_username}"
-
                 s.sendall(subject.encode("utf-8"))
 
                 raw_data = s.recv(1024)
@@ -1840,15 +1929,11 @@ try:
 
                 dataFromServer = raw_data.decode("utf-8").strip()
                 print(f"Received from server: {dataFromServer}")
-                
-                dataFromServer = raw_data.decode("utf-8").strip()
-                print(f"Received from server: {dataFromServer}")
 
                 if dataFromServer.startswith("username:"):
                     messagebox.showerror("שגיאה", "עליך להירשם למערכת כדי להשתמש באופציה זו")
                     open_login_window()
                     return
-
                 else:
                     try:
                         tasks = json.loads(dataFromServer)
@@ -1859,17 +1944,19 @@ try:
 
         except ConnectionRefusedError:
             messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
-            
+            return
         except Exception as e:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
-                
-        new_win = tk.Toplevel()
+            return
+
+        # ------------------ חלון ראשי ------------------
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
         destroy_and_set_new_window(new_win)
         new_win.title("To Do List")
 
-        width, height = 620, 800
+        width, height = 550, 750
         screen_width = new_win.winfo_screenwidth()
         screen_height = new_win.winfo_screenheight()
 
@@ -1877,44 +1964,44 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a") # רקע כהה
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
+        # התיקון כאן: ה-width וה-height מוגדרים בתוך ה-CTkFrame, ולא ב-place()
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=510, height=710)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False) # מונע מהפריים להתכווץ לפי התוכן
 
-        header = tk.Frame(main_frame, bg="#1a73e8", height=100)
-        header.pack(fill="x")
+        # ------------------ כותרת ------------------
+        header = ctk.CTkFrame(main_frame, fg_color="#3b82f6", corner_radius=15, height=90)
+        header.pack(fill="x", padx=15, pady=(15, 10))
         header.pack_propagate(False)
 
-        tk.Label(
+        ctk.CTkLabel(
             header,
             text="📝 To Do List",
-            font=("Arial", 22, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(18, 5))
+            font=("Segoe UI", 22, "bold"),
+            text_color="white"
+        ).pack(pady=(15, 2))
 
-        tk.Label(
+        ctk.CTkLabel(
             header,
             text="המשימות שלך להיום",
-            font=("Arial", 10),
-            fg="#dbeafe",
-            bg="#1a73e8"
+            font=("Segoe UI", 11),
+            text_color="#e0f2fe"
         ).pack()
 
-        tasks_frame = tk.Frame(main_frame, bg="#f8fafc")
-        tasks_frame.pack(fill="both", expand=True, padx=20, pady=15)
+        # ------------------ אזור המשימות ------------------
+        tasks_frame = ctk.CTkScrollableFrame(
+            main_frame, 
+            fg_color="#0f172a", 
+            corner_radius=15,
+            scrollbar_button_color="#334155"
+        )
+        tasks_frame.pack(fill="both", expand=True, padx=15, pady=10)
 
         def add_task(task_text, done=False):
-            row = tk.Frame(
-                tasks_frame,
-                bg="white",
-                highlightbackground="#e2e8f0",
-                highlightthickness=1
-            )
-            
-            row.pack(fill="x", pady=6)
+            row = ctk.CTkFrame(tasks_frame, fg_color="#1e293b", corner_radius=12)
+            row.pack(fill="x", pady=5, padx=5)
 
             var = tk.BooleanVar(value=done)
 
@@ -1924,58 +2011,89 @@ try:
                         tasks.remove(task_text)
                     row.destroy()
 
-            tk.Checkbutton(
+            chk = ctk.CTkCheckBox(
                 row,
+                text="",
                 variable=var,
                 command=remove_task,
-                bg="white",
-                activebackground="white"
-            ).pack(side="left", padx=12, pady=12)
+                width=24,
+                height=24,
+                corner_radius=6,
+                checkbox_width=20,
+                checkbox_height=20,
+                fg_color="#10b981",
+                hover_color="#059669"
+            )
+            chk.pack(side="left", padx=12, pady=12)
 
-            tk.Label(
+            ctk.CTkLabel(
                 row,
                 text=task_text,
-                font=("Arial", 11),
-                bg="white",
-                fg="#334155",
+                font=("Segoe UI", 13),
+                text_color="#f8fafc",
                 anchor="e"
             ).pack(side="right", fill="x", expand=True, padx=15, pady=12)
-        
+
         def add_task_to_gui():
-            if current_user_role == "teacher" or current_user_role == "student":
-                add_task(task_text=str(task_entry.get()))
-                tasks.append(str(task_entry.get()))
+            if current_user_role in ["teacher", "student"]:
+                text_val = task_entry.get().strip()
+                add_task(task_text=text_val)
+                tasks.append(text_val)
                 task_entry.delete(0, tk.END)
-                
             else:
-                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
                 return
-            
+
         for task in tasks:
             add_task(task)
 
-        input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
-        input_frame.pack(fill="x", padx=20, pady=(0, 15))
-        input_frame.pack_propagate(False)
+        # ------------------ סרגל הכנסת משימה ------------------
+        input_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        input_frame.pack(fill="x", padx=15, pady=10)
 
-        task_entry = tk.Entry(
+        task_entry = ctk.CTkEntry(
             input_frame,
-            font=("Arial", 11),
-            bd=0,
-            relief="flat"
+            placeholder_text="הקלד משימה חדשה...",
+            font=("Segoe UI", 12),
+            fg_color="#0f172a",
+            border_color="#334155",
+            border_width=1,
+            corner_radius=12,
+            justify="right",
+            text_color="#f8fafc",
+            placeholder_text_color="#64748b"
         )
-        task_entry.pack(
-            side="right",
-            fill="x",
-            expand=True,
-            padx=(10, 10),
-            pady=18,
-            ipady=10
+        task_entry.pack(side="right", fill="x", expand=True, padx=(8, 0), ipady=4)
+
+        def checkIfValid():
+            if current_user_role in ["teacher", "student"]:
+                if task_entry.get().strip() == "":
+                    messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
+                    return
+                
+                if len(tasks) >= 7:
+                    messagebox.showerror("שגיאה", "הגעת למגבלת המשימות (עד 7 משימות)")
+                    return
+            add_task_to_gui()
+
+        btn_add = ctk.CTkButton(
+            input_frame,
+            text="הוסף +",
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            corner_radius=12,
+            width=80,
+            height=38,
+            command=checkIfValid
         )
-        
+        btn_add.pack(side="left")
+
+        footer = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer.pack(fill="x", padx=15, pady=(5, 15))
+
         def saveTasks():
-            if current_user_role == "teacher" or current_user_role == "student":
-            
+            if current_user_role in ["teacher", "student"]:
                 tasks_json = json.dumps(tasks, ensure_ascii=False)
                 update_message = f"update_tasks|{current_user_class}|{current_username}|{tasks_json}"
                 
@@ -1993,57 +2111,19 @@ try:
                 except Exception as e:
                     messagebox.showwarning("שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
             
-            else:
-                open_main_page(current_username)
-                return
-
             open_main_page(current_username)
-        
-        def checkIfValid():
-            if current_user_role == "teacher" or current_user_role == "student":
-                if task_entry.get().strip() == "":
-                    messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
-                    return
-                
-                if len(tasks) == 7:
-                    messagebox.showerror("שגיאה", "הגעת למגבלת המשימות")
-                    return
-                
-            else:
-                pass
-            
-            add_task_to_gui()
 
-        tk.Button(
-            input_frame,
-            text="הוסף",
-            font=("Arial", 11, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            bd=0,
-            relief="flat",
-            padx=18,
-            pady=8,
-            cursor="hand2",
-            command=checkIfValid,
-        ).pack(side="left", padx=10, pady=18)
-
-        footer = tk.Frame(main_frame, bg="white", height=60)
-        footer.pack(fill="x")
-        footer.pack_propagate(False)
-
-        tk.Button(
+        btn_back = ctk.CTkButton(
             footer,
-            text="חזרה",
-            font=("Arial", 12),
-            bg="#64748b",
-            fg="white",
-            bd=0,
-            padx=18,
-            pady=8,
-            cursor="hand2",
-            command=saveTasks,
-        ).pack(pady=10)
+            text="שמור וחזור",
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#475569",
+            hover_color="#334155",
+            corner_radius=12,
+            height=40,
+            command=saveTasks
+        )
+        btn_back.pack(fill="x")
         
     def open_reminder():
         new_win = tk.Toplevel()
@@ -2485,14 +2565,17 @@ try:
     def open_freer():            
         global current_user_role, current_username, current_user_class
         
+        # =========================================================================
+        #                             ממשק מורה (מנהל)
+        # =========================================================================
         if current_user_role == "teacher":
-            new_win = tk.Toplevel()
+            new_win = ctk.CTkToplevel()
             new_win.overrideredirect(True)
 
             destroy_and_set_new_window(new_win)
             new_win.title("ניהול בקשות שחרור - ממשק מורה")
 
-            width, height = 700, 770 
+            width, height = 720, 780 
             screen_width = new_win.winfo_screenwidth()
             screen_height = new_win.winfo_screenheight()
 
@@ -2500,50 +2583,59 @@ try:
             y = (screen_height // 2) - (height // 2)
 
             new_win.geometry(f"{width}x{height}+{x}+{y}")
-            new_win.configure(bg="#f0f4f8")
-            new_win.resizable(False, False)
+            new_win.configure(fg_color="#0f172a")
 
-            main_frame = tk.Frame(new_win, bg="white")
-            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=660, height=730)
+            # פריים ראשי - הגדרת גודל בתוך ה-Constructor
+            main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=680, height=740)
+            main_frame.place(relx=0.5, rely=0.5, anchor="center")
+            main_frame.pack_propagate(False)
 
-            header_frame = tk.Frame(main_frame, bg="#1a73e8", height=140)
-            header_frame.pack(fill="x")
+            # ------------------ כותרת מורה ------------------
+            header_frame = ctk.CTkFrame(main_frame, fg_color="#3b82f6", corner_radius=15, height=120)
+            header_frame.pack(fill="x", padx=15, pady=(15, 10))
             header_frame.pack_propagate(False)
 
-            tk.Label(
+            ctk.CTkLabel(
                 header_frame,
-                text="📋",
-                font=("Arial", 38),
-                fg="white",
-                bg="#1a73e8"
-            ).pack(pady=(12, 0))
+                text="📋 מרכז בקשות שחרור",
+                font=("Segoe UI", 20, "bold"),
+                text_color="white"
+            ).pack(pady=(20, 2))
 
-            tk.Label(
-                header_frame,
-                text="מרכז בקשות שחרור",
-                font=("Arial", 22, "bold"),
-                fg="white",
-                bg="#1a73e8"
-            ).pack()
-
-            tk.Label(
+            ctk.CTkLabel(
                 header_frame,
                 text="צפייה, אישור ודחייה של בקשות יציאה של תלמידים",
-                font=("Arial", 11),
-                fg="#dbeafe",
-                bg="#1a73e8"
+                font=("Segoe UI", 11),
+                text_color="#e0f2fe"
             ).pack()
 
-            table_frame = tk.Frame(main_frame, bg="#f8fafc")
-            table_frame.pack(fill="both", expand=True, padx=25, pady=20)
+            # ------------------ אזור הטבלה ------------------
+            table_container = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=15)
+            table_container.pack(fill="both", expand=True, padx=15, pady=10)
 
+            # עיצוב מודרני ל-Treeview המובנה
             style = ttk.Style()
             style.theme_use("clam")
-            style.configure("Treeview", font=("Arial", 11), rowheight=32, background="#ffffff", fieldbackground="#ffffff")
-            style.configure("Treeview.Heading", font=("Arial", 11, "bold"), background="#e2e8f0", foreground="#334155")
-            
+            style.configure(
+                "Treeview", 
+                font=("Segoe UI", 10), 
+                rowheight=32, 
+                background="#1e293b", 
+                foreground="#f8fafc",
+                fieldbackground="#1e293b",
+                bordercolor="#334155"
+            )
+            style.configure(
+                "Treeview.Heading", 
+                font=("Segoe UI", 10, "bold"), 
+                background="#334155", 
+                foreground="#f8fafc",
+                relief="flat"
+            )
+            style.map("Treeview", background=[("selected", "#3b82f6")], foreground=[("selected", "white")])
+
             columns = ("id_s", "day", "hour", "reason")
-            tree = ttk.Treeview(table_frame, columns=columns, show="headings", selectmode="browse")
+            tree = ttk.Treeview(table_container, columns=columns, show="headings", selectmode="browse")
             
             tree.heading("id_s", text="ת.ז. תלמיד")
             tree.heading("day", text="יום שחרור")
@@ -2555,24 +2647,22 @@ try:
             tree.column("hour", width=70, anchor="center")
             tree.column("reason", width=280, anchor="e") 
 
-            scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+            scrollbar = ttk.Scrollbar(table_container, orient="vertical", command=tree.yview)
             tree.configure(yscrollcommand=scrollbar.set)
             
-            tree.pack(side="left", fill="both", expand=True)
-            scrollbar.pack(side="right", fill="y")
+            tree.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+            scrollbar.pack(side="right", fill="y", pady=5)
 
+            # ------------------ לוגיקת מורה ------------------
             def approve_request():
                 selected_item = tree.selection()
                 if not selected_item:
                     messagebox.showwarning("שימו לב", "אנא בחרו בקשה מהרשימה לאישור")
                     return
                 
-                # בדיקה מה ה-ID שנשלף מהשורה שנבחרה
                 req_id = selected_item[0]
                 item_details = tree.item(selected_item)['values']
                 student_id = item_details[0]
-                
-                print(f"[DEBUG CLIENT] Teacher clicked Approve. Selected row iid (req_id): '{req_id}'")
 
                 class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
                 class_name = str(class_name).strip()
@@ -2584,23 +2674,18 @@ try:
                     with create_secure_socket() as s:
                         s.connect((SERVER_IP, PORT))
                         update_msg = f"update_request_status|{class_name}|{req_id}|approved"
-                        print(f"[DEBUG CLIENT] Sending update message to server: '{update_msg}'")
                         s.sendall(update_msg.encode('utf-8'))
 
                         raw_data = s.recv(1024)
                         if raw_data:
                             res = raw_data.decode('utf-8').strip()
-                            print(f"[DEBUG CLIENT] Server responded to update: '{res}'")
-                            
                             if res == "200 ok":
                                 messagebox.showinfo("הצלחה", f"בקשת השחרור עבור תלמיד {student_id} אושרה בהצלחה!")
                                 tree.delete(selected_item)
                             else:
                                 messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
                 except Exception as e:
-                    print(f"[DEBUG CLIENT] Error in approve_request: {e}")
                     messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
-
 
             def reject_request():
                 selected_item = tree.selection()
@@ -2611,8 +2696,6 @@ try:
                 req_id = selected_item[0]
                 item_details = tree.item(selected_item)['values']
                 student_id = item_details[0]
-                
-                print(f"[DEBUG CLIENT] Teacher clicked Reject. Selected row iid (req_id): '{req_id}'")
 
                 class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
                 class_name = str(class_name).strip()
@@ -2624,21 +2707,17 @@ try:
                     with create_secure_socket() as s:
                         s.connect((SERVER_IP, PORT))
                         update_msg = f"update_request_status|{class_name}|{req_id}|rejected"
-                        print(f"[DEBUG CLIENT] Sending update message to server: '{update_msg}'")
                         s.sendall(update_msg.encode('utf-8'))
 
                         raw_data = s.recv(1024)
                         if raw_data:
                             res = raw_data.decode('utf-8').strip()
-                            print(f"[DEBUG CLIENT] Server responded to update: '{res}'")
-                            
                             if res == "200 ok":
                                 messagebox.showinfo("סטטוס עודכן", f"בקשת השחרור עבור תלמיד {student_id} נדחתה.")
                                 tree.delete(selected_item)
                             else:
                                 messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
                 except Exception as e:
-                    print(f"[DEBUG CLIENT] Error in reject_request: {e}")
                     messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
 
             def load_requests():
@@ -2651,15 +2730,11 @@ try:
                 try:
                     with create_secure_socket() as s:
                         s.connect((SERVER_IP, PORT))
-                        
-                        # דיבאג 1: נראה איזו כיתה המורה מנסה לבקש
                         class_name = current_user_class.get() if hasattr(current_user_class, 'get') else current_user_class
-                        print(f"[DEBUG CLIENT] Teacher is requesting data for class: '{class_name}'")
                         
                         request_msg = f"get_freer_requests|{class_name}"
                         s.sendall(request_msg.encode('utf-8'))
 
-                        # מנגנון לקבלת המידע המלא (בלולאה) עד שהשרת מסיים לשלוח
                         full_response = ""
                         while True:
                             raw_data = s.recv(4096)
@@ -2668,22 +2743,15 @@ try:
                             full_response += raw_data.decode('utf-8')
                         
                         response = full_response.strip()
-                        print(f"[DEBUG CLIENT] Raw response from server: {response}") # דיבאג 2
 
                         if response.startswith("requests_data|"):
                             json_string = response.split("|", 1)[1]
-                            print(f"[DEBUG CLIENT] Extracted JSON string: {json_string}") # דיבאג 3
-                            
                             if json_string == "{}" or not json_string:
-                                print("[DEBUG CLIENT] JSON is empty, nothing to load.")
                                 return  
                             
                             all_requests = json.loads(json_string)
                             
                             for req_id, req_info in all_requests.items():
-                                print(f"[DEBUG CLIENT] Processing request {req_id}: {req_info}") # דיבאג 4
-                                
-                                # שים לב: בדוק שהסטטוס ב-JSON שלך הוא באמת באותיות קטנות "pending"
                                 if req_info.get("status") == "pending":
                                     row = (
                                         req_info.get("student_id"),
@@ -2692,65 +2760,62 @@ try:
                                         req_info.get("reason")
                                     )
                                     tree.insert("", "end", iid=req_id, values=row)
-                                    print(f"[DEBUG CLIENT] Successfully inserted row for student: {req_info.get('student_id')}")
-                                else:
-                                    print(f"[DEBUG CLIENT] Skipped request {req_id} because status is {req_info.get('status')}")
-                                    
                 except Exception as e:
-                    print(f"[DEBUG CLIENT] Error in load_requests: {e}")
                     messagebox.showerror("שגיאה", f"לא ניתן לטעון את בקשות השחרור: {e}")
 
             load_requests()
 
-            actions_frame = tk.Frame(main_frame, bg="white")
-            actions_frame.pack(fill="x", padx=25, pady=(0, 15))
+            # ------------------ כפתורי פעולה למורה ------------------
+            actions_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            actions_frame.pack(fill="x", padx=15, pady=5)
 
-            btn_approve = tk.Button(
+            btn_approve = ctk.CTkButton(
                 actions_frame,
                 text="אשר בקשה ✔",
                 command=approve_request,
-                font=("Arial", 12, "bold"),
-                bg="#10b981", 
-                fg="white",
-                relief="flat",
-                cursor="hand2"
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#10b981", 
+                hover_color="#059669",
+                corner_radius=10,
+                height=40
             )
-            btn_approve.pack(side="right", fill="x", expand=True, padx=(8, 0), ipady=10)
+            btn_approve.pack(side="right", fill="x", expand=True, padx=(5, 0))
 
-            btn_reject = tk.Button(
+            btn_reject = ctk.CTkButton(
                 actions_frame,
                 text="דחה בקשה ❌",
                 command=reject_request,
-                font=("Arial", 12, "bold"),
-                bg="#ef4444", 
-                fg="white",
-                relief="flat",
-                cursor="hand2"
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#ef4444", 
+                hover_color="#dc2626",
+                corner_radius=10,
+                height=40
             )
-            btn_reject.pack(side="left", fill="x", expand=True, padx=(0, 8), ipady=10)
+            btn_reject.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-            footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-            footer_frame.pack(fill="x", side="bottom")
-            footer_frame.pack_propagate(False)
+            footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            footer_frame.pack(fill="x", padx=15, pady=(5, 15))
 
-            tk.Button(
+            ctk.CTkButton(
                 footer_frame,
                 text="חזרה למסך ראשי",
                 command=lambda: open_main_page(current_username),
-                font=("Arial", 13, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                relief="flat",
-                bd=0,
-                cursor="hand2"
-            ).pack(pady=15, ipadx=18, ipady=8)
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#475569",
+                hover_color="#334155",
+                corner_radius=10,
+                height=38
+            ).pack(fill="x")
 
             return 
-                
-        new_win = tk.Toplevel()
-        destroy_and_set_new_window(new_win)
+
+        # =========================================================================
+        #                        ממשק תלמיד / הורה (טופס)
+        # =========================================================================
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
+        destroy_and_set_new_window(new_win)
         new_win.title("עמוד שיחרורון")
 
         width, height = 520, 770
@@ -2761,8 +2826,11 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a")
+
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=480, height=730)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
         student_id_var = tk.StringVar()
         parent_id_var = tk.StringVar()
@@ -2770,12 +2838,133 @@ try:
         hour_var = tk.StringVar()
         reason_var = tk.StringVar()
 
+        # ------------------ כותרת תלמיד ------------------
+        header_frame = ctk.CTkFrame(main_frame, fg_color="#3b82f6", corner_radius=15, height=130)
+        header_frame.pack(fill="x", padx=15, pady=(15, 10))
+        header_frame.pack_propagate(False)
+
+        # כפתור בדיקת סטטוס בתוך הכותרת
+        btn_status = ctk.CTkButton(
+            header_frame,
+            text="בדוק סטטוס 🔍",
+            command=lambda: check_my_requests_status(student_id_var.get(), current_user_class), 
+            font=("Segoe UI", 10, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            corner_radius=8,
+            width=100,
+            height=28
+        )
+        btn_status.place(relx=0.05, rely=0.15)
+
+        ctk.CTkLabel(
+            header_frame,
+            text="📄 בקשת שחרור",
+            font=("Segoe UI", 20, "bold"),
+            text_color="white"
+        ).pack(pady=(25, 2))
+
+        ctk.CTkLabel(
+            header_frame,
+            text="שליחת בקשת יציאה מסודרת למחנך/ת",
+            font=("Segoe UI", 11),
+            text_color="#e0f2fe"
+        ).pack()
+
+        # ------------------ טופס בקשה ------------------
+        form_frame = ctk.CTkScrollableFrame(main_frame, fg_color="#0f172a", corner_radius=15)
+        form_frame.pack(fill="both", expand=True, padx=15, pady=10)
+
+        def add_label(text):
+            ctk.CTkLabel(
+                form_frame, 
+                text=text, 
+                font=("Segoe UI", 11, "bold"), 
+                text_color="#cbd5e1",
+                anchor="e"
+            ).pack(fill="x", pady=(10, 2), padx=5)
+
+        add_label("ת.ז. של התלמיד/ה")
+        ctk.CTkEntry(
+            form_frame, 
+            font=("Segoe UI", 12), 
+            textvariable=student_id_var,
+            fg_color="#1e293b",
+            border_color="#334155",
+            text_color="white",
+            justify="right"
+        ).pack(fill="x", ipady=2, padx=5)
+
+        add_label("ת.ז. שלך (ההורה)")
+        ctk.CTkEntry(
+            form_frame, 
+            font=("Segoe UI", 12), 
+            textvariable=parent_id_var,
+            fg_color="#1e293b",
+            border_color="#334155",
+            text_color="white",
+            justify="right"
+        ).pack(fill="x", ipady=2, padx=5)
+
+        add_label("יום השחרור")
+        ctk.CTkComboBox(
+            form_frame,
+            values=["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי"],
+            font=("Segoe UI", 12),
+            dropdown_font=("Segoe UI", 12),
+            variable=day_var,
+            fg_color="#1e293b",
+            border_color="#334155",
+            button_color="#3b82f6",
+            text_color="white",
+            justify="right"
+        ).pack(fill="x", padx=5)
+
+        add_label("שעה")
+        ctk.CTkComboBox(
+            form_frame,
+            values=[
+                "9:00", "9:30", "10:00", "10:30",
+                "11:00", "11:30", "12:00", "12:30",
+                "13:00", "13:30", "14:00", "14:30",
+                "15:00", "15:30", "16:00"
+            ],
+            font=("Segoe UI", 12),
+            dropdown_font=("Segoe UI", 12),
+            variable=hour_var,
+            fg_color="#1e293b",
+            border_color="#334155",
+            button_color="#3b82f6",
+            text_color="white",
+            justify="right"
+        ).pack(fill="x", padx=5)
+
+        add_label("סיבה / הערה")
+        ctk.CTkEntry(
+            form_frame, 
+            font=("Segoe UI", 12), 
+            textvariable=reason_var,
+            fg_color="#1e293b",
+            border_color="#334155",
+            text_color="white",
+            justify="right"
+        ).pack(fill="x", ipady=2, padx=5)
+
+        ctk.CTkLabel(
+            form_frame,
+            text="בלחיצה על הכפתור הנך מאשר/ת את תנאי השימוש והמדיניות",
+            font=("Segoe UI", 9),
+            text_color="#64748b",
+            wraplength=380,
+            justify="center"
+        ).pack(pady=15)
+
         def freer_completed():
             nonlocal student_id_var, parent_id_var, day_var, hour_var, reason_var
             global current_user_role, current_user_class
 
-            if current_user_role != "teacher" and current_user_role != "student":
-                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            if current_user_role not in ["teacher", "student"]:
+                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
                 return
             
             s_id = str(student_id_var.get()).strip()
@@ -2783,7 +2972,7 @@ try:
             s_day = str(day_var.get()).strip()
             s_hour = str(hour_var.get()).strip()
             s_reason = str(reason_var.get()).strip()
-    
+
             if hasattr(current_user_class, 'get'):
                 u_class = current_user_class.get()
             else:  
@@ -2798,7 +2987,6 @@ try:
 
             try:
                 with create_secure_socket() as s:
-                    print(f"Connecting to {SERVER_IP}:{PORT}...")
                     s.connect((SERVER_IP, PORT))
                     
                     subject = f"freer premition|{s_id}|{s_hour}|{s_day}|{s_reason}|{u_class}"
@@ -2812,7 +3000,7 @@ try:
                         dataFromServer = raw_data.decode('utf-8').strip()
 
                         if dataFromServer == "200 ok":
-                            messagebox.showinfo("!הצלחה", "בקשת השיחרור נשלחה בהצלחה ומחכה לאישור המחנך")
+                            messagebox.showinfo("הצלחה!", "בקשת השיחרור נשלחה בהצלחה ומחכה לאישור המחנך")
                             break
                         else:
                             messagebox.showerror("שגיאה!", "תקלה בשליחת בקשת שיחרור, אנא נסה שוב")
@@ -2823,141 +3011,36 @@ try:
             except Exception as e:
                 messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
-
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
-        header_frame.pack(fill="x")
-        header_frame.pack_propagate(False)
-
-
-        tk.Button(
-            header_frame,
-            text="➜  בדוק סטטוס בקשות",
-            command=lambda: check_my_requests_status(student_id_var.get(), current_user_class), 
-            font=("Arial", 10, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            activebackground="#1557b0",
-            activeforeground="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).place(x=340, y=12) 
-
-        tk.Label(
-            header_frame,
-            text="📄",
-            font=("Arial", 40),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(15, 0))
-
-        tk.Label(
-            header_frame,
-            text="בקשת שחרור",
-            font=("Arial", 24, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack()
-
-        tk.Label(
-            header_frame,
-            text="שליחת בקשת יציאה מסודרת",
-            font=("Arial", 11),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack()
-
-        form_frame = tk.Frame(main_frame, bg="#f8fafc")
-        form_frame.pack(fill="both", expand=True, padx=25, pady=20)
-
-        label_style = {
-            "font": ("Arial", 11, "bold"),
-            "fg": "#334155",
-            "bg": "#f8fafc",
-            "anchor": "e"
-        }
-
-        def add_label(text):
-            tk.Label(form_frame, text=text, **label_style).pack(fill="x", pady=(10, 4))
-
-        add_label("ת.ז. של התלמיד/ה")
-        id_s = ttk.Entry(form_frame, font=("Arial", 11), textvariable=student_id_var)
-        id_s.pack(fill="x", ipady=6)
-
-        add_label("ת.ז. שלך (ההורה)")
-        id = ttk.Entry(form_frame, font=("Arial", 11), textvariable=parent_id_var)
-        id.pack(fill="x", ipady=6)
-
-        add_label("יום השחרור")
-        days = ttk.Combobox(
-            form_frame,
-            values=["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי"],
-            state="readonly",
-            font=("Arial", 11),
-            textvariable=day_var
-        )
-        days.pack(fill="x")
-
-        add_label("שעה")
-        hr = ttk.Combobox(
-            form_frame,
-            values=[
-                "9:00", "9:30", "10:00", "10:30",
-                "11:00", "11:30", "12:00", "12:30",
-                "13:00", "13:30", "14:00", "14:30",
-                "15:00", "15:30", "16:00"
-            ],
-            state="readonly",
-            font=("Arial", 11),
-            textvariable=hour_var
-        )
-        hr.pack(fill="x")
-
-        add_label("סיבה / הערה")
-        rs = ttk.Entry(form_frame, font=("Arial", 11), textvariable=reason_var)
-        rs.pack(fill="x", ipady=6)
-
-        tk.Label(
-            form_frame,
-            text="בלחיצה על הכפתור הנך מאשר/ת את תנאי השימוש והמדיניות",
-            font=("Arial", 10),
-            fg="#64748b",
-            bg="#f8fafc",
-            wraplength=400,
-            justify="right"
-        ).pack(pady=25)
-
-        tk.Button(
+        ctk.CTkButton(
             form_frame,
             text="שלח בקשת שחרור",
             command=freer_completed,
-            font=("Arial", 13, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
-            cursor="hand2"
-        ).pack(fill="x", ipady=12)
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            corner_radius=10,
+            height=42
+        ).pack(fill="x", padx=5, pady=(0, 10))
 
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-        footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False)
+        # ------------------ פוטר חזרה ------------------
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer_frame.pack(fill="x", padx=15, pady=(5, 15))
 
-        tk.Button(
+        ctk.CTkButton(
             footer_frame,
             text="חזרה למסך ראשי",
             command=lambda: open_main_page(current_username),
-            font=("Arial", 13, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).pack(pady=15, ipadx=18, ipady=8)
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#475569",
+            hover_color="#334155",
+            corner_radius=10,
+            height=38
+        ).pack(fill="x")
         
     def open_marechet():
-        new_win = tk.Toplevel()
+        global current_username, current_user_class
+
+        new_win = ctk.CTkToplevel()
         new_win.overrideredirect(True)
 
         destroy_and_set_new_window(new_win)
@@ -2971,8 +3054,7 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a") # רקע כהה ראשי
 
         try:
             with open("data/schedules_z_to_yb.json", "r", encoding="utf-8") as f:
@@ -2981,97 +3063,93 @@ try:
             messagebox.showerror("שגיאה", f"שגיאה בטעינת המערכת: {e}")
             return
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
+        # פריים ראשי - הגדרת הגודל מתבצעת בבנאי (Constructor)
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=480, height=730)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
-        header_frame.pack(fill="x")
+        # ------------------ כותרת ------------------
+        header_frame = ctk.CTkFrame(main_frame, fg_color="#3b82f6", corner_radius=15, height=130)
+        header_frame.pack(fill="x", padx=15, pady=(15, 10))
         header_frame.pack_propagate(False)
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text="📅",
-            font=("Arial", 40),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(18, 0))
+            text="📅 מערכת שעות",
+            font=("Segoe UI", 22, "bold"),
+            text_color="white"
+        ).pack(pady=(25, 2))
 
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text="מערכת שעות",
-            font=("Arial", 24, "bold"),
-            fg="white",
-            bg="#1a73e8"
+            text="צפייה במערכת השבועית לפי יום וכיתה",
+            font=("Segoe UI", 11),
+            text_color="#e0f2fe"
         ).pack()
 
-        tk.Label(
-            header_frame,
-            text="צפייה במערכת השבועית",
-            font=("Arial", 11),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack(pady=2)
+        # ------------------ סרגל בחירה ------------------
+        selector_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12)
+        selector_frame.pack(fill="x", padx=15, pady=10)
 
-        selector_frame = tk.Frame(main_frame, bg="#f8fafc")
-        selector_frame.pack(fill="x", padx=25, pady=20)
-
-        tk.Label(
+        ctk.CTkLabel(
             selector_frame,
-            text=":בחר יום וכיתה",
-            font=("Arial", 14, "bold"),
-            bg="#f8fafc",
-            fg="#334155"
-        ).pack(side="right", padx=10)
+            text="בחר יום וכיתה:",
+            font=("Segoe UI", 12, "bold"),
+            text_color="#f8fafc"
+        ).pack(side="right", padx=12, pady=10)
 
-        class_cb = ttk.Combobox(
+        class_cb = ctk.CTkComboBox(
             selector_frame,
             values=list(schedule_data.keys()),
-            state="readonly",
-            font=("Arial", 11),
-            width=10
+            font=("Segoe UI", 11),
+            dropdown_font=("Segoe UI", 11),
+            width=100,
+            fg_color="#1e293b",
+            border_color="#334155",
+            button_color="#3b82f6",
+            text_color="white",
+            justify="center"
         )
-        class_cb.pack(side="right", padx=8)
+        class_cb.pack(side="right", padx=5, pady=10)
 
-        day_cb = ttk.Combobox(
+        day_cb = ctk.CTkComboBox(
             selector_frame,
             values=["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"],
-            state="readonly",
-            font=("Arial", 11),
-            width=10
+            font=("Segoe UI", 11),
+            dropdown_font=("Segoe UI", 11),
+            width=100,
+            fg_color="#1e293b",
+            border_color="#334155",
+            button_color="#3b82f6",
+            text_color="white",
+            justify="center"
         )
-        day_cb.pack(side="right", padx=8)
+        day_cb.pack(side="right", padx=5, pady=10)
 
-        # set defaults: user's class + today's day
+        # ברירת מחדל: כיתת המשתמש + היום הנוכחי בשבוע
         hebrew_days = {6: "ראשון", 0: "שני", 1: "שלישי", 2: "רביעי", 3: "חמישי", 4: "שישי"}
         today_name = hebrew_days.get(datetime.datetime.now().weekday(), "ראשון")
 
-        if current_user_class in schedule_data:
-            class_cb.set(current_user_class)
-        else:
+        user_class_str = current_user_class.get() if hasattr(current_user_class, 'get') else str(current_user_class)
+
+        if user_class_str in schedule_data:
+            class_cb.set(user_class_str)
+        elif schedule_data:
             class_cb.set(list(schedule_data.keys())[0])
 
         day_cb.set(today_name)
 
-        list_container = tk.Frame(main_frame, bg="#f8fafc")
-        list_container.pack(fill="both", expand=True, padx=25, pady=10)
-
-        canvas = tk.Canvas(list_container, bg="#f8fafc", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(list_container, orient="vertical", command=canvas.yview)
-
-        scrollable_frame = tk.Frame(canvas, bg="#f8fafc")
-
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        # ------------------ רשימת שיעורים נגללת ------------------
+        scrollable_frame = ctk.CTkScrollableFrame(
+            main_frame,
+            fg_color="#0f172a",
+            corner_radius=15,
+            scrollbar_button_color="#334155"
         )
+        scrollable_frame.pack(fill="both", expand=True, padx=15, pady=10)
 
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=430)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        def refresh_schedule(event=None):
+        def refresh_schedule(choice=None):
+            # ניקוי הווידג'טים הקודמים
             for widget in scrollable_frame.winfo_children():
                 widget.destroy()
 
@@ -3083,45 +3161,53 @@ try:
 
             lessons = schedule_data.get(selected_class, {}).get(selected_day, [])
 
-            for lesson in lessons:
-                lesson_card = tk.Frame(
+            if not lessons:
+                ctk.CTkLabel(
                     scrollable_frame,
-                    bg="white",
-                    highlightbackground="#e2e8f0",
-                    highlightthickness=1
-                )
-                lesson_card.pack(fill="x", pady=6, ipady=10)
+                    text="אין לימודים ביום זה 🎉",
+                    font=("Segoe UI", 13),
+                    text_color="#94a3b8"
+                ).pack(pady=30)
+                return
 
-                tk.Label(
+            for lesson in lessons:
+                lesson_card = ctk.CTkFrame(
+                    scrollable_frame,
+                    fg_color="#1e293b",
+                    border_color="#334155",
+                    border_width=1,
+                    corner_radius=10
+                )
+                lesson_card.pack(fill="x", pady=4, padx=5, ipady=4)
+
+                ctk.CTkLabel(
                     lesson_card,
                     text=lesson,
-                    font=("Arial", 12, "bold"),
-                    fg="#1e293b",
-                    bg="white",
-                    anchor="e",
-                    justify="right"
-                ).pack(fill="x", padx=15)
+                    font=("Segoe UI", 12, "bold"),
+                    text_color="#f8fafc",
+                    anchor="e"
+                ).pack(fill="x", padx=15, pady=8)
 
-        class_cb.bind("<<ComboboxSelected>>", refresh_schedule)
-        day_cb.bind("<<ComboboxSelected>>", refresh_schedule)
+        # חיבור האירוע של שינוי הבחירה בתיבות הבחירה
+        class_cb.configure(command=refresh_schedule)
+        day_cb.configure(command=refresh_schedule)
 
-        refresh_schedule()  # show right away with the defaults set above
+        refresh_schedule()
 
-        footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
-        footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False)
+        # ------------------ פוטר חזרה ------------------
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer_frame.pack(fill="x", padx=15, pady=(5, 15))
 
-        tk.Button(
+        ctk.CTkButton(
             footer_frame,
             text="חזרה למסך ראשי",
             command=lambda: open_main_page(current_username),
-            font=("Arial", 13, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).pack(pady=15, ipadx=18, ipady=8)
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#475569",
+            hover_color="#334155",
+            corner_radius=10,
+            height=38
+        ).pack(fill="x")
 
 
     def open_moodle_tasks():
@@ -3136,7 +3222,7 @@ try:
         fetched_tasks = []
 
         # ---------------------------------------------------------
-        # שלב א': שליפת המשימות האמיתיות מהשרת בזמן אמת
+        # שלב א': שליפת הנתונים מהשרת
         # ---------------------------------------------------------
         try:
             with create_secure_socket() as s:
@@ -3156,7 +3242,7 @@ try:
         # ---------------------------------------------------------
         # שלב ב': בניית ממשק המשתמש (UI)
         # ---------------------------------------------------------
-        new_win = tk.Toplevel()
+        new_win = ctk.CTkToplevel()
         new_win.title("מרכז משימות ולמידה דיגיטלית")
         destroy_and_set_new_window(new_win)
         new_win.overrideredirect(True)
@@ -3167,78 +3253,87 @@ try:
         x = (screen_width // 2) - (width // 2)
         y = (screen_height // 2) - (height // 2)
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a") # רקע כהה ראשי
 
-        BLUE = "#1a73e8"
-        BG = "#f8fafc"
-        BORDER = "#e2e8f0"
-        GREEN = "#10b981"
-        RED = "#f43f5e"
-        LINK = "#2563eb"
-        TEXT_DARK = "#1e293b"
-        TEXT_MUTED = "#475569"
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=480, height=730)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
-
-        # ---------- header ----------
-        header_frame = tk.Frame(main_frame, bg=BLUE, height=150)
-        header_frame.pack(fill="x")
+        # ---------- כותרת (Header) ----------
+        header_frame = ctk.CTkFrame(main_frame, fg_color="#3b82f6", corner_radius=15, height=130)
+        header_frame.pack(fill="x", padx=15, pady=(15, 10))
         header_frame.pack_propagate(False)
 
-        tk.Label(header_frame, text="🎓", font=("Arial", 40), fg="white", bg=BLUE).pack(pady=(18, 0))
+        is_teacher = "teacher" in str(role) or "מורה" in str(role)
+        title_text = "🎓 ניהול והעלאת משימות" if is_teacher else "🎓 משימות ומטלות פתוחות"
 
-        is_teacher = "teacher" in role or "מורה" in role
-        title_text = "ניהול והעלאת קישורי משימות" if is_teacher else "משימות ומטלות פתוחות"
-        tk.Label(header_frame, text=title_text, font=("Arial", 20, "bold"), fg="white", bg=BLUE).pack()
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text=f"{username} שלום  •  כיתה {class_name}",
-            font=("Arial", 11),
-            fg="#dbeafe",
-            bg=BLUE
-        ).pack(pady=2)
+            text=title_text,
+            font=("Segoe UI", 20, "bold"),
+            text_color="white"
+        ).pack(pady=(25, 2))
 
-        # ---------- scrollable body ----------
-        body_container = tk.Frame(main_frame, bg=BG)
-        body_container.pack(fill="both", expand=True)
+        ctk.CTkLabel(
+            header_frame,
+            text=f"שלום {username}  •  כיתה {class_name}",
+            font=("Segoe UI", 11),
+            text_color="#e0f2fe"
+        ).pack()
 
-        canvas = tk.Canvas(body_container, bg=BG, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(body_container, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, bg=BG)
-
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        # ---------- אזור תוכן נגלל (Scrollable Frame) ----------
+        scrollable_frame = ctk.CTkScrollableFrame(
+            main_frame,
+            fg_color="#0f172a",
+            corner_radius=15,
+            scrollbar_button_color="#334155"
         )
+        scrollable_frame.pack(fill="both", expand=True, padx=15, pady=10)
 
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=480)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True, padx=(20, 0), pady=15)
-        scrollbar.pack(side="right", fill="y", pady=15)
-
-        def card(parent, **kwargs):
-            f = tk.Frame(parent, bg="white", highlightbackground=BORDER, highlightthickness=1)
-            f.pack(fill="x", pady=6, padx=(0, 15), **kwargs)
-            return f
-
-        # ---------- teacher view ----------
+        # ---------- תצוגת מורה (Teacher View) ----------
         if is_teacher:
-            form_card = card(scrollable_frame, ipady=15)
+            form_card = ctk.CTkFrame(scrollable_frame, fg_color="#1e293b", corner_radius=12, border_color="#334155", border_width=1)
+            form_card.pack(fill="x", pady=6, padx=5, ipady=10)
 
-            tk.Label(
-                form_card, text="יצירת משימה חדשה לכיתה",
-                font=("Arial", 13, "bold"), bg="white", fg=BLUE
-            ).pack(anchor="e", padx=18, pady=(15, 10))
+            ctk.CTkLabel(
+                form_card,
+                text="יצירת משימה חדשה לכיתה",
+                font=("Segoe UI", 13, "bold"),
+                text_color="#60a5fa"
+            ).pack(anchor="e", padx=18, pady=(12, 8))
 
-            tk.Label(form_card, text="שם המשימה / נושא הלימוד:", font=("Arial", 10), bg="white", fg=TEXT_MUTED).pack(anchor="e", padx=18)
-            task_name_entry = tk.Entry(form_card, font=("Arial", 12), bg=BG, bd=1, relief="solid", justify="right")
-            task_name_entry.pack(fill="x", padx=18, pady=(2, 12))
+            ctk.CTkLabel(
+                form_card,
+                text=":שם המשימה / נושא הלימוד",
+                font=("Segoe UI", 10),
+                text_color="#94a3b8"
+            ).pack(anchor="e", padx=18)
 
-            tk.Label(form_card, text="קישור למטלה (אופק מטח / Moodle / סרטון):", font=("Arial", 10), bg="white", fg=TEXT_MUTED).pack(anchor="e", padx=18)
-            task_url_entry = tk.Entry(form_card, font=("Arial", 11), bg=BG, bd=1, relief="solid", justify="left")
+            task_name_entry = ctk.CTkEntry(
+                form_card,
+                font=("Segoe UI", 12),
+                fg_color="#0f172a",
+                border_color="#334155",
+                text_color="white",
+                justify="right"
+            )
+            task_name_entry.pack(fill="x", padx=18, pady=(2, 10))
+
+            ctk.CTkLabel(
+                form_card,
+                text=":(Moodle / קישור למטלה (אופק / סרטון",
+                font=("Segoe UI", 10),
+                text_color="#94a3b8"
+            ).pack(anchor="e", padx=18)
+
+            task_url_entry = ctk.CTkEntry(
+                form_card,
+                font=("Segoe UI", 11),
+                fg_color="#0f172a",
+                border_color="#334155",
+                text_color="white",
+                justify="left"
+            )
             task_url_entry.insert(0, "https://")
             task_url_entry.pack(fill="x", padx=18, pady=(2, 14))
 
@@ -3246,7 +3341,7 @@ try:
                 name = task_name_entry.get().strip()
                 url = task_url_entry.get().strip()
                 if not name or url == "https://" or not url:
-                    tk.messagebox.showwarning("שדה חסר", "אנא מלא שם משימה וקישור תקין")
+                    messagebox.showwarning("שדה חסר", "אנא מלא שם משימה וקישור תקין")
                     return
 
                 try:
@@ -3264,126 +3359,178 @@ try:
                             if dataFromServer.startswith("publish_moodle_task_response|"):
                                 parts = dataFromServer.split("|")
                                 if len(parts) > 1 and parts[1] == "success":
-                                    tk.messagebox.showinfo("משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
+                                    messagebox.showinfo("משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
                                     new_win.destroy()
                                     open_moodle_tasks()
                                 else:
-                                    tk.messagebox.showerror("שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
+                                    messagebox.showerror("שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
                                 break
                 except Exception as e:
-                    tk.messagebox.showerror("שגיאה", f"אירעה שגיאה בתקשורת: {e}")
+                    messagebox.showerror("שגיאה", f"אירעה שגיאה בתקשורת: {e}")
 
-            publish_btn = tk.Button(
-                form_card, text="➕  פרסם קישור למשימה",
-                font=("Arial", 12, "bold"), bg=GREEN, fg="white",
-                bd=0, cursor="hand2", command=publish_task, pady=9
+            publish_btn = ctk.CTkButton(
+                form_card,
+                text="➕  פרסם קישור למשימה",
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#10b981",
+                hover_color="#059669",
+                height=36,
+                command=publish_task
             )
-            publish_btn.pack(fill="x", padx=18)
+            publish_btn.pack(fill="x", padx=18, pady=(5, 5))
 
-            tk.Label(
-                scrollable_frame, text="משימות פעילות כרגע בכיתה:",
-                font=("Arial", 12, "bold"), bg=BG, fg=TEXT_DARK
-            ).pack(anchor="e", padx=3, pady=(15, 5))
+            ctk.CTkLabel(
+                scrollable_frame,
+                text=":משימות פעילות כרגע בכיתה",
+                font=("Segoe UI", 12, "bold"),
+                text_color="#f8fafc"
+            ).pack(anchor="e", padx=5, pady=(15, 5))
 
             if not fetched_tasks:
-                tk.Label(scrollable_frame, text="אין משימות פעילות כרגע", font=("Arial", 10), bg=BG, fg="#94a3b8").pack(anchor="e", padx=3, pady=10)
+                ctk.CTkLabel(
+                    scrollable_frame,
+                    text="אין משימות פעילות כרגע",
+                    font=("Segoe UI", 10),
+                    text_color="#94a3b8"
+                ).pack(anchor="e", padx=5, pady=10)
 
             for task in fetched_tasks:
                 t_name = task.get("name", "משימה ללא שם")
                 t_url = task.get("url", "#")
 
-                row = card(scrollable_frame, ipady=6)
-                inner = tk.Frame(row, bg="white")
-                inner.pack(fill="x", padx=15, pady=6)
+                row = ctk.CTkFrame(scrollable_frame, fg_color="#1e293b", corner_radius=10, border_color="#334155", border_width=1)
+                row.pack(fill="x", pady=4, padx=5)
 
-                tk.Label(inner, text=f"• {t_name}", font=("Arial", 11, "bold"), fg=TEXT_DARK, bg="white").pack(side="right")
-                tk.Button(
-                    inner, text="פתח קישור 🔗", font=("Arial", 9, "bold"),
-                    fg="white", bg=LINK, bd=0, cursor="hand2", padx=10, pady=4,
+                inner = ctk.CTkFrame(row, fg_color="transparent")
+                inner.pack(fill="x", padx=12, pady=8)
+
+                ctk.CTkButton(
+                    inner,
+                    text="🔗 פתח קישור",
+                    font=("Segoe UI", 10, "bold"),
+                    fg_color="#2563eb",
+                    hover_color="#1d4ed8",
+                    width=90,
+                    height=28,
                     command=lambda url=t_url: webbrowser.open(url)
                 ).pack(side="left")
 
-        # ---------- student view ----------
+                ctk.CTkLabel(
+                    inner,
+                    text=f"• {t_name}",
+                    font=("Segoe UI", 11, "bold"),
+                    text_color="#f8fafc"
+                ).pack(side="right")
+
+        # ---------- תצוגת תלמיד (Student View) ----------
         else:
             total_tasks = len(fetched_tasks)
             completed_tasks = sum(1 for t in fetched_tasks if t.get("status") == "✅ בוצע")
-            pct = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 100
+            pct_float = (completed_tasks / total_tasks) if total_tasks > 0 else 1.0
+            pct_int = int(pct_float * 100)
 
-            progress_card = card(scrollable_frame, ipady=12)
-            tk.Label(
+            progress_card = ctk.CTkFrame(scrollable_frame, fg_color="#1e293b", corner_radius=12, border_color="#334155", border_width=1)
+            progress_card.pack(fill="x", pady=6, padx=5, ipady=8)
+
+            ctk.CTkLabel(
                 progress_card,
-                text=f"📈 הספק המשימות השבוע: {completed_tasks} מתוך {total_tasks} בוצעו ({pct}%)",
-                font=("Arial", 11, "bold"), fg="#166534", bg="white"
-            ).pack(anchor="e", padx=15, pady=(10, 6))
+                text=f"📈 הספק המשימות: {completed_tasks} מתוך {total_tasks} בוצעו ({pct_int}%)",
+                font=("Segoe UI", 11, "bold"),
+                text_color="#4ade80"
+            ).pack(anchor="e", padx=15, pady=(8, 8))
 
-            bar_bg = tk.Frame(progress_card, bg="#e2e8f0", height=10)
-            bar_bg.pack(fill="x", padx=15, pady=(0, 10))
-            bar_bg.pack_propagate(False)
-            fill_width = max(int(4.6 * pct), 2) if pct > 0 else 0
-            bar_fill = tk.Frame(bar_bg, bg=GREEN, width=fill_width, height=10)
-            bar_fill.place(x=0, y=0, relheight=1)
+            progress_bar = ctk.CTkProgressBar(
+                progress_card,
+                fg_color="#0f172a",
+                progress_color="#10b981",
+                height=10
+            )
+            progress_bar.pack(fill="x", padx=15, pady=(0, 8))
+            progress_bar.set(pct_float)
 
-            tk.Label(
-                scrollable_frame, text="רשימת קישורים ומטלות לביצוע:",
-                font=("Arial", 12, "bold"), bg=BG, fg=TEXT_DARK
-            ).pack(anchor="e", padx=3, pady=(10, 5))
+            ctk.CTkLabel(
+                scrollable_frame,
+                text=":רשימת קישורים ומטלות לביצוע",
+                font=("Segoe UI", 12, "bold"),
+                text_color="#f8fafc"
+            ).pack(anchor="e", padx=5, pady=(10, 5))
 
             def toggle_status(btn, task_obj):
                 if btn.cget("text") == "❌ לא בוצע":
-                    btn.config(text="✅ בוצע", bg=GREEN, activebackground=GREEN)
+                    btn.configure(text="✅ בוצע", fg_color="#10b981", hover_color="#059669")
                     task_obj["status"] = "✅ בוצע"
                 else:
-                    btn.config(text="❌ לא בוצע", bg=RED, activebackground=RED)
+                    btn.configure(text="❌ לא בוצע", fg_color="#f43f5e", hover_color="#e11d48")
                     task_obj["status"] = "❌ לא בוצע"
 
             if not fetched_tasks:
-                tk.Label(scrollable_frame, text="אין משימות כרגע 🎉", font=("Arial", 10), bg=BG, fg="#94a3b8").pack(anchor="e", padx=3, pady=10)
+                ctk.CTkLabel(
+                    scrollable_frame,
+                    text="אין משימות כרגע 🎉",
+                    font=("Segoe UI", 10),
+                    text_color="#94a3b8"
+                ).pack(anchor="e", padx=5, pady=10)
 
             for task in fetched_tasks:
                 title = task.get("name", "משימה כללית")
                 link_url = task.get("url", "#")
                 start_status = task.get("status", "❌ לא בוצע")
-                start_color = GREEN if start_status == "✅ בוצע" else RED
+                start_color = "#10b981" if start_status == "✅ בוצע" else "#f43f5e"
+                hover_color = "#059669" if start_status == "✅ בוצע" else "#e11d48"
 
-                row = card(scrollable_frame, ipady=8)
-                inner = tk.Frame(row, bg="white")
-                inner.pack(fill="x", padx=15, pady=6)
+                row = ctk.CTkFrame(scrollable_frame, fg_color="#1e293b", corner_radius=10, border_color="#334155", border_width=1)
+                row.pack(fill="x", pady=4, padx=5)
 
-                tk.Label(inner, text=title, font=("Arial", 11, "bold"), fg=TEXT_DARK, bg="white").pack(side="right")
+                inner = ctk.CTkFrame(row, fg_color="transparent")
+                inner.pack(fill="x", padx=12, pady=8)
 
-                btn_frame = tk.Frame(inner, bg="white")
+                btn_frame = ctk.CTkFrame(inner, fg_color="transparent")
                 btn_frame.pack(side="left")
 
-                status_btn = tk.Button(
-                    btn_frame, text=start_status, font=("Arial", 9, "bold"),
-                    fg="white", bg=start_color, activebackground=start_color,
-                    bd=0, width=9, cursor="hand2", pady=4
+                status_btn = ctk.CTkButton(
+                    btn_frame,
+                    text=start_status,
+                    font=("Segoe UI", 9, "bold"),
+                    fg_color=start_color,
+                    hover_color=hover_color,
+                    width=80,
+                    height=28
                 )
-                status_btn.config(command=lambda b=status_btn, t=task: toggle_status(b, t))
-                status_btn.pack(side="right", padx=4)
+                status_btn.configure(command=lambda b=status_btn, t=task: toggle_status(b, t))
+                status_btn.pack(side="left", padx=(0, 5))
 
-                tk.Button(
-                    btn_frame, text="🔗 פתח", font=("Arial", 9, "bold"),
-                    fg="white", bg=LINK, bd=0, cursor="hand2", padx=8, pady=4,
+                ctk.CTkButton(
+                    btn_frame,
+                    text="🔗 פתח",
+                    font=("Segoe UI", 9, "bold"),
+                    fg_color="#2563eb",
+                    hover_color="#1d4ed8",
+                    width=65,
+                    height=28,
                     command=lambda url=link_url: webbrowser.open(url)
-                ).pack(side="right")
+                ).pack(side="left")
 
-        # ---------- footer ----------
-        footer_frame = tk.Frame(main_frame, bg=BG, height=70)
-        footer_frame.pack(fill="x", side="bottom")
-        footer_frame.pack_propagate(False)
+                ctk.CTkLabel(
+                    inner,
+                    text=title,
+                    font=("Segoe UI", 11, "bold"),
+                    text_color="#f8fafc"
+                ).pack(side="right", padx=5)
 
-        tk.Button(
+        # ---------- פוטר חזרה (Footer) ----------
+        footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        footer_frame.pack(fill="x", padx=15, pady=(5, 15))
+
+        ctk.CTkButton(
             footer_frame,
             text="חזרה למסך ראשי",
             command=lambda: open_main_page(current_username),
-            font=("Arial", 13, "bold"),
-            bg=BLUE,
-            fg="white",
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        ).pack(pady=15, ipadx=18, ipady=8)
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#475569",
+            hover_color="#334155",
+            corner_radius=10,
+            height=38
+        ).pack(fill="x")
     
     def open_attendance():
         global current_username, current_user_role, current_user_class
@@ -3392,7 +3539,6 @@ try:
         PORT = 9999
         
         class_students = []
-
         try:
             with create_secure_socket() as s:
                 print(f"Connecting to {SERVER_IP}:{PORT}...")
@@ -3413,24 +3559,25 @@ try:
                         if len(parts) > 1 and parts[1]:
                             class_students = parts[1].split(",")
                         break
-                    
                     else:
                         messagebox.showerror("שגיאה!", "שגיאת שרת")
                         break
 
         except ConnectionRefusedError:
             messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
-            
         except Exception as e:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
         
         role = current_user_role if 'current_user_role' in globals() else "student"
         username = current_username if 'current_username' in globals() else "תלמיד"
 
-        new_win = tk.Toplevel()
+        # ---------------------------------------------------------
+        # שלב ב': בניית הממשק (UI)
+        # ---------------------------------------------------------
+        new_win = ctk.CTkToplevel()
         new_win.title("מערכת נוכחות - משוב")
         new_win.overrideredirect(True)
- 
+
         destroy_and_set_new_window(new_win)
 
         width, height = 550, 750
@@ -3441,126 +3588,114 @@ try:
         y = (screen_height // 2) - (height // 2)
 
         new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
+        new_win.configure(fg_color="#0f172a") # רקע כהה ראשי
 
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=510, height=710)
+        main_frame = ctk.CTkFrame(new_win, fg_color="#1e293b", corner_radius=20, width=510, height=710)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame.pack_propagate(False)
 
-        header_color = "#0284c7" if "teacher" in role or "מורה" in role else "#0ea5e9"
-        header_frame = tk.Frame(main_frame, bg=header_color, height=130)
-        header_frame.pack(fill="x")
+        is_teacher = "teacher" in str(role) or "מורה" in str(role)
+        header_color = "#0284c7" if is_teacher else "#0ea5e9"
+
+        # ---------- Header ----------
+        header_frame = ctk.CTkFrame(main_frame, fg_color=header_color, corner_radius=15, height=120)
+        header_frame.pack(fill="x", padx=15, pady=(15, 10))
         header_frame.pack_propagate(False)
 
-        tk.Label(
-            header_frame,
-            text="📝",
-            font=("Arial", 32),
-            fg="white",
-            bg=header_color
-        ).pack(pady=(10, 0))
-
-        title_text = "ניהול נוכחות כיתתית" if "teacher" in role or "מורה" in role else "מצב נוכחות אישי"
-        tk.Label(
+        title_text = "📝 ניהול נוכחות כיתתית" if is_teacher else "📝 מצב נוכחות אישי"
+        ctk.CTkLabel(
             header_frame,
             text=title_text,
-            font=("Arial", 20, "bold"),
-            fg="white",
-            bg=header_color
-        ).pack()
+            font=("Segoe UI", 20, "bold"),
+            text_color="white"
+        ).pack(pady=(22, 2))
 
-        subtitle_text = f"משתמש מחובר: {username}"
-        tk.Label(
+        ctk.CTkLabel(
             header_frame,
-            text=subtitle_text,
-            font=("Arial", 11),
-            fg="#e0f2fe",
-            bg=header_color
+            text=f"משתמש מחובר: {username}",
+            font=("Segoe UI", 11),
+            text_color="#e0f2fe"
         ).pack()
 
-        subjects_list = ["שיעור מתמטיקה", "שיעור נביא", "שיעור גמרא", "שיעור אנגלית", "שיעור עברית", "שיעור לשון", "שיעור היסטוריה", "שיעור מדעים", "שיעור תורה", "שיעור ספורט"]
+        subjects_list = [
+            "שיעור מתמטיקה", "שיעור נביא", "שיעור גמרא", "שיעור אנגלית", 
+            "שיעור עברית", "שיעור לשון", "שיעור היסטוריה", "שיעור מדעים", 
+            "שיעור תורה", "שיעור ספורט"
+        ]
 
-        if "teacher" in role or "מורה" in role:
-            class_frame = tk.Frame(main_frame, bg="#f8fafc", height=45)
-            class_frame.pack(fill="x", padx=15, pady=15)
-            class_frame.pack_propagate(False)
+        # =========================================================
+        #                    תצוגת מורה (TEACHER)
+        # =========================================================
+        if is_teacher:
+            class_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=12)
+            class_frame.pack(fill="x", padx=15, pady=5)
             
-            tk.Label(
+            ctk.CTkLabel(
                 class_frame, 
-                text=f":בחר מקצוע", 
-                font=("Arial", 11, "bold"), 
-                fg="#1e293b", 
-                bg="#f8fafc"
-            ).pack(side="right", padx=(10, 5), pady=10)
+                text=":בחר מקצוע", 
+                font=("Segoe UI", 12, "bold"), 
+                text_color="#f8fafc"
+            ).pack(side="right", padx=(10, 15), pady=8)
 
-            teacher_subject_var = tk.StringVar(value=subjects_list[0])
-            subject_dropdown = ttk.Combobox(
+            teacher_subject_var = ctk.StringVar(value=subjects_list[0])
+            subject_dropdown = ctk.CTkComboBox(
                 class_frame, 
-                textvariable=teacher_subject_var, 
-                values=subjects_list, 
-                state="readonly", 
-                width=12,
-                font=("Arial", 10)
+                values=subjects_list,
+                variable=teacher_subject_var,
+                font=("Segoe UI", 11),
+                dropdown_font=("Segoe UI", 11),
+                width=150,
+                fg_color="#1e293b",
+                border_color="#334155",
+                button_color="#0284c7",
+                text_color="white",
+                justify="center"
             )
-            subject_dropdown.pack(side="right", padx=5, pady=10)
+            subject_dropdown.pack(side="right", padx=5, pady=8)
 
-            labels_frame = tk.Frame(main_frame, bg="white")
-            labels_frame.pack(fill="x", padx=20)
-            tk.Label(labels_frame, text="שם התלמיד", font=("Arial", 11, "bold"), fg="#64748b", bg="white").pack(side="right")
-            tk.Label(labels_frame, text="סטטוס הגעה וציוד", font=("Arial", 11, "bold"), fg="#64748b", bg="white").pack(side="left", padx=55)
+            # אזור גלילה לתלמידים
+            scroll_students = ctk.CTkScrollableFrame(
+                main_frame,
+                fg_color="#0f172a",
+                corner_radius=12,
+                scrollbar_button_color="#334155"
+            )
+            scroll_students.pack(fill="both", expand=True, padx=15, pady=10)
 
-            students = class_students if class_students else ["שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה", "שגיאה בטעינת תלמידי הכיתה"]
+            students = class_students if class_students else ["אין תלמידים משוייכים"]
             attendance_vars = {}
 
-            for index, student_name in enumerate(students):
-                row_bg = "#f8fafc" if index % 2 == 0 else "white"
-                row_frame = tk.Frame(main_frame, bg=row_bg, height=50)
-                row_frame.pack(fill="x", padx=15, pady=2)
-                row_frame.pack_propagate(False)
+            for student_name in students:
+                row_card = ctk.CTkFrame(scroll_students, fg_color="#1e293b", corner_radius=10, border_color="#334155", border_width=1)
+                row_card.pack(fill="x", pady=4, padx=5)
 
-                tk.Label(
-                    row_frame, 
+                ctk.CTkLabel(
+                    row_card, 
                     text=student_name, 
-                    font=("Arial", 12), 
-                    fg="#334155", 
-                    bg=row_bg
-                ).pack(side="right", padx=10, pady=12)
+                    font=("Segoe UI", 12, "bold"), 
+                    text_color="#f8fafc"
+                ).pack(side="right", padx=12, pady=8)
 
-                status_var = tk.StringVar(value="נוכח")
+                status_var = ctk.StringVar(value="נוכח")
                 attendance_vars[student_name] = status_var
 
-                btn_container = tk.Frame(row_frame, bg=row_bg)
-                btn_container.pack(side="left", padx=5, pady=10)
-
-                options = [
-                    ("חוסר ציוד", "#3B50C5"), 
-                    ("חיסור", "#ef4444"), 
-                    ("איחור", "#f59e0b"), 
-                    ("נוכח", "#10b981")
-                ]
-                
-                for text, active_color in options:
-                    rb = tk.Radiobutton(
-                        btn_container,
-                        text=text,
-                        variable=status_var,
-                        value=text,
-                        indicatoron=0, 
-                        font=("Arial", 9, "bold"),
-                        fg="#475569",
-                        bg="#e2e8f0",
-                        selectcolor=active_color,
-                        activebackground=active_color,
-                        bd=0,
-                        width=7,
-                        cursor="hand2"
-                    )
-                    rb.pack(side="left", padx=1)
+                # כפתור סגמנטציוני (Segmented Button) לבחירת סטטוס מהירה
+                seg_btn = ctk.CTkSegmentedButton(
+                    row_card,
+                    values=["חוסר ציוד", "חיסור", "איחור", "נוכח"],
+                    variable=status_var,
+                    font=("Segoe UI", 9, "bold"),
+                    selected_color="#0284c7",
+                    selected_hover_color="#0369a1",
+                    unselected_color="#0f172a",
+                    unselected_hover_color="#334155",
+                    text_color="white"
+                )
+                seg_btn.pack(side="left", padx=8, pady=8)
 
             def save_attendance_action():
                 selected_sub = teacher_subject_var.get()
                 
-                # 1. מפת כיתות מקומית כדי לתרגם את השם עבור השרת וה-JSON (למשל "ט3" ל-"9th3")
                 class_map = {
                     "ז1": "7th1", "ז2": "7th2", "ז3": "7th3", "ז4": "7th4", "ז5": "7th5", "ז6": "7th6",
                     "ח1": "8th1", "ח2": "8th2", "ח3": "8th3", "ח4": "8th4", "ח5": "8th5", "ח6": "8th6",
@@ -3571,18 +3706,12 @@ try:
                 }
                 server_class_name = class_map.get(current_user_class, current_user_class)
                 
-                attendance_records = []
-                for s_name, s_var in attendance_vars.items():
-                    attendance_records.append(f"{s_name}:{s_var.get()}")
+                attendance_records = [f"{s_name}:{s_var.get()}" for s_name, s_var in attendance_vars.items()]
                 attendance_data_str = ",".join(attendance_records)
-                
-                SERVER_IP = '127.0.0.1' 
-                PORT = 9999
                 
                 try:
                     with create_secure_socket() as s:
                         s.connect((SERVER_IP, PORT))
-                        
                         msg = f"save_attendance|{server_class_name}|{selected_sub}|{attendance_data_str}"
                         s.sendall(msg.encode('utf-8'))
                         
@@ -3591,142 +3720,145 @@ try:
                             response = raw_response.decode('utf-8').strip()
                             if response == "save_attendance_response|success":
                                 messagebox.showinfo("הצלחה", f"יומן הנוכחות עבור שיעור {selected_sub} נשמר בהצלחה בשרת!")
-
                             else:
                                 messagebox.showerror("שגיאה", "השרת נכשל בשמירת הנתונים בקובץ.")
                         else:
                             messagebox.showerror("שגיאה", "לא התקבלה תגובה מהשרת.")
-                            
                 except Exception as e:
                     messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
 
-            save_btn = tk.Button(
-                main_frame,
+            # כפתורי תחתית למורה
+            footer_btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            footer_btn_frame.pack(fill="x", padx=15, pady=(5, 15))
+
+            ctk.CTkButton(
+                footer_btn_frame,
                 text="💾 שמור נוכחות ביומן",
-                font=("Arial", 14, "bold"),
-                bg="#0284c7",
-                fg="white",
-                bd=0,
-                cursor="hand2",
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#0284c7",
+                hover_color="#0369a1",
+                height=38,
                 command=save_attendance_action
-            )
-            save_btn.pack(side="bottom", fill="x", padx=20, pady=20)
-            
-            tk.Button(
-                main_frame,
+            ).pack(fill="x", pady=(0, 6))
+
+            ctk.CTkButton(
+                footer_btn_frame,
                 text="חזרה למסך ראשי",
                 command=lambda: open_main_page(current_username),
-                font=("Arial", 13, "bold"),
-                bg="#1a73e8",
-                fg="white",
-                relief="flat",
-                bd=0,
-                cursor="hand2"
-            ).pack(side="bottom", pady=15, ipadx=18, ipady=4)
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#475569",
+                hover_color="#334155",
+                height=36
+            ).pack(fill="x")
 
+        # =========================================================
+        #                    תצוגת תלמיד (STUDENT)
+        # =========================================================
         else:
-            stats_frame = tk.Frame(main_frame, bg="white")
-            stats_frame.pack(fill="x", padx=10, pady=15)
+            # כרטיסיות סטטיסטיקה
+            stats_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            stats_frame.pack(fill="x", padx=12, pady=5)
             stats_frame.columnconfigure((0, 1, 2, 3, 4), weight=1, uniform="equal")
 
             cards_data = [
-                ("נוכחות", "92%", "#e0f2fe", "#0369a1"),
-                ("איחורים", "2", "#fef3c7", "#b45309"),
-                ("חיסורים", "1", "#fee2e2", "#b91c1c"),
-                ("חוסר ציוד", "3", "#f3e8ff", "#6b21a8"), 
-                ("מוצדק", "2", "#f1f5f9", "#475569")
+                ("נוכחות", "92%", "#0369a1", "#e0f2fe"),
+                ("איחורים", "2", "#b45309", "#fef3c7"),
+                ("חיסורים", "1", "#b91c1c", "#fee2e2"),
+                ("חוסר ציוד", "3", "#6b21a8", "#f3e8ff"), 
+                ("מוצדק", "2", "#334155", "#f1f5f9")
             ]
 
-            for i, (label, val, bg_c, fg_c) in enumerate(cards_data):
-                card = tk.Frame(stats_frame, bg=bg_c, bd=0, height=75)
-                card.grid(row=0, column=i, padx=3)
+            for i, (label, val, bg_c, text_c) in enumerate(cards_data):
+                card = ctk.CTkFrame(stats_frame, fg_color=bg_c, corner_radius=10, height=65)
+                card.grid(row=0, column=i, padx=2)
                 card.pack_propagate(False)
 
-                tk.Label(card, text=val, font=("Arial", 16, "bold"), fg=fg_c, bg=bg_c).pack(pady=(10, 0))
-                tk.Label(card, text=label, font=("Arial", 9, "bold"), fg=fg_c, bg=bg_c).pack()
+                ctk.CTkLabel(card, text=val, font=("Segoe UI", 15, "bold"), text_color=text_c).pack(pady=(8, 0))
+                ctk.CTkLabel(card, text=label, font=("Segoe UI", 9, "bold"), text_color=text_c).pack()
 
-            # אזור סנן המקצועות החכם של התלמיד
-            filter_frame = tk.Frame(main_frame, bg="white")
-            filter_frame.pack(fill="x", padx=20, pady=(10, 5))
+            # סרגל סינון
+            filter_frame = ctk.CTkFrame(main_frame, fg_color="#0f172a", corner_radius=10)
+            filter_frame.pack(fill="x", padx=15, pady=(10, 5))
 
-            tk.Label(
+            ctk.CTkLabel(
                 filter_frame, 
-                text="היסטוריית אירועי נוכחות", 
-                font=("Arial", 13, "bold"), 
-                fg="#1e293b", 
-                bg="white"
-            ).pack(side="right")
+                text="היסטוריית אירועים", 
+                font=("Segoe UI", 12, "bold"), 
+                text_color="#f8fafc"
+            ).pack(side="right", padx=12, pady=8)
 
-            tk.Label(filter_frame, text=":סנן לפי מקצוע",
-                     font=("Arial", 10),
-                     fg="#64748b",
-                     bg="white").pack(side="left", padx=(5, 2))
-            
-            student_filter_var = tk.StringVar(value="הכול")
-            filter_dropdown = ttk.Combobox(
+            student_filter_var = ctk.StringVar(value="הכול")
+            filter_dropdown = ctk.CTkComboBox(
                 filter_frame, 
-                textvariable=student_filter_var, 
-                values=["הכול"] + subjects_list, 
-                state="readonly", 
-                width=10,
-                font=("Arial", 10)
+                variable=student_filter_var, 
+                values=["הכול"] + subjects_list,
+                font=("Segoe UI", 10),
+                dropdown_font=("Segoe UI", 10),
+                width=120,
+                fg_color="#1e293b",
+                border_color="#334155",
+                button_color="#0ea5e9",
+                text_color="white",
+                justify="center"
             )
-            filter_dropdown.pack(side="left")
+            filter_dropdown.pack(side="left", padx=10, pady=8)
 
-            history_container = tk.Frame(main_frame, bg="white")
-            history_container.pack(fill="both", expand=True, padx=5)
-            
-            SERVER_IP = '127.0.0.1' 
-            PORT = 9999
+            # אזור גלילת היסטוריית נוכחות
+            history_scroll = ctk.CTkScrollableFrame(
+                main_frame,
+                fg_color="#0f172a",
+                corner_radius=12,
+                scrollbar_button_color="#334155"
+            )
+            history_scroll.pack(fill="both", expand=True, padx=15, pady=8)
 
             history_events = []
 
-            with create_secure_socket() as s:
-                s.connect((SERVER_IP, PORT))
-                
-                msg = f"get_attendance_history|{current_user_class}|{current_username}"
-                s.sendall(msg.encode('utf-8'))
-                
-                raw_response = s.recv(4096) 
-                if raw_response:
-                    response = raw_response.decode('utf-8').strip()
+            try:
+                with create_secure_socket() as s:
+                    s.connect((SERVER_IP, PORT))
+                    msg = f"get_attendance_history|{current_user_class}|{current_username}"
+                    s.sendall(msg.encode('utf-8'))
                     
-                    parts = response.split("|")
-                    
-                    if len(parts) >= 3 and parts[0] == "get_attendance_response":
-                        if parts[1] == "SUCCESS":
-                            parts_limited = response.split("|", 2)
-                            history_events = json.loads(parts_limited[2])
-                        elif parts[1] == "ERROR":
-                            messagebox.showerror("שגיאה", f"שגיאת שרת: {parts[2]}")
+                    raw_response = s.recv(4096) 
+                    if raw_response:
+                        response = raw_response.decode('utf-8').strip()
+                        parts = response.split("|")
+                        
+                        if len(parts) >= 3 and parts[0] == "get_attendance_response":
+                            if parts[1] == "SUCCESS":
+                                parts_limited = response.split("|", 2)
+                                history_events = json.loads(parts_limited[2])
+                            elif parts[1] == "ERROR":
+                                messagebox.showerror("שגיאה", f"שגיאת שרת: {parts[2]}")
+                        elif len(parts) >= 2 and parts[0] == "get_attendance_response":
+                            parts_limited = response.split("|", 1)
+                            history_events = json.loads(parts_limited[1])
+                        elif parts[0] == "SUCCESS":
+                            parts_limited = response.split("|", 1)
+                            history_events = json.loads(parts_limited[1])
                         else:
-                            messagebox.showerror("שגיאה", f"תגובה לא צפויה מהשרת: {response}")
-                            
-                    elif len(parts) >= 2 and parts[0] == "get_attendance_response":
-                        parts_limited = response.split("|", 1)
-                        history_events = json.loads(parts_limited[1])
-                        
-                    elif parts[0] == "SUCCESS":
-                        parts_limited = response.split("|", 1)
-                        history_events = json.loads(parts_limited[1])
-                    elif parts[0] == "ERROR":
-                        parts_limited = response.split("|", 1)
-                        messagebox.showerror("שגיאה", f"שגיאת שרת: {parts_limited[1]}")
-                        
-                    else:
-                        try:
-                            history_events = json.loads(response)
-                        except json.JSONDecodeError:
-                            messagebox.showerror("שגיאה", f"תגובה לא מוכרת מהשרת: {response}")
-                else:
-                    messagebox.showerror("שגיאה", "לא התקבלה תגובה מהשרת.")
+                            try:
+                                history_events = json.loads(response)
+                            except json.JSONDecodeError:
+                                pass
+            except Exception as e:
+                print(f"Error fetching attendance history: {e}")
 
-            def update_filtered_history(event=None):
-                for widget in history_container.winfo_children():
+            def update_filtered_history(choice=None):
+                for widget in history_scroll.winfo_children():
                     widget.destroy()
 
                 selected_filter = student_filter_var.get()
-                row_index = 0
+
+                if not history_events:
+                    ctk.CTkLabel(
+                        history_scroll,
+                        text="אין נתוני נוכחות להצגה 🎉",
+                        font=("Segoe UI", 11),
+                        text_color="#94a3b8"
+                    ).pack(pady=20)
+                    return
 
                 for event_data in history_events:
                     subject = event_data.get("subject", "שיעור כללי")
@@ -3734,51 +3866,46 @@ try:
                     status = event_data.get("status", "")
                     
                     if "חיסור" in status or "חוסר" in status:
-                        status_color = "#ef4444" 
+                        status_color = "#f43f5e" 
                     elif "איחור" in status:
-                        status_color = "#f59e0b" 
+                        status_color = "#fbbf24" 
                     else:
-                        status_color = "#10b981" 
+                        status_color = "#34d399" 
 
                     if selected_filter == "הכול" or subject == selected_filter:
-                        row_bg = "#f8fafc" if row_index % 2 == 0 else "white"
-                        event_row = tk.Frame(history_container, bg=row_bg, height=42)
-                        event_row.pack(fill="x", padx=15, pady=2)
-                        event_row.pack_propagate(False)
+                        event_row = ctk.CTkFrame(history_scroll, fg_color="#1e293b", corner_radius=8, border_color="#334155", border_width=1)
+                        event_row.pack(fill="x", padx=5, pady=3)
 
-                        tk.Label(
+                        ctk.CTkLabel(
                             event_row, 
                             text=f"{subject}   •   {date}", 
-                            font=("Arial", 11, "bold" if "חיסור" in status or "חוסר" in status else "normal"), 
-                            fg="#334155", 
-                            bg=row_bg
-                        ).pack(side="right", padx=15, pady=9)
+                            font=("Segoe UI", 11), 
+                            text_color="#f8fafc"
+                        ).pack(side="right", padx=12, pady=6)
 
-                        tk.Label(
+                        ctk.CTkLabel(
                             event_row, 
                             text=status, 
-                            font=("Arial", 11, "bold"), 
-                            fg=status_color, 
-                            bg=row_bg
-                        ).pack(side="left", padx=15, pady=9)
-                        
-                        row_index += 1
+                            font=("Segoe UI", 11, "bold"), 
+                            text_color=status_color
+                        ).pack(side="left", padx=12, pady=6)
 
-            filter_dropdown.bind("<<ComboboxSelected>>", update_filtered_history)
-            
+            filter_dropdown.configure(command=update_filtered_history)
             update_filtered_history()
 
-            close_btn = tk.Button(
-                main_frame,
-                text="סגור חלון",
-                font=("Arial", 12, "bold"),
-                bg="#f1f5f9",
-                fg="#475569",
-                bd=0,
-                cursor="hand2",
-                command=lambda: open_main_page(current_username)
-            )
-            close_btn.pack(side="bottom", fill="x", padx=20, pady=15)
+            # פוטר תלמיד
+            footer_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+            footer_frame.pack(fill="x", padx=15, pady=(5, 15))
+
+            ctk.CTkButton(
+                footer_frame,
+                text="חזרה למסך ראשי",
+                command=lambda: open_main_page(current_username),
+                font=("Segoe UI", 12, "bold"),
+                fg_color="#475569",
+                hover_color="#334155",
+                height=38
+            ).pack(fill="x")
         
     
     if __name__ == "__main__":

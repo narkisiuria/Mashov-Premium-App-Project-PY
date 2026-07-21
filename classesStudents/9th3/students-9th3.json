@@ -22,10 +22,9 @@
         "role": "student",
         "class": "9th3",
         "tasks": [
-            "ret",
             "tuyjtyjt",
             "tyjt",
-            "yjtyjtyujt"
+            "fthtfhfth"
         ],
         "created_at": "07/06/2026 17:11:29",
         "grades": [
@@ -86,6 +85,16 @@
                 "subject": "שיעור מתמטיקה",
                 "date": "02/07/2026",
                 "status": "נוכח"
+            },
+            {
+                "subject": "שיעור לשון",
+                "date": "21/07/2026",
+                "status": "נוכח"
+            },
+            {
+                "subject": "שיעור לשון",
+                "date": "21/07/2026",
+                "status": "נוכח"
             }
         ],
         "moodle_tasks": [
@@ -104,6 +113,10 @@
             {
                 "url": "https://youtube.com/chill",
                 "name": "יוטיוב וציל"
+            },
+            {
+                "url": "https://rhrthrthrt",
+                "name": "ghgfhh"
             }
         ]
     },
@@ -124,6 +137,14 @@
             [
                 "משנה",
                 56
+            ],
+            [
+                "נביא",
+                99
+            ],
+            [
+                "נביא",
+                99
             ]
         ],
         "attendance": [
@@ -146,6 +167,16 @@
                 "subject": "שיעור מתמטיקה",
                 "date": "02/07/2026",
                 "status": "נוכח"
+            },
+            {
+                "subject": "שיעור לשון",
+                "date": "21/07/2026",
+                "status": "נוכח"
+            },
+            {
+                "subject": "שיעור לשון",
+                "date": "21/07/2026",
+                "status": "נוכח"
             }
         ],
         "moodle_tasks": [
@@ -164,6 +195,10 @@
             {
                 "url": "https://youtube.com/chill",
                 "name": "יוטיוב וציל"
+            },
+            {
+                "url": "https://rhrthrthrt",
+                "name": "ghgfhh"
             }
         ]
     }

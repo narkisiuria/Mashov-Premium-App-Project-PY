@@ -24,5 +24,18 @@
         "grades": [],
         "attendance": "",
         "moodle_tasks": ""
+    },
+    "rannen": {
+        "id": 3,
+        "first_name": "rannen",
+        "last_name": "arusi",
+        "gmail_account": "ran123@gmail.com",
+        "role": "student",
+        "class": "12th6",
+        "tasks": [],
+        "created_at": "21/07/2026 20:21:42",
+        "grades": [],
+        "attendance": "",
+        "moodle_tasks": ""
     }
 }
