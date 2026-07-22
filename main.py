@@ -4,7 +4,6 @@ try:
     import ssl
     import socket
     import tkinter as tk
-    from tkinter import messagebox
     from tkinter import ttk
     import json
     import threading
@@ -32,8 +31,70 @@ try:
     current_user_class = ""
     splash_root = None
     
+    import customtkinter as ctk
+
+    def show_custom_message(parent_win=None, title="", message="", icon="⚠️", parent=None):
+        # מזהה אם הועבר parent או parent_win
+        active_parent = parent if parent is not None else parent_win
+
+        msg_win = ctk.CTkToplevel(active_parent)
+        msg_win.title(title)
+        msg_win.overrideredirect(True)
+        msg_win.attributes("-topmost", True)
+
+        w, h = 380, 210
+
+        # התמרכזות מול החלון האב או מול המסך
+        if active_parent and hasattr(active_parent, 'winfo_exists') and active_parent.winfo_exists():
+            active_parent.update_idletasks()
+            x = active_parent.winfo_x() + (active_parent.winfo_width() // 2) - (w // 2)
+            y = active_parent.winfo_y() + (active_parent.winfo_height() // 2) - (h // 2)
+        else:
+            screen_w = msg_win.winfo_screenwidth()
+            screen_h = msg_win.winfo_screenheight()
+            x = (screen_w // 2) - (w // 2)
+            y = (screen_h // 2) - (h // 2)
+
+        msg_win.geometry(f"{w}x{h}+{int(x)}+{int(y)}")
+        msg_win.configure(fg_color="#0f172a")
+
+        frame = ctk.CTkFrame(
+            msg_win,
+            fg_color="#1e293b",
+            corner_radius=16,
+            border_color="#334155",
+            border_width=2
+        )
+        frame.pack(fill="both", expand=True, padx=8, pady=8)
+
+        ctk.CTkLabel(frame, text=icon, font=("Segoe UI", 34)).pack(pady=(12, 2))
+        ctk.CTkLabel(frame, text=title, font=("Segoe UI", 16, "bold"), text_color="#ffffff").pack()
+
+        ctk.CTkLabel(
+            frame,
+            text=message,
+            font=("Segoe UI", 12),
+            text_color="#cbd5e1",
+            wraplength=320,
+            justify="center"
+        ).pack(pady=(6, 12))
+
+        ctk.CTkButton(
+            frame,
+            text="אישור",
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            height=34,
+            width=110,
+            corner_radius=8,
+            cursor="hand2",
+            command=msg_win.destroy
+        ).pack(pady=(0, 12))
+
+        msg_win.grab_set()
+    
     def verify_server_health(splash_root):
-        """פונקציה שרצה ברקע ובודקת אם השרת בחיים - בלי לסגור את החלון אוטומטית"""
         SERVER_IP = '127.0.0.1'
         PORT = 9999
         
@@ -56,10 +117,7 @@ try:
             splash_root.after(0, lambda: handle_health_failure(splash_root))
 
     def handle_health_failure(splash_root):
-        tk.messagebox.showerror(
-            "שגיאת תקשורת", 
-            "לא ניתן להתחבר לשרת המשוב המרכזי.\nאנא וודא שהשרת פועל ושהחיבור לרשת תקין."
-        )
+        show_custom_message(splash_root, "שגיאת תקשורת", "לא ניתן להתחבר לשרת המשוב המרכזי.\nאנא וודא שהשרת פועל ושהחיבור לרשת תקין.")
         
         try:
             if splash_root and splash_root.winfo_exists():
@@ -118,7 +176,7 @@ try:
         )
         main_frame.place(relx=0.5, rely=0.5, anchor="center")
         main_frame.pack_propagate(False)
-
+        
         header_frame = ctk.CTkFrame(
             main_frame,
             fg_color="#1d4ed8",
@@ -244,7 +302,6 @@ try:
             text_color="#64748b"
         ).pack(expand=True)
 
-        # הפעלת ה-Thread לבדיקת השרת והרצת ה-Mainloop
         threading.Thread(target=lambda: verify_server_health(splash_root), daemon=True).start()
         splash_root.mainloop()
         
@@ -264,7 +321,7 @@ try:
 
     def open_peak():
         global current_user_role
-        messagebox.showwarning("אורח יקר", "בתור אורח אתה לא תוכל להשתמש בכל הפיצרים")
+        show_custom_message(None, "אורח יקר", "בתור אורח אתה לא תוכל להשתמש בכל הפיצרים")
         
         SERVER_IP = '127.0.0.1' 
         PORT = 9999
@@ -292,15 +349,15 @@ try:
                     return
                 
                 else:
-                    messagebox.showerror("שגיאה", "שגיאת שרת")
+                    show_custom_message(None, "שגיאה", "שגיאת שרת")
                     return
                     
 
         except ConnectionRefusedError:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
             
         except Exception as e:
-            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            show_custom_message(None, "שגיאה", f"אירעה שגיאה: {e}")
 
     def open_main_page(username):
         global current_username, current_user_role
@@ -418,7 +475,7 @@ try:
     ###########################################################
 
     def forgotPass():
-        messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה/י את סיסמתך במשרד המזכירות בבית הספר")
+        show_custom_message(None, title="?שכחת את הסיסמה", message="שנה/י את סיסמתך במשרד המזכירות בבית הספר")
 
 
     def openPrivecyPolicy():
@@ -676,17 +733,17 @@ try:
                     open_main_page(typedUSERNAME)
                 
                 elif dataFromServer == "attempt limit reached":
-                        messagebox.showerror("שגיאה", "יותר מידי ניסיונות, במידה ושכחת את הסיסמה שלך אז לחץ על שכחת את הסיסמה")
+                        show_custom_message(None, "שגיאה", "יותר מידי ניסיונות, במידה ושכחת את הסיסמה שלך אז לחץ על שכחת את הסיסמה")
                         exit()
                 
                 else:
-                    messagebox.showerror("שגיאה", "שם משתמש או סיסמה שגויים")
+                    show_custom_message(None, "שגיאה", "שם משתמש או סיסמה שגויים")
                     print("unsuccessful")
 
         except ConnectionRefusedError:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
         except Exception as e:
-            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            show_custom_message(None, "שגיאה", f"אירעה שגיאה: {e}")
         
     def signUp():       
         def attemptSignUp():
@@ -694,24 +751,24 @@ try:
             role = role_box.get()
 
             if any(entry.get().strip() == "" for entry in all_entries):
-                messagebox.showerror("שגיאה", "נא למלא את כל השדות")
+                show_custom_message(None, "שגיאה", "נא למלא את כל השדות")
                 return
 
             if class_box.get().strip() in ["בחר כיתה", ""]:
-                messagebox.showerror("שגיאה", "נא לבחור כיתה")
+                show_custom_message(None, "שגיאה", "נא לבחור כיתה")
                 return
 
             if role_box.get().strip() in ["בחר תפקיד", ""]:
-                messagebox.showerror("שגיאה", "נא לבחור תפקיד")
+                show_custom_message(None, "שגיאה", "נא לבחור תפקיד")
                 return
 
             user_email = gmail.get().strip()
             if "@" not in user_email or user_email.startswith("@") or user_email.endswith("@"):
-                messagebox.showerror("שגיאה", "אימייל לא תקין")
+                show_custom_message(None, "שגיאה", "אימייל לא תקין")
                 return
 
             if firstName.get().isdigit() or lastName.get().isdigit():
-                messagebox.showerror("שגיאה", "שם לא יכול להיות מספר")
+                show_custom_message(None, "שגיאה", "שם לא יכול להיות מספר")
                 return
             
             if role == "teacher":
@@ -764,7 +821,7 @@ try:
                 new_class_code = class_code.get()
 
                 if not teachers_code or not new_class_code:
-                    messagebox.showerror("שגיאה", "נא למלא את כל השדות")
+                    show_custom_message(win, "שגיאה", "נא למלא את כל השדות")
                     return
 
                 SERVER_IP = '127.0.0.1'
@@ -791,34 +848,34 @@ try:
 
                         raw_data = s.recv(1024)
                         if not raw_data:
-                            messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                            show_custom_message(win, "שגיאה", "אין תגובה מהשרת")
                             return
 
                         dataFromServer = raw_data.decode("utf-8").strip()
 
                         if dataFromServer.startswith("200"):
-                            messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
+                            show_custom_message(win, "הצלחה", "החשבון נוצר בהצלחה")
                             win.destroy()       
                             open_login_window()
                         elif dataFromServer == "gmail already exists":
-                            messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
+                            show_custom_message(win, "שגיאה", "אימייל כבר בשימוש")
                         elif dataFromServer == "username already exists":
-                            messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
+                            show_custom_message(win, "שגיאה", "שם משתמש כבר בשימוש")
                         elif dataFromServer == "invalid teacher code":
-                            messagebox.showerror("שגיאה", "קוד מורה שגוי")
+                            show_custom_message(win, "שגיאה", "קוד מורה שגוי")
                         elif dataFromServer == "invalid student code":
-                            messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+                            show_custom_message(win, "שגיאה", "קוד תלמיד שגוי")
                         elif dataFromServer.startswith("teacher"):
-                            messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
+                            show_custom_message(win, "שגיאה", "מורה כבר קיים בכיתה המבוקשת")
                         elif dataFromServer.startswith("error|"):
-                            messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
+                            show_custom_message(win, "שגיאת שרת", "שגיאת שרת: 500")
                         elif dataFromServer.startswith("404"):
-                            messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
+                            show_custom_message(win, "שגיאה", "הכיתה המבוקשת אינה קיימת")
                         else:
-                            messagebox.showerror("שגיאה", dataFromServer)
+                            show_custom_message(win, "שגיאה", dataFromServer)
 
                 except ConnectionRefusedError:
-                    messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+                    show_custom_message(win, "שגיאה", "לא ניתן להתחבר לשרת")
 
             ctk.CTkButton(
                 frame, text="המשך", font=("Segoe UI", 14, "bold"),
@@ -862,7 +919,7 @@ try:
                 class_code = code_entry.get()
 
                 if not class_code:
-                    messagebox.showerror("שגיאה", "נא להזין קוד כיתה")
+                    show_custom_message(win, "שגיאה", "נא להזין קוד כיתה")
                     return
 
                 SERVER_IP = '127.0.0.1'
@@ -889,30 +946,30 @@ try:
 
                         raw_data = s.recv(1024)
                         if not raw_data:
-                            messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                            show_custom_message(win, "שגיאה", "אין תגובה מהשרת")
                             return
 
                         dataFromServer = raw_data.decode("utf-8").strip()
 
                         if dataFromServer.startswith("200"):
-                            messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
+                            show_custom_message(win, "הצלחה", "החשבון נוצר בהצלחה")
                             win.destroy()                  
                             open_login_window()
                         elif dataFromServer == "gmail already exists":
-                            messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
+                            show_custom_message(win, "שגיאה", "אימייל כבר בשימוש")
                         elif dataFromServer == "username already exists":
-                            messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
+                            show_custom_message(win, "שגיאה", "שם משתמש כבר בשימוש")
                         elif dataFromServer == "invalid student code":
-                            messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+                            show_custom_message(win, "שגיאה", "קוד תלמיד שגוי")
                         elif dataFromServer.startswith("404"):
-                            messagebox.showerror("שגיאה", "הכיתה המבוקשת אינה קיימת")
+                            show_custom_message(win, "שגיאה", "הכיתה המבוקשת אינה קיימת")
                         else:
-                            messagebox.showerror("שגיאה", dataFromServer)
+                            show_custom_message(win, "שגיאה", dataFromServer)
 
                 except ConnectionRefusedError:
-                    messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+                    show_custom_message(win, "שגיאה", "לא ניתן להתחבר לשרת")
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+                    show_custom_message(win, "שגיאה", f"אירעה שגיאה: {e}")
 
             ctk.CTkButton(
                 frame, text="כניסה", font=("Segoe UI", 14, "bold"),
@@ -1024,7 +1081,7 @@ try:
 
     def open_grades():
         if current_user_role not in ["teacher", "student"]:
-            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            show_custom_message(None, "שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
 
         # --- ממשק מורה (Dark Theme) ---
@@ -1109,7 +1166,7 @@ try:
                             if res_parts[1]:
                                 class_students = res_parts[1].split(",")
             except Exception as e:
-                messagebox.showerror("שגיאה", f"שגיאה בהתחברות לשרת: {e}")
+                show_custom_message(None, "שגיאה", f"שגיאה בהתחברות לשרת: {e}")
                 return
 
             # שדות הקלט כהים
@@ -1158,7 +1215,7 @@ try:
                 grd = grade_entry.get().strip()
 
                 if not student or not sub or not grd:
-                    messagebox.showwarning("שגיאה", "אנא מלא את כל השדות")
+                    show_custom_message(None)
                     return
 
                 try:
@@ -1173,11 +1230,11 @@ try:
                             if dataFromServer.startswith("insert_grade_response|"):
                                 res_parts = dataFromServer.split("|")
                                 if res_parts[1] == "success":
-                                    messagebox.showinfo("הצלחה", f"הציון {grd} במקצוע {sub} עודכן בהצלחה עבור {student}")
+                                    show_custom_message(None, "הצלחה", f"הציון {grd} במקצוע {sub} עודכן בהצלחה עבור {student}")
                                 else:
-                                    messagebox.showerror("שגיאה", f"{res_parts[2]}")
+                                    show_custom_message(None, "שגיאה", f"{res_parts[2]}")
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"שגיאה בהעברת הנתונים: {e}")
+                    show_custom_message(None, "שגיאה", f"שגיאה בהעברת הנתונים: {e}")
 
             save_button = ctk.CTkButton(
                 form_frame,
@@ -1291,11 +1348,11 @@ try:
                         grades = response_data.get("grades", [])
                         average = response_data.get("average", 0)
                     else:
-                        messagebox.showerror("שגיאה", "שגיאה בקבלת הנתונים מהשרת.")
+                        show_custom_message(None, "שגיאה", "שגיאה בקבלת הנתונים מהשרת.")
                         new_win.destroy()
                         return
         except Exception as e:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת.")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת.")
             new_win.destroy()
             return
 
@@ -1379,7 +1436,7 @@ try:
         PORT = 9999
         
         if current_user_role not in ["teacher", "student"]:
-            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            show_custom_message(None, "שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
             return
 
         # שלב 1: משיכת הנתונים מהשרת
@@ -1398,7 +1455,7 @@ try:
                     
         except Exception as e:
             print(f"Error loading mail: {e}")
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת או לטעון את ההודעות.")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת או לטעון את ההודעות.")
             return
 
         # שלב 2: יצירת חלון הממשק (Dark Theme)
@@ -1561,7 +1618,7 @@ try:
                 content = content_text.get("1.0", tk.END).strip()
                 
                 if not title or not content:
-                    messagebox.showwarning("שגיאה", "נא למלא את כל השדות", parent=compose_win)
+                    show_custom_message(None, "שגיאה", "נא למלא את כל השדות", parent=compose_win)
                     return
                     
                 try:
@@ -1574,13 +1631,13 @@ try:
                         
                         if server_response == "200 ok":
                             messages.insert(0, (title, content))
-                            messagebox.showinfo("הצלחה", "ההודעה פורסמה בהצלחה!", parent=compose_win)
+                            show_custom_message(None, "הצלחה", "ההודעה פורסמה בהצלחה!", parent=compose_win)
                             compose_win.destroy()
                             refresh_messages()
                         else:
-                            messagebox.showerror("שגיאה", "השרת נכשל בשמירת ההודעה.", parent=compose_win)
+                            show_custom_message(None, "שגיאה", "השרת נכשל בשמירת ההודעה.", parent=compose_win)
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}", parent=compose_win)
+                    show_custom_message(None, "שגיאה", f"שגיאת תקשורת עם השרת: {e}", parent=compose_win)
 
             # כפתור פרסום ירוק מודרני
             ctk.CTkButton(
@@ -1643,7 +1700,7 @@ try:
         global current_username, current_user_class, current_user_role
         
         if current_user_role not in ["student", "teacher"]:
-            messagebox.showerror("שגיאה", "פיצ'ר זה זמין למשתמשים רשומים בלבד")
+            show_custom_message(None, "שגיאה", "פיצ'ר זה זמין למשתמשים רשומים בלבד")
             return
 
         hebrew_display_map = {
@@ -1924,14 +1981,14 @@ try:
 
                 raw_data = s.recv(1024)
                 if not raw_data:
-                    messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                    show_custom_message(None, "שגיאה", "אין תגובה מהשרת")
                     return
 
                 dataFromServer = raw_data.decode("utf-8").strip()
                 print(f"Received from server: {dataFromServer}")
 
                 if dataFromServer.startswith("username:"):
-                    messagebox.showerror("שגיאה", "עליך להירשם למערכת כדי להשתמש באופציה זו")
+                    show_custom_message(None, "שגיאה", "עליך להירשם למערכת כדי להשתמש באופציה זו")
                     open_login_window()
                     return
                 else:
@@ -1943,10 +2000,10 @@ try:
                         tasks = []
 
         except ConnectionRefusedError:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת")
             return
         except Exception as e:
-            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            show_custom_message(None, "שגיאה", f"אירעה שגיאה: {e}")
             return
 
         # ------------------ חלון ראשי ------------------
@@ -2041,7 +2098,7 @@ try:
                 tasks.append(text_val)
                 task_entry.delete(0, tk.END)
             else:
-                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
+                show_custom_message(None, "שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
                 return
 
         for task in tasks:
@@ -2068,11 +2125,11 @@ try:
         def checkIfValid():
             if current_user_role in ["teacher", "student"]:
                 if task_entry.get().strip() == "":
-                    messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
+                    show_custom_message(None, "שגיאה", "משימה לא יכולה להיות ריקה")
                     return
                 
                 if len(tasks) >= 7:
-                    messagebox.showerror("שגיאה", "הגעת למגבלת המשימות (עד 7 משימות)")
+                    show_custom_message(None, "שגיאה", "הגעת למגבלת המשימות (עד 7 משימות)")
                     return
             add_task_to_gui()
 
@@ -2109,7 +2166,7 @@ try:
                             print(f"[-] Server error during save: {response}")
                             
                 except Exception as e:
-                    messagebox.showwarning("שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
+                    show_custom_message(None, "שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
             
             open_main_page(current_username)
 
@@ -2156,39 +2213,39 @@ try:
                 }
                 
                 if not current_user_role == "teacher" or not current_user_role == "student":
-                    messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+                    show_custom_message(None, "שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
                     return
 
                 if any(value == "" for value in fields.values()):
-                        messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
+                        show_custom_message(None, "שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
                         
                 else:
                         try:
                                 files = os.listdir(".")
                                 for file in files:
                                         if os.path.exists("reminder.json"):
-                                                messagebox.showerror("שגיאה", "תזכורון אחד כבר קיים, מחק אותו כדי ליצור חדש")
+                                                show_custom_message(None, "שגיאה", "תזכורון אחד כבר קיים, מחק אותו כדי ליצור חדש")
                                                 break
                                         
                                         else:      
                                                 with open("data/reminder.json", "w", encoding="utf-8") as f:
                                                         json.dump(fields, f, indent=4, ensure_ascii=False)
-                                                        messagebox.showinfo("תזכורון מוצלח", "טופס התזכורון נשמר בהצלחה!")
+                                                        show_custom_message(None, "תזכורון מוצלח", "טופס התזכורון נשמר בהצלחה!")
                                                         break
                                 
                         except Exception as e:
-                                messagebox.showerror("שגיאה", f"ארעה שגיאה בשמירה: {e}")
+                                show_custom_message(None, "שגיאה", f"ארעה שגיאה בשמירה: {e}")
 
         def delete_existing():
                 files = os.listdir(".")
                 for file in files:
                         if os.path.exists("data/reminder.json"):
                                 os.remove("data/reminder.json")
-                                messagebox.showinfo("הצלחה", "התזכורון הקיים נמחק")
+                                show_custom_message(None, "הצלחה", "התזכורון הקיים נמחק")
                                 break
                         
                 else:
-                        messagebox.showerror("שגיאה", "לא נמצא תזכורון קיים")
+                        show_custom_message(None, "שגיאה", "לא נמצא תזכורון קיים")
         
         def see_existing():
                 files = os.listdir(".")
@@ -2365,7 +2422,7 @@ try:
                                 keep_an_eye1.config(state="readonly")
                                 
                         else:
-                                messagebox.showerror("שגיאה", "לא נמצא תזכורון קיים")
+                                show_custom_message(None, "שגיאה", "לא נמצא תזכורון קיים")
                                 break
                         
         tk.Button(new_win, 
@@ -2540,7 +2597,7 @@ try:
                 if response.startswith("student_requests_data|"):
                     json_string = response.split("|", 1)[1]
                     if json_string == "{}" or not json_string:
-                        messagebox.showinfo("סטטוס בקשות", "אין לך בקשות שחרור במערכת.")
+                        show_custom_message(None, "סטטוס בקשות", "אין לך בקשות שחרור במערכת.")
                         return
                     
                     my_requests = json.loads(json_string)
@@ -2557,10 +2614,10 @@ try:
                         else:
                             status_heb = "ממתינה לבדיקת מורה ⏳"
                             
-                        messagebox.showinfo("עדכון בקשה", f"הבקשה שלך ל{day} בשעה {time}:\nסטטוס: {status_heb}")
+                        show_custom_message(None, "עדכון בקשה", f"הבקשה שלך ל{day} בשעה {time}:\nסטטוס: {status_heb}")
                         
         except Exception as e:
-            messagebox.showerror("שגיאה", f"לא ניתן לבדוק סטטוס: {e}")
+            show_custom_message(None, "שגיאה", f"לא ניתן לבדוק סטטוס: {e}")
     
     def open_freer():            
         global current_user_role, current_username, current_user_class
@@ -2657,7 +2714,7 @@ try:
             def approve_request():
                 selected_item = tree.selection()
                 if not selected_item:
-                    messagebox.showwarning("שימו לב", "אנא בחרו בקשה מהרשימה לאישור")
+                    show_custom_message(None, "שימו לב", "אנא בחרו בקשה מהרשימה לאישור")
                     return
                 
                 req_id = selected_item[0]
@@ -2680,17 +2737,17 @@ try:
                         if raw_data:
                             res = raw_data.decode('utf-8').strip()
                             if res == "200 ok":
-                                messagebox.showinfo("הצלחה", f"בקשת השחרור עבור תלמיד {student_id} אושרה בהצלחה!")
+                                show_custom_message(None, "הצלחה", f"בקשת השחרור עבור תלמיד {student_id} אושרה בהצלחה!")
                                 tree.delete(selected_item)
                             else:
-                                messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
+                                show_custom_message(None, "שגיאה", f"השרת החזיר תשובה שלילית: {res}")
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+                    show_custom_message(None, "שגיאה", f"שגיאת תקשורת עם השרת: {e}")
 
             def reject_request():
                 selected_item = tree.selection()
                 if not selected_item:
-                    messagebox.showwarning("שימו לב", "אנא בחרו בקשה מהרשימה לדחייה")
+                    show_custom_message(None, "שימו לב", "אנא בחרו בקשה מהרשימה לדחייה")
                     return
                 
                 req_id = selected_item[0]
@@ -2713,12 +2770,12 @@ try:
                         if raw_data:
                             res = raw_data.decode('utf-8').strip()
                             if res == "200 ok":
-                                messagebox.showinfo("סטטוס עודכן", f"בקשת השחרור עבור תלמיד {student_id} נדחתה.")
+                                show_custom_message(None, "סטטוס עודכן", f"בקשת השחרור עבור תלמיד {student_id} נדחתה.")
                                 tree.delete(selected_item)
                             else:
-                                messagebox.showerror("שגיאה", f"השרת החזיר תשובה שלילית: {res}")
+                                show_custom_message(None, "שגיאה", f"השרת החזיר תשובה שלילית: {res}")
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+                    show_custom_message(None, "שגיאה", f"שגיאת תקשורת עם השרת: {e}")
 
             def load_requests():
                 for item in tree.get_children():
@@ -2761,7 +2818,7 @@ try:
                                     )
                                     tree.insert("", "end", iid=req_id, values=row)
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"לא ניתן לטעון את בקשות השחרור: {e}")
+                    show_custom_message(None, "שגיאה", f"לא ניתן לטעון את בקשות השחרור: {e}")
 
             load_requests()
 
@@ -2964,7 +3021,7 @@ try:
             global current_user_role, current_user_class
 
             if current_user_role not in ["teacher", "student"]:
-                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
+                show_custom_message(None, "שגיאה", "הירשם כדי להשתמש או לראות את פיצ'ר זה")
                 return
             
             s_id = str(student_id_var.get()).strip()
@@ -2979,7 +3036,7 @@ try:
                 u_class = str(current_user_class)   
 
             if not s_id or not p_id or not s_day or not s_hour or not s_reason:
-                messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
+                show_custom_message(None, "שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
                 return
 
             SERVER_IP = '127.0.0.1'
@@ -3000,16 +3057,16 @@ try:
                         dataFromServer = raw_data.decode('utf-8').strip()
 
                         if dataFromServer == "200 ok":
-                            messagebox.showinfo("הצלחה!", "בקשת השיחרור נשלחה בהצלחה ומחכה לאישור המחנך")
+                            show_custom_message(None, "הצלחה!", "בקשת השיחרור נשלחה בהצלחה ומחכה לאישור המחנך")
                             break
                         else:
-                            messagebox.showerror("שגיאה!", "תקלה בשליחת בקשת שיחרור, אנא נסה שוב")
+                            show_custom_message(None, "שגיאה!", "תקלה בשליחת בקשת שיחרור, אנא נסה שוב")
                             break
 
             except ConnectionRefusedError:
-                messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+                show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
             except Exception as e:
-                messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+                show_custom_message(None, "שגיאה", f"אירעה שגיאה: {e}")
 
         ctk.CTkButton(
             form_frame,
@@ -3060,7 +3117,7 @@ try:
             with open("data/schedules_z_to_yb.json", "r", encoding="utf-8") as f:
                 schedule_data = json.load(f)
         except Exception as e:
-            messagebox.showerror("שגיאה", f"שגיאה בטעינת המערכת: {e}")
+            show_custom_message(None, "שגיאה", f"שגיאה בטעינת המערכת: {e}")
             return
 
         # פריים ראשי - הגדרת הגודל מתבצעת בבנאי (Constructor)
@@ -3341,7 +3398,7 @@ try:
                 name = task_name_entry.get().strip()
                 url = task_url_entry.get().strip()
                 if not name or url == "https://" or not url:
-                    messagebox.showwarning("שדה חסר", "אנא מלא שם משימה וקישור תקין")
+                    show_custom_message(None, "שדה חסר", "אנא מלא שם משימה וקישור תקין")
                     return
 
                 try:
@@ -3359,14 +3416,14 @@ try:
                             if dataFromServer.startswith("publish_moodle_task_response|"):
                                 parts = dataFromServer.split("|")
                                 if len(parts) > 1 and parts[1] == "success":
-                                    messagebox.showinfo("משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
+                                    show_custom_message(None, "משימה פורסמה", f"המשימה '{name}' פורסמה בהצלחה!")
                                     new_win.destroy()
                                     open_moodle_tasks()
                                 else:
-                                    messagebox.showerror("שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
+                                    show_custom_message(None, "שגיאה", "השרת נתקל בשגיאה בעת שמירת המשימה.")
                                 break
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"אירעה שגיאה בתקשורת: {e}")
+                    show_custom_message(None, "שגיאה", f"אירעה שגיאה בתקשורת: {e}")
 
             publish_btn = ctk.CTkButton(
                 form_card,
@@ -3560,20 +3617,17 @@ try:
                             class_students = parts[1].split(",")
                         break
                     else:
-                        messagebox.showerror("שגיאה!", "שגיאת שרת")
+                        show_custom_message(None, "שגיאה!", "שגיאת שרת")
                         break
 
         except ConnectionRefusedError:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            show_custom_message(None, "שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
         except Exception as e:
-            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+            show_custom_message(None, "שגיאה", f"אירעה שגיאה: {e}")
         
         role = current_user_role if 'current_user_role' in globals() else "student"
         username = current_username if 'current_username' in globals() else "תלמיד"
 
-        # ---------------------------------------------------------
-        # שלב ב': בניית הממשק (UI)
-        # ---------------------------------------------------------
         new_win = ctk.CTkToplevel()
         new_win.title("מערכת נוכחות - משוב")
         new_win.overrideredirect(True)
@@ -3719,13 +3773,13 @@ try:
                         if raw_response:
                             response = raw_response.decode('utf-8').strip()
                             if response == "save_attendance_response|success":
-                                messagebox.showinfo("הצלחה", f"יומן הנוכחות עבור שיעור {selected_sub} נשמר בהצלחה בשרת!")
+                                show_custom_message(None, "הצלחה", f"יומן הנוכחות עבור שיעור {selected_sub} נשמר בהצלחה בשרת!")
                             else:
-                                messagebox.showerror("שגיאה", "השרת נכשל בשמירת הנתונים בקובץ.")
+                                show_custom_message(None, "שגיאה", "השרת נכשל בשמירת הנתונים בקובץ.")
                         else:
-                            messagebox.showerror("שגיאה", "לא התקבלה תגובה מהשרת.")
+                            show_custom_message(None, "שגיאה", "לא התקבלה תגובה מהשרת.")
                 except Exception as e:
-                    messagebox.showerror("שגיאה", f"שגיאת תקשורת עם השרת: {e}")
+                    show_custom_message(None, "שגיאה", f"שגיאת תקשורת עם השרת: {e}")
 
             # כפתורי תחתית למורה
             footer_btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
@@ -3803,7 +3857,6 @@ try:
             )
             filter_dropdown.pack(side="left", padx=10, pady=8)
 
-            # אזור גלילת היסטוריית נוכחות
             history_scroll = ctk.CTkScrollableFrame(
                 main_frame,
                 fg_color="#0f172a",
@@ -3830,7 +3883,7 @@ try:
                                 parts_limited = response.split("|", 2)
                                 history_events = json.loads(parts_limited[2])
                             elif parts[1] == "ERROR":
-                                messagebox.showerror("שגיאה", f"שגיאת שרת: {parts[2]}")
+                                show_custom_message(None, "שגיאה", f"שגיאת שרת: {parts[2]}")
                         elif len(parts) >= 2 and parts[0] == "get_attendance_response":
                             parts_limited = response.split("|", 1)
                             history_events = json.loads(parts_limited[1])

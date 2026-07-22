@@ -8,7 +8,9 @@
         "class": "9th3",
         "tasks": [
             "גכהנגכע",
-            "jkljkl"
+            "jkljkl",
+            "fnfh",
+            "jfj"
         ],
         "created_at": "07/06/2026 17:10:55",
         "grades": "is teacher",
@@ -63,6 +65,10 @@
             [
                 "משנה",
                 56
+            ],
+            [
+                "tyjtj",
+                54
             ]
         ],
         "attendance": [
@@ -95,6 +101,11 @@
                 "subject": "שיעור לשון",
                 "date": "21/07/2026",
                 "status": "נוכח"
+            },
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "22/07/2026",
+                "status": "חיסור"
             }
         ],
         "moodle_tasks": [
@@ -117,6 +128,10 @@
             {
                 "url": "https://rhrthrthrt",
                 "name": "ghgfhh"
+            },
+            {
+                "url": "https://neverssl",
+                "name": "חיח אטח אטח"
             }
         ]
     },
@@ -145,6 +160,10 @@
             [
                 "נביא",
                 99
+            ],
+            [
+                "משנה",
+                88
             ]
         ],
         "attendance": [
@@ -177,6 +196,11 @@
                 "subject": "שיעור לשון",
                 "date": "21/07/2026",
                 "status": "נוכח"
+            },
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "22/07/2026",
+                "status": "איחור"
             }
         ],
         "moodle_tasks": [
@@ -199,6 +223,10 @@
             {
                 "url": "https://rhrthrthrt",
                 "name": "ghgfhh"
+            },
+            {
+                "url": "https://neverssl",
+                "name": "חיח אטח אטח"
             }
         ]
     }
