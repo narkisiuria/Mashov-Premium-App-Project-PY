@@ -285,7 +285,6 @@ try:
         )
         peak_btn.pack(fill="x")
 
-        # 5. Footer מותאם בתחתית
         footer_frame = ctk.CTkFrame(
             main_frame,
             fg_color="#0f172a",
@@ -304,20 +303,12 @@ try:
 
         threading.Thread(target=lambda: verify_server_health(splash_root), daemon=True).start()
         splash_root.mainloop()
-        
-    ###########################################################
-    #                   מסך לוגין                   #
-    ###########################################################
 
     def open_login_window():
         global splash_root
         if splash_root:
             splash_root.destroy()
         root.deiconify()  
-
-    ###########################################################
-    #                      עמוד ראשי               #
-    ###########################################################
 
     def open_peak():
         global current_user_role
