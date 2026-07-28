@@ -1,0 +1,15 @@
+{
+    "y": {
+        "id": 1,
+        "first_name": "y",
+        "last_name": "y",
+        "gmail_account": "y@gmail.com",
+        "role": "teacher",
+        "class": "10th5",
+        "tasks": [],
+        "created_at": "21/07/2026 20:29:05",
+        "grades": "is teacher",
+        "attendance": "",
+        "moodle_tasks": ""
+    }
+}

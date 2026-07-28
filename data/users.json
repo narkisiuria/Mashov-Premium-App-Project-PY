@@ -1,0 +1,162 @@
+{
+    "fbdfbd": {
+        "id": 1,
+        "password": "d2127d46b6c2219cc66b704e509ac99d:ca0efd2e8dd36840f3300ea306116a480698cee56929fc6f15b217a19617d69fda524c4f42e7ac8e741cacf05bab438e1869bfef44553c4bda6a20618f5e702a",
+        "first_name": "fdbdf",
+        "last_name": "bdfbdf",
+        "gmail_account": "bfbdmple@gmail.com",
+        "role": "teacher",
+        "class": "7th5",
+        "created_at": "17/05/2026 12:11:56"
+    },
+    "gdfgd": {
+        "id": 2,
+        "password": "024ee5b362f19a1c6dcd8f0246315b28:c6aaa10fd27c7d715d396cccbaa819f0ffe182066532bad7e26d8fef49bb1200a4744757aad292acff3c12a9174f4a10e4c293ed0dcf0d66920aa1064c021a3f",
+        "first_name": "fdgvd",
+        "last_name": "vdgdg",
+        "gmail_account": "gdfgdfle@gmail.com",
+        "role": "student",
+        "class": "7th5",
+        "created_at": "17/05/2026 12:12:23"
+    },
+    "1": {
+        "id": 3,
+        "password": "b8c2308dfc2dedbc7e7b89f6ec7dd760:3a253f7bd17db8d31007cc794ef4e286d502cabc2c6a975a39d7da15aa6412c786e031b47bf9f4a567a912622579fb3f3ce1a2d52fe28d2b8c4a61d419f577fc",
+        "first_name": "afsdf",
+        "last_name": "sfsdf1",
+        "gmail_account": "example@gmail.com",
+        "role": "teacher",
+        "class": "7th1",
+        "created_at": "17/05/2026 12:14:12"
+    },
+    "uria": {
+        "id": 4,
+        "password": "9f7d70be109beea613dee5163a2dcd4f:45bdb1766c44e4f5d09e1b96e790fd266a1c704ce5211adeaaa93da35dd9227fada3abdbdc0a3ce5e0121eb45cf0805d5dc8b81ad16c0196117e715b017540fe",
+        "first_name": "uria",
+        "last_name": "narkisi",
+        "gmail_account": "urianar@gmail.com",
+        "role": "teacher",
+        "class": "12th2",
+        "created_at": "04/06/2026 12:03:20"
+    },
+    "ido": {
+        "id": 5,
+        "password": "e61a0a7d876edab8c89ee6556995f687:69860bcc77515334303eaca2ea92014d58fafa500cef9ea4c0a7efeebdacae5fbdfba97286ab86f70d2e24e146ed5729a7e52b4dfb71a54c4a61c4231a870ca0",
+        "first_name": "ido",
+        "last_name": "k",
+        "gmail_account": "idok1@gmail.com",
+        "role": "student",
+        "class": "12th2",
+        "created_at": "04/06/2026 12:04:18"
+    },
+    "rthrt": {
+        "id": 6,
+        "password": "d08ef981f2c939d720bb027c71a3e791:fbbbc8aaec88656a194e8026dc2dbfd8dcaa6b05ee4026cebd4b480fc2afca0efada4e7f98f3463b3922e7e13bfe0637978127ce268937c3e5c07f282552d49c",
+        "first_name": "trh",
+        "last_name": "hrth",
+        "gmail_account": "rthrth@gmail.com",
+        "role": "teacher",
+        "class": "11th1",
+        "created_at": "07/06/2026 16:29:56"
+    },
+    "u": {
+        "id": 7,
+        "password": "f10d36076581a9d294d39af3aa7d6cac:8cdbc28ffaceb9f5c3bfab581e7cfb81e13c35b68b7e04efb06d2ea46fbbbb18f65861a44b79ad83aa3569d1d7571a8d0e5a4e0dd61f9b15991d59bdb3a83133",
+        "first_name": "u",
+        "last_name": "u",
+        "gmail_account": "u@gmail.com",
+        "role": "teacher",
+        "class": "9th3",
+        "created_at": "07/06/2026 17:10:55"
+    },
+    "i": {
+        "id": 8,
+        "password": "d176fbd89d8c53cb68300231e34854cb:3ff1a92af8e14f9323cfe3f0530d811cd9daedcedd122ec068495f27867f38dfc84002e8b76847d29ba2757d974cfc8b1ff1f1ab07e3ab7ccb36980c53556994",
+        "first_name": "i",
+        "last_name": "i",
+        "gmail_account": "i@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "created_at": "07/06/2026 17:11:29"
+    },
+    "אוריה": {
+        "id": 9,
+        "password": "226b1ea444466fdc7e467ee444d1f3a0:4db4202057f005d934e12ce00a22c08979c6e0325d63c900bb116dfe24497855d9d8f2cdbe5aec52c982627cc661ddfe580edb02f8d66976de70f59687cb3018",
+        "first_name": "אוריה",
+        "last_name": "נרקיסי",
+        "gmail_account": "uria123@gmail.com",
+        "role": "teacher",
+        "class": "12th3",
+        "created_at": "22/06/2026 11:56:18"
+    },
+    "עידו": {
+        "id": 10,
+        "password": "65226e370f2d8006ac3782b4e31cb0be:7aa4f898e296e7035bd39f47ed0c7450517d0da8a0aec89b5fae4d05fcbc5f9c403eaa33bd3bc498d83fa48301432c3322dc0eec5fe878802a32db6ca8db1fac",
+        "first_name": "עידו",
+        "last_name": "קוואס",
+        "gmail_account": "ido123@gmail.com",
+        "role": "student",
+        "class": "9th3",
+        "created_at": "22/06/2026 12:01:02"
+    },
+    "רנן": {
+        "id": 11,
+        "password": "ea35ca89fade8cff4be3ad2b6ab5c01f:1cb6b3890f426e4f2c68e3a4b122ec117e3adcfb45938473779b14c62592dcbc45ae156f898c0c0dc4ede4d2d7d0893e74f3cd5775580b81fa704c0b358e2560",
+        "first_name": "רנן",
+        "last_name": "ערוסי",
+        "gmail_account": "rannen123@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "created_at": "23/06/2026 13:17:44"
+    },
+    "fdgh": {
+        "id": 12,
+        "password": "cdfa74fc2aa7b0aae5e24c8c2033b35c:452821a81a1928baa8f48e1ac789a69b19086f88969291d53bd51731d27bb60ae34e1a990bab43bc50efa00e35f21090c197d804b66126483593267499985270",
+        "first_name": "fhfghdfh",
+        "last_name": "gfhdfg",
+        "gmail_account": "efghe@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "created_at": "01/07/2026 11:09:04"
+    },
+    "o": {
+        "id": 13,
+        "password": "095e553be7cc1f72299b1f423698f109:38ac0e2e3037c580a3ab984f61c56c5cdca88b0cbf0dc5b11c9b9e63c84ad83c925232bc0777edc8bdf640a7410724941ba25e7a1b1bb3df3b71d8e3200b506b",
+        "first_name": "o",
+        "last_name": "o",
+        "gmail_account": "o@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "created_at": "01/07/2026 11:11:35"
+    },
+    "סבא": {
+        "id": 14,
+        "password": "9a3f8f0c753a7086579910cd1d6c0332:cbc6ab86035ba680976b00b38b71a3a1a92463994ae69617b0b5f3fe55f5096574fc5b4729a0494f40118eb2cc0af8e204713949e8581b226c5701f9c05bdd12",
+        "first_name": "סבא",
+        "last_name": "נרקיסי",
+        "gmail_account": "sababa@gmail.com",
+        "role": "student",
+        "class": "12th6",
+        "created_at": "08/07/2026 12:21:19"
+    },
+    "rannen": {
+        "id": 15,
+        "password": "8c11203ca787749a21250c885cb0f2bf:6d2ca8292312f24630ef2b40925c13463e8cc6bf11adeee95c683c181718ebecc3f6c92e8cf3df23ac7b59e24757605c2d76791f1fb08473c8a03dcda3866ef2",
+        "first_name": "rannen",
+        "last_name": "arusi",
+        "gmail_account": "ran123@gmail.com",
+        "role": "student",
+        "class": "12th6",
+        "created_at": "21/07/2026 20:21:42"
+    },
+    "y": {
+        "id": 16,
+        "password": "bd2d6db47809bdb2f304344f421b5608:b262db59aa9e0f9b17115965cd29e7b088baac30c45a73a27555510ae168f37fcd7f5401a4cb9a237bf310ae6f63330a418af4ec2c1e683dfd71eb9761e11fbb",
+        "first_name": "y",
+        "last_name": "y",
+        "gmail_account": "y@gmail.com",
+        "role": "teacher",
+        "class": "10th5",
+        "created_at": "21/07/2026 20:29:05"
+    }
+}

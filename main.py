@@ -34,7 +34,6 @@ try:
     import customtkinter as ctk
 
     def show_custom_message(parent_win=None, title="", message="", icon="⚠️", parent=None):
-        # מזהה אם הועבר parent או parent_win
         active_parent = parent if parent is not None else parent_win
 
         msg_win = ctk.CTkToplevel(active_parent)
@@ -44,7 +43,6 @@ try:
 
         w, h = 380, 210
 
-        # התמרכזות מול החלון האב או מול המסך
         if active_parent and hasattr(active_parent, 'winfo_exists') and active_parent.winfo_exists():
             active_parent.update_idletasks()
             x = active_parent.winfo_x() + (active_parent.winfo_width() // 2) - (w // 2)

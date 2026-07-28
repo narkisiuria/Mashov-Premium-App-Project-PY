@@ -1,0 +1,67 @@
+{
+    "אוריה": {
+        "id": 1,
+        "first_name": "אוריה",
+        "last_name": "נרקיסי",
+        "gmail_account": "uria123@gmail.com",
+        "role": "teacher",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "22/06/2026 11:56:18",
+        "grades": "is teacher"
+    },
+    "רנן": {
+        "id": 2,
+        "first_name": "רנן",
+        "last_name": "ערוסי",
+        "gmail_account": "rannen123@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "23/06/2026 13:17:44",
+        "grades": [],
+        "attendance": [
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "01/07/2026",
+                "status": "נוכח"
+            }
+        ]
+    },
+    "fdgh": {
+        "id": 3,
+        "first_name": "fhfghdfh",
+        "last_name": "gfhdfg",
+        "gmail_account": "efghe@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "01/07/2026 11:09:04",
+        "grades": [],
+        "attendance": [
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "01/07/2026",
+                "status": "חיסור"
+            }
+        ]
+    },
+    "o": {
+        "id": 4,
+        "first_name": "o",
+        "last_name": "o",
+        "gmail_account": "o@gmail.com",
+        "role": "student",
+        "class": "12th3",
+        "tasks": [],
+        "created_at": "01/07/2026 11:11:35",
+        "grades": [],
+        "attendance": [
+            {
+                "subject": "שיעור מתמטיקה",
+                "date": "01/07/2026",
+                "status": "איחור"
+            }
+        ]
+    }
+}
