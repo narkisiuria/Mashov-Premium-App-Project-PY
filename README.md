@@ -1,4 +1,4 @@
-# Mashov System Project
+# Mashov+ System Project
 
 A multi-threaded school management system built entirely in Python. I developed this project using a client-server architecture to handle school schedules, grades, and real-time class communication securely.
 
