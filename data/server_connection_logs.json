@@ -336,3 +336,7 @@
 {"time": "24/07/2026 19:09:56", "address": "('127.0.0.1', 16217)", "username": "", "status": "failed"}
 {"time": "24/07/2026 19:09:59", "address": "('127.0.0.1', 16218)", "username": "", "status": "failed"}
 {"time": "24/07/2026 19:10:03", "address": "('127.0.0.1', 16219)", "username": "1", "status": "success"}
+{"time": "28/07/2026 16:50:21", "address": "('127.0.0.1', 7470)", "username": "i", "status": "success"}
+{"time": "30/07/2026 11:23:29", "address": "('127.0.0.1', 46282)", "username": "1", "status": "success"}
+{"time": "07/08/2026 18:40:14", "address": "('127.0.0.1', 25572)", "username": "u", "status": "success"}
+{"time": "07/08/2026 18:42:47", "address": "('127.0.0.1', 14296)", "username": "i", "status": "success"}

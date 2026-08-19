@@ -368,7 +368,6 @@ try:
         new_win.geometry(f"{width}x{height}+{x}+{y}")
         new_win.configure(fg_color="#0f172a")  # Dark Background
 
-        # Container ראשי לכל גובה החלון
         main_frame = ctk.CTkFrame(
             new_win,
             fg_color="#1e293b",
@@ -379,7 +378,6 @@ try:
         main_frame.place(relx=0.5, rely=0.5, anchor="center")
         main_frame.pack_propagate(False)
 
-        # 1. Header כחול מודרני
         header_frame = ctk.CTkFrame(
             main_frame,
             fg_color="#1d4ed8",
@@ -410,17 +408,14 @@ try:
             text_color="#93c5fd"
         ).pack(pady=(2, 0))
 
-        # 2. Grid Frame עבור הכפתורים - מתפרס בצורה שווה במרכז
         content_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
         content_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # הגדרת משקל שווה לשורות ולעמודות כדי שימלאו את השטח בצורה מאוזנת
         for i in range(4):
             content_frame.rowconfigure(i, weight=1)
         content_frame.columnconfigure(0, weight=1)
         content_frame.columnconfigure(1, weight=1)
 
-        # הגדרת פונקציית עזר ליצירת כפתור אחיד ומעוצב
         def create_menu_button(parent, text, command, icon, row, col, fg_color, hover_color):
             btn = ctk.CTkButton(
                 parent,
@@ -456,7 +451,27 @@ try:
             text="Mashov מערכת ניהול לימודים • גרסה 2.0",
             font=("Segoe UI", 11),
             text_color="#64748b"
-        ).pack(expand=True)
+        ).pack(side="right", padx=(0, 20), fill="y")
+
+        def exit_application():
+            new_win.quit()  
+            new_win.destroy()  
+
+        # כפתור יציאה מעוצב בצבע אדו
+        exit_button = ctk.CTkButton(
+            footer_frame,
+            text="❌ יציאה",
+            command=exit_application,
+            font=("Segoe UI", 12, "bold"),
+            fg_color="#ef4444",      # אדום מודרני (Tailwind Red 500)
+            hover_color="#dc2626", # אדום כהה בריחוף
+            width=90,
+            height=28,
+            corner_radius=8,
+            cursor="hand2"
+        )
+        exit_button.pack(side="left", padx=(12, 0), pady=8)
+
             
         
     ###########################################################
